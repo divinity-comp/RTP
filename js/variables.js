@@ -1,11 +1,13 @@
 // Navigation 
-
-var basicMenuList = [{
-    "name": "My Jobs",
-    "link": "jobs/myJobs"
-}, {
+/* 
+, {
     "name": "Account",
     "link": "account"
+} */
+var basicMenuList = [{
+    "name": "My Jobs",
+    "link": "jobs/myJobs",
+    "function": "startJobSearch"
 }];
 var adminMenuList = [{
     "name": "Job Control",

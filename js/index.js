@@ -237,6 +237,7 @@ function isAdmin() {
 function logout() {
     ajaxRequestGet("pages/login.html",
         function (response) {
+        idc("centralHub").innerHTML = response;
             delete_cookie("user");
             delete_cookie("pass");
         },
@@ -247,7 +248,10 @@ function defaultMenu() {
     let navString = "";
     let navAdd = basicMenuList;
     for (i = 0; i < navAdd.length; i++) {
-        navString += "<li onclick='openPage(\"" + navAdd[i].link + "\",this)'>" + navAdd[i].name + "</li>";
+        let tArg = "";
+        if("function" in navAdd[i])
+            tArg = "," + navAdd[i].function;
+        navString += "<li onclick='openPage(\"" + navAdd[i].link + "\",this"+ tArg +")'>" + navAdd[i].name + "</li>";
     }
     idc("navMenu").innerHTML += navString;
 
@@ -306,7 +310,7 @@ function getMainDashboard() {
             if (isAdmin()) {
                 openApiPage("jobControl");
             } else {
-                openPage("myJobs");
+                openPage("myJobs", null, startJobSearch);
             }
             idc("navMenu").children[0].className = "active";
         },
@@ -345,7 +349,7 @@ function successMessage(messageSuc) {
             width: "0px",
             ease: Circ.easeOut,
             onComplete: function () {
-                //sucMessage.style.display = "none";
+                sucMessage.style.display = "none";
             }
         });
     }, 2000);
@@ -390,7 +394,7 @@ function errorMessage(messageSuc) {
 }
 
 // Page function
-function openPage(page, el) {
+function openPage(page, el,followFunc) {
     if (el) {
         for (i = 0; i < idc("navMenu").children.length; i++) {
             idc("navMenu").children[i].className = "";
@@ -400,9 +404,11 @@ function openPage(page, el) {
     }
     ajaxRequestGet("pages/" + page + ".html",
         function (response) {
-            console.log(response);
             idc("main").innerHTML = response;
             idc("main").className = page;
+            if(followFunc)
+                followFunc();
+            console.log(response);
         },
         "");
 }
@@ -521,6 +527,67 @@ function closeOverlay(elId, type) {
 /* 
     Job Functions
 */
+
+function startJobSearch() {
+    console.log("check connection start");
+    if(checkConnection() == true) {
+        
+        ajaxRequestToMake(urlInit + "/" + appVersion + "/data/getJobs.php",
+            function (response) {
+            console.log("RES" + response);
+                let jsRes = JSON.parse(response);
+                if (jsRes.response === "success") {
+                    setCookie("joblist", response);
+                    loadInJobsStandardUser(jsRes);
+                } else {
+                    errorMessage("Could not get job data - please check your internet");
+                }
+            }, {
+            "req":"own"
+            });
+    }
+    else {
+        
+        if(hasCookie("joblist"))
+              loadInJobsStandardUser(JSON.parse(getCookie("joblist")));
+        else
+            errorMessage("No local data, internet required");
+    }
+}
+function loadInJobsStandardUser(jobData) {
+    console.log(jobData);
+    for(i = 0; i < jobData["jobData"].length;i++) {
+        var jrD = document.createElement("tr");
+        jrD.setAttribute("cid",jobData["jobData"][i].clientid[0]);
+        jrD.setAttribute("aid",jobData["jobData"][i].jobid);
+        jrD.innerHTML = '<td><span>'+ jobData["jobData"][i].clientid[1] +'</span></td><td><div><span>'+ jobData["jobData"][i].clientid[2] + '</span><a href="'+ jobData["jobData"][i].clientid[3]  +'">'+ jobData["jobData"][i].clientid[3] +'</a></div></td><td onclick="openJob('+ jobData["jobData"][i].jobid +')">View</td><td class="hidden jobdetails">'+ JSON.stringify(jobData["jobData"][i].jobdetails) +'</td>';
+        switch(jobData["jobData"][i].stage) {    
+            case "active":
+                if(idc("activeJobs").getElementsByTagName("tr")[0].classList.contains("hidden"))
+                idc("activeJobs").getElementsByTagName("tr")[0].classList.remove("hidden");
+                idc("activeJobs").appendChild(jrD);
+                break;
+            case "review":
+                idc("reviewJobs").appendChild(jrD);
+                if(idc("reviewJobs").getElementsByTagName("tr")[0].classList.contains("hidden"))
+                idc("reviewJobs").getElementsByTagName("tr")[0].classList.remove("hidden");
+                break;
+            case "complete":
+                idc("completeJobs").appendChild(jrD);
+                if(idc("completeJobs").getElementsByTagName("tr")[0].classList.contains("hidden"))
+                    idc("completeJobs").getElementsByTagName("tr")[0].classList.remove("hidden");
+                break;
+        }
+    }
+    
+    if(idc("completeJobs").getElementsByTagName("tr")[0].classList.contains("hidden"))
+        idc("completeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+    if(idc("reviewJobs").getElementsByTagName("tr")[0].classList.contains("hidden"))
+        idc("reviewJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+    if(idc("activeJobs").getElementsByTagName("tr")[0].classList.contains("hidden"))
+        idc("activeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+}
+
 let jobJS;
 
 function openJob(jobid) {
@@ -731,11 +798,13 @@ function loadFromJson(pageNum) {
 
             tl.to(documentPage, 0.35, {
                 opacity: 0,
+                x:"-100%",
                 onComplete: function () {
                     viewJob.style.display = "block";
                     documentPage.style.display = "none";
                 }
             }).to(viewJob, 0.35, {
+                x:"0%",
                 opacity: 1
             });
         }
@@ -746,7 +815,7 @@ function loadFromJson(pageNum) {
                 x: "0%",
                 opacity: 1
             }, {
-                x: "100%",
+                x: "-100%",
                 opacity: 0,
                 ease: Circ.easeOut,
                 onComplete: function () {
@@ -760,22 +829,27 @@ function loadFromJson(pageNum) {
 }
 
 function docElementLoadIn(loc, elParent) {
+    console.log(loc);
     var elLoad = docJSON.pages;
     var hasTable = false;
     for (a = 0; a < loc.length; a++) {
         elLoad = elLoad[loc[a]];
-        if(elLoad != "undefined") {
-            if("type" in elLoad) { 
-                if(elLoad.type == "table") {
+        if(elLoad != null) {
+            if(!Array.isArray(elLoad)) {
+                console.log(elLoad);
+                if("type" in elLoad) { 
                     if(elLoad.type == "table") {
-                        hasTable = loc.splice(0, loc.length - a);
-                        hasTable.push("value");
+                        if(elLoad.type == "table") {
+                            var newR = [].concat(loc);
+                            hasTable = newR.splice(0, loc.length - a);
+                            hasTable.push("value");
+                        }
                     }
                 }
             }
         }
     }
-    var locN = loc.splice(0);
+    let locN = loc.splice(0);
     let genEl;
     switch (elLoad.type) {
         case "title":

@@ -1028,7 +1028,9 @@ table {
 #completeJobs button {
     color:#3fbd3d;
 }
-
+tr.hidden {
+    display: none;
+}
 tr.noJobs td {
     border:0 !important;
 }
@@ -1039,6 +1041,59 @@ tr.noJobs h2 {
     padding: 1em 0;
     border-top: 1px solid;
     border-bottom: 1px solid;
+}
+#activeJobs tr td:nth-child(4),#activeJobs tr td:nth-child(5),#reviewJobs tr td:nth-child(4),#reviewJobs tr td:nth-child(5),#completeJobs tr td:nth-child(4),#completeJobs tr td:nth-child(5) {
+    display: none;
+}
+#activeJobs,#reviewJobs,#completeJobs {
+    width:100%;
+    border-collapse: collapse;
+    font-size: 1.2em;
+}
+#activeJobs tr:nth-child(1),#reviewJobs tr:nth-child(1),#completeJobs tr:nth-child(1) {
+    font-weight: bold;
+}
+#activeJobs td:nth-child(1),#activeJobs td:nth-child(2),#reviewJobs td:nth-child(1),#reviewJobs td:nth-child(2),#completeJobs td:nth-child(1),#completeJobs td:nth-child(2) {
+    width:50%;
+    padding: 3px 6px;
+}
+#activeJobs tr:nth-child(1),#reviewJobs tr:nth-child(1),#completeJobs tr:nth-child(1) {
+    width: 40%;
+}
+#activeJobs td:nth-child(2) div,#reviewJobs td:nth-child(2) div,#completeJobs td:nth-child(2) div {
+    border-bottom:1px solid #aaa;
+}
+#activeJobs td:nth-child(2) div:last-child,#reviewJobs td:nth-child(2) div:last-child,#completeJobs td:nth-child(2) div:last-child {
+    border-bottom:0;
+}
+#activeJobs tr td, #reviewJobs tr td , #completeJobs tr td {
+    border-bottom:1px solid #aaa;
+    
+}
+#activeJobs tr td:nth-child(1),#reviewJobs tr td:nth-child(1),#completeJobs tr td:nth-child(1) {
+    border-right: 1px solid #aaa;
+}
+#activeJobs td:nth-child(1) span,#reviewJobs td:nth-child(1) span,#completeJobs td:nth-child(1) span {
+    width: 100%;
+    display: block;
+}
+#activeJobs td:nth-child(2) span,#reviewJobs td:nth-child(2) span,#completeJobs td:nth-child(2) span {
+    display: block;
+}
+#activeJobs td:nth-child(3),#reviewJobs td:nth-child(3) ,#completeJobs td:nth-child(3) {
+    padding: 10px 12px;
+    background: #fff;
+    color: #3d7de0;
+    font-size: 1em;
+    -webkit-box-shadow: inset -2px 0px 0px 0px, inset 2px 0px 0px 0px;
+    box-shadow: inset -2px 0px 0px 0px, inset 2px 0px 0px 0px;
+    font-weight: bold;
+}
+#reviewJobs td:nth-child(3) {
+    color:#dc1a35;
+}
+#completeJobs td:nth-child(3) {
+    color:#3fbd3d;
 }
 /* MEDIA QUIERIES */
 
