@@ -486,7 +486,7 @@ function openOverlay(elId, type) {
         let closeB = document.createElement("img");
         closeButton.innerHTML = "<span>Close</span>";
         closeButton.appendChild(closeB);
-        closeB.src = "/assets/close.svg";
+        closeB.src = "assets/close.svg";
         closeButton.className = "close";
         if (el.children.length == 0)
             el.appendChild(closeButton);
