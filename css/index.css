@@ -189,7 +189,8 @@ body {
 
 #loginPage img {
     max-width: 150px;
-    margin-bottom: 30px;
+    margin: 0 auto 30px;
+    display: block;
 }
 
 #loginPage input {

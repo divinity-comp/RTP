@@ -34,6 +34,9 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function () {
         devicePlatform = device.platform;
+        if (cordova.platformId == 'android') {
+            StatusBar.backgroundColorByHexString("#0e0e0e");
+        }
         checkLogin();
     },
     // Update DOM on a Received Event
