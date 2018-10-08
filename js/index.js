@@ -594,10 +594,12 @@ function addDocument(docFind, Inter, fullJson) {
     }
 
     if (checkInternal) {
+        console.log("checking internal");
         readFile(Inter + returnDocFilename(docFind), function (results) {
             addDocRow(docFind, Inter, fullJson, results);
         });
     } else {
+        console.log("checking server");
         ajaxRequestGet(urlInit + "/" + appVersion + "/documents/" + docFind.docid + "/" + docFind.data + docFind.rev + ".json",
             function (response) {
                 writeTofile(Inter + returnDocFilename(docFind), response, function () {

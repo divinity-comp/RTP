@@ -1028,3 +1028,33 @@ table {
 #completeJobs button {
     color:#3fbd3d;
 }
+
+tr.noJobs td {
+    border:0 !important;
+}
+tr.noJobs h2 {
+    margin: 0.5em 0;
+    text-align: center;
+    font-size: 0.9em;
+    padding: 1em 0;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+}
+/* MEDIA QUIERIES */
+
+@media screen and (orientation: landscape) {
+    #navigation {
+        height: 60px;
+    }
+    #mobileMenu {
+        font-size: 0.75em;
+        margin-top: 0.6em;
+    }
+    #clientDeats figure img {
+        max-height: 40px;
+        margin: 10px 5px; 
+    }
+    #panelLinks, #main,.overlayM {
+        height:calc(100vh - 60px);
+    }
+}
