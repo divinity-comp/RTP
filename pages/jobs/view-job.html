@@ -6,3 +6,9 @@
     
 </div>
 <button id="rtpSend" onclick="rtpSend()">Send to RTP</button>
+
+<div id="signatureCanvas" class="overlay overlayM">
+    <canvas></canvas>
+    <button class="saveSig" ontouchstart="saveSignature()">Save</button>
+    <button class="clearSig" onclick="signaturePad.clear();">Reset</button>
+</div>

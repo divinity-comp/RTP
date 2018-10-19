@@ -481,6 +481,9 @@ function openApiPage(page, el, getR) {
 function openOverlay(elId, type) {
     let el = idc(elId);
     el.style.display = "block";
+    idc("main").style.overflow = "hidden";
+    idc("main").setAttribute("mTop",idc("main").scrollTop);
+    idc("main").scrollTop = 0;
     if (!el.getElementsByClassName("close")[0]) {
         let closeButton = document.createElement("button");
         let closeB = document.createElement("img");
@@ -493,8 +496,9 @@ function openOverlay(elId, type) {
         else
             el.insertBefore(closeButton, el.children[0]);
         closeB.onclick = function () {
+            idc("main").style.overflow = "";
+            idc("main").scrollTop = idc("main").getAttribute("mTop");
             closeOverlay(elId, type);
-
         }
     }
     let tl = new TimelineMax();
@@ -514,7 +518,10 @@ function closeOverlay(elId, type) {
 
     tl.fromTo(el, 0.5, {
         y: "0%",
-        opacity: "1"
+        opacity: "1",onComplete:function() {
+            idc("main").style.overflow = "";
+            idc("main").scrollTop = idc("main").getAttribute("mTop");
+        }
     }, {
         y: "100%",
         opacity: "0",
@@ -874,6 +881,34 @@ function docElementLoadIn(loc, elParent) {
             genEl = document.createElement("hr");
             genEl.classList.add("seperator");
         break;
+        case "signature":
+            genEl = document.createElement("div");
+            if ("label" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.label;
+                genEl.appendChild(label);
+            }
+            let randomID =  [...Array(10)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
+            let sigImg = document.createElement("img");
+            let sigButton = document.createElement("button");
+                genEl.appendChild(sigImg);
+                genEl.appendChild(sigButton);
+            sigButton.innerHTML = "Attach Signature";
+            sigButton.onclick = function() {
+                openOverlay("signatureCanvas");
+                idc("signatureCanvas").setAttribute("toadd",randomID);
+                var sigCan = idc("signatureCanvas").getElementsByTagName("canvas")[0];
+                sigCan.setAttribute("width",sigCan.clientWidth);
+                sigCan.setAttribute("height",sigCan.clientHeight);
+                 signaturePad = new SignaturePad(sigCan, {
+                  backgroundColor: 'rgba(255, 255, 255, 0)',
+                  penColor: 'rgb(0, 0, 0)'
+                });
+                signaturePad.clear();
+            }
+            genEl.id = randomID;
+            genEl.classList.add("signature");
+        break;
         case "textinput":
             locN.push("value");
             
@@ -913,6 +948,11 @@ function docElementLoadIn(loc, elParent) {
             genEl.classList.add("textinput");
             genEl.appendChild(spaninput);
         break;
+        case "clientinformation":
+            
+            genEl = document.createElement("div");
+            genEl.innerHTML = "This content will autofill";
+            break;
         case "textarea":
             locN.push("value");
             
@@ -973,7 +1013,6 @@ function docElementLoadIn(loc, elParent) {
             input.onclick = function() {
                 if(input.hasAttribute("active")) {
                    input.removeAttribute("active");
-                    
                     if(hasTable == false) {
                         docJSON.pages =  jsonUpdate(docJSON.pages,locN,false);
                     }
@@ -982,6 +1021,23 @@ function docElementLoadIn(loc, elParent) {
                     }
                 }
                 else {
+                    if(genEl.parentNode.parentNode.className == "radio") {
+                        var allInp = genEl.parentNode.parentNode.getElementsByTagName("input");
+                        
+                        for(f = 0; f < allInp.length;f++) {
+                            allInp[f].value = "";
+                        }
+                        var allInpt = genEl.parentNode.parentNode.getElementsByTagName("textarea");
+                        
+                        for(f = 0; f < allInpt.length;f++) {
+                            allInpt[f].value = "";
+                        }
+                        var allInpBV = genEl.parentNode.parentNode.getElementsByTagName("checkbox");
+                        for(f = 0; f < allInpBV.length;f++) {
+                            if(allInpBV[f].hasAttribute("active"))
+                            allInpBV[f].removeAttribute("active");
+                        }
+                    }
                     input.setAttribute("active","true");
                     
                     if(hasTable == false) {
@@ -1445,6 +1501,17 @@ function docElementLoadIn(loc, elParent) {
 
         elParent.appendChild(genEl);
     }
+}
+var signaturePad;
+function saveSignature() {
+    let sigCanV = idc("signatureCanvas");
+    let dataPng = signaturePad.toDataURL('image/png');
+    
+    let findToAdd = idc(sigCanV.getAttribute("toadd"));
+    findToAdd.getElementsByTagName("img")[0].src = dataPng;
+    console.log("Done>");
+    
+    closeOverlay("signatureCanvas");
 }
 function jsonUpdate(jsToChange, layers,vChange) {
     var jsToChangeN = jsToChange;
