@@ -85,6 +85,9 @@ function checkLogin() {
                 pass: getCookie("pass")
             });
     }
+    else {
+        loginInit();
+    }
 }
 
 function loginInit() {
@@ -168,10 +171,10 @@ function loginOrPasswordReset(ev) {
         } else {
             setCookie("user", formL[0].value);
             setCookie("pass", formL[1].value);
-            console.log(urlInit + "/" + appVersion + "/login");
+            alert(urlInit + "/" + appVersion + "/login");
             ajaxRequestToMake(urlInit + "/" + appVersion + "/login",
                 function (response) {
-                    console.log(response);
+                    alert(response);
                     buttonE.removeAttribute("clicked");
                     let jsRes = JSON.parse(response);
                     if (jsRes.response === "success") {
@@ -180,6 +183,7 @@ function loginOrPasswordReset(ev) {
                     } else {
                         idc("error").innerHTML = jsRes.response;
                     }
+                    alert("end login");
                 }, {
                     user: formL[0].value,
                     pass: formL[1].value
