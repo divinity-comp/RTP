@@ -37,14 +37,20 @@ var app = {
         if (cordova.platformId == 'android') {
             StatusBar.backgroundColorByHexString("#0e0e0e");
         }
-        pictureSource = navigator.camera.PictureSourceType;
-        destinationType = navigator.camera.DestinationType;
         checkLogin();
-        camOptions = {
-            quality: 100,
-            destinationType: destinationType.FILE_URI,
-            sourceType: pictureSource.PHOTOLIBRARY
-        };
+        try {
+            pictureSource = navigator.camera.PictureSourceType;
+            destinationType = navigator.camera.DestinationType;
+            camOptions = {
+                quality: 100,
+                destinationType: destinationType.FILE_URI,
+                sourceType: pictureSource.PHOTOLIBRARY
+            };
+        }
+        catch(error) {
+            alert(error);
+        }
+
     },
     // Update DOM on a Received Event
     receivedEvent: function (id) {}
