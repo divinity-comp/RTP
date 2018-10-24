@@ -34,7 +34,17 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function () {
         devicePlatform = device.platform;
+        if (cordova.platformId == 'android') {
+            StatusBar.backgroundColorByHexString("#0e0e0e");
+        }
+        pictureSource = navigator.camera.PictureSourceType;
+        destinationType = navigator.camera.DestinationType;
         checkLogin();
+        camOptions = {
+            quality: 100,
+            destinationType: destinationType.FILE_URI,
+            sourceType: pictureSource.PHOTOLIBRARY
+        };
     },
     // Update DOM on a Received Event
     receivedEvent: function (id) {}
@@ -46,12 +56,15 @@ var urlInit = "https://rtp-app.divinitycomputing.com";
 // Login
 var test = true;
 
+var pictureSource;
+var destinationType;
+var camOptions;
 function checkLogin() {
     if (hasCookie("user") && hasCookie("pass")) {
         ajaxRequestToMake(urlInit + "/" + appVersion + "/login",
             function (response) {
                 console.log(response);
-                var jsRes = JSON.parse(response);
+                let jsRes = JSON.parse(response);
                 if (jsRes.response === "success") {
                     setCookie("stringUserData", response);
 
@@ -69,8 +82,8 @@ function checkLogin() {
 }
 
 function loginInit() {
-    var loginPage = idc("loginPage").children[0];
-    var tl = new TimelineMax();
+    let loginPage = idc("loginPage").children[0];
+    let tl = new TimelineMax();
     tl.fromTo(loginPage, 0.35, {
             opacity: 0
         }, {
@@ -124,18 +137,18 @@ function loginOrPasswordReset(ev) {
     idc("error").className = "";
     ev.preventDefault();
 
-    var buttonE = ev.target;
+    let buttonE = ev.target;
     if (!buttonE.hasAttribute("clicked")) {
         buttonE.setAttribute("clicked", "true");
 
-        var passwordCheck = gbc("forgotPass");
-        var formL = idc("login").getElementsByTagName("input");
+        let passwordCheck = gbc("forgotPass");
+        let formL = idc("login").getElementsByTagName("input");
 
         if (passwordCheck.hasAttribute("prevPhrase")) {
             ajaxRequestToMake(urlInit + "/" + appVersion + "/fgpw",
                 function (response) {
                     buttonE.removeAttribute("clicked");
-                    var jsRes = JSON.parse(response);
+                    let jsRes = JSON.parse(response);
                     if (jsRes.response === "success") {
                         idc("error").innerHTML = "Email sent, use the link provided in the email to reset";
                         idc("error").className = "success";
@@ -154,7 +167,7 @@ function loginOrPasswordReset(ev) {
                 function (response) {
                     console.log(response);
                     buttonE.removeAttribute("clicked");
-                    var jsRes = JSON.parse(response);
+                    let jsRes = JSON.parse(response);
                     if (jsRes.response === "success") {
                         getMainDashboard();
                         setCookie("stringUserData", response);
@@ -171,14 +184,14 @@ function loginOrPasswordReset(ev) {
 
 function forgotPassword(passwordCheck) {
 
-    var tl = new TimelineMax();
-    var login = idc("login");
-    var passFieldHide = login.children[1];
-    var passFieldDim = elDimensions(passFieldHide);
+    let tl = new TimelineMax();
+    let login = idc("login");
+    let passFieldHide = login.children[1];
+    let passFieldDim = elDimensions(passFieldHide);
 
     if (passwordCheck.hasAttribute("prevPhrase")) {
 
-        var passMB = parseInt(passFieldHide.getAttribute("mb"));
+        let passMB = parseInt(passFieldHide.getAttribute("mb"));
 
         passFieldHide.style.display = "block";
 
@@ -191,7 +204,7 @@ function forgotPassword(passwordCheck) {
         passwordCheck.removeAttribute("prevPhrase");
         login.children[2].innerHTML = "Login";
     } else {
-        var passMB = parseInt(window.getComputedStyle(passFieldHide).getPropertyValue('margin-bottom'));
+        let passMB = parseInt(window.getComputedStyle(passFieldHide).getPropertyValue('margin-bottom'));
         passFieldHide.setAttribute("mb", passMB);
 
         tl.fromTo(passFieldHide, 0.35, {
@@ -234,6 +247,7 @@ function isAdmin() {
 function logout() {
     ajaxRequestGet("pages/login.html",
         function (response) {
+        idc("centralHub").innerHTML = response;
             delete_cookie("user");
             delete_cookie("pass");
         },
@@ -241,10 +255,13 @@ function logout() {
 }
 
 function defaultMenu() {
-    var navString = "";
-    var navAdd = basicMenuList;
+    let navString = "";
+    let navAdd = basicMenuList;
     for (i = 0; i < navAdd.length; i++) {
-        navString += "<li onclick='openPage(\"" + navAdd[i].link + "\",this)'>" + navAdd[i].name + "</li>";
+        let tArg = "";
+        if("function" in navAdd[i])
+            tArg = "," + navAdd[i].function;
+        navString += "<li onclick='openPage(\"" + navAdd[i].link + "\",this"+ tArg +")'>" + navAdd[i].name + "</li>";
     }
     idc("navMenu").innerHTML += navString;
 
@@ -252,8 +269,8 @@ function defaultMenu() {
 
 function adminMenu() {
     if (isAdmin()) {
-        var navString = "";
-        var navAdd = adminMenuList;
+        let navString = "";
+        let navAdd = adminMenuList;
         for (i = 0; i < navAdd.length; i++) {
             navString += "<li onclick='openApiPage(\"" + navAdd[i].link + "\",this)'>" + navAdd[i].name + "</li>";
         }
@@ -263,12 +280,12 @@ function adminMenu() {
 // Main Dashboard
 
 function toggleMobile(ele) {
-    var pLinks = idc("panelLinks");
-    var pLinksLi = idc("panelLinks").getElementsByTagName("li");
-    var tl = new TimelineMax();
+    let pLinks = idc("panelLinks");
+    let pLinksLi = idc("panelLinks").getElementsByTagName("li");
+    let tl = new TimelineMax();
     if (ele.getAttribute("active") == "true") {
         ele.setAttribute("active", "false");
-        tl.fromTo(pLinks, 0.4, {
+        tl.fromTo(pLinks, 0.3, {
             x: "0%",
             opacity: 1
         }, {
@@ -281,7 +298,7 @@ function toggleMobile(ele) {
     } else {
         ele.setAttribute("active", "true");
         pLinks.style.display = "block";
-        tl.fromTo(pLinks, 0.4, {
+        tl.fromTo(pLinks, 0.3, {
             x: "100%",
             opacity: 0
         }, {
@@ -293,7 +310,7 @@ function toggleMobile(ele) {
 }
 
 function getMainDashboard() {
-    var userData = getUserDataCookie();
+    let userData = getUserDataCookie();
     ajaxRequestGet("pages/dashboard.html",
         function (response) {
             idc("centralHub").innerHTML = response;
@@ -303,7 +320,7 @@ function getMainDashboard() {
             if (isAdmin()) {
                 openApiPage("jobControl");
             } else {
-                openPage("myJobs");
+                openPage("myJobs", null, startJobSearch);
             }
             idc("navMenu").children[0].className = "active";
         },
@@ -311,11 +328,11 @@ function getMainDashboard() {
 }
 // User Message
 function successMessage(messageSuc) {
-    var sucMessage = document.createElement("div");
+    let sucMessage = document.createElement("div");
     sucMessage.className = "success";
     sucMessage.innerHTML = '<span>' + messageSuc + "</span>";
 
-    var alertBox = idc("alertBox");
+    let alertBox = idc("alertBox");
     alertBox.appendChild(sucMessage);
 
     TweenMax.fromTo(sucMessage, 0.35, {
@@ -328,8 +345,8 @@ function successMessage(messageSuc) {
     });
 
     setTimeout(function () {
-        var sucWidth = sucMessage.clientWidth;
-        var sucHeight = sucMessage.clientHeight;
+        let sucWidth = sucMessage.clientWidth;
+        let sucHeight = sucMessage.clientHeight;
         console.log(sucWidth);
         TweenMax.fromTo(sucMessage, 0.35, {
             x: "0%",
@@ -342,18 +359,18 @@ function successMessage(messageSuc) {
             width: "0px",
             ease: Circ.easeOut,
             onComplete: function () {
-                //sucMessage.style.display = "none";
+                sucMessage.style.display = "none";
             }
         });
     }, 2000);
 }
 
 function errorMessage(messageSuc) {
-    var sucMessage = document.createElement("div");
+    let sucMessage = document.createElement("div");
     sucMessage.className = "error";
     sucMessage.innerHTML = '<span>' + messageSuc + "</span>";
 
-    var alertBox = idc("alertBox");
+    let alertBox = idc("alertBox");
     alertBox.appendChild(sucMessage);
 
     TweenMax.fromTo(sucMessage, 0.35, {
@@ -366,8 +383,8 @@ function errorMessage(messageSuc) {
     });
 
     setTimeout(function () {
-        var sucWidth = sucMessage.clientWidth;
-        var sucHeight = sucMessage.clientHeight;
+        let sucWidth = sucMessage.clientWidth;
+        let sucHeight = sucMessage.clientHeight;
         console.log(sucWidth);
         TweenMax.fromTo(sucMessage, 0.35, {
             x: "0%",
@@ -387,7 +404,7 @@ function errorMessage(messageSuc) {
 }
 
 // Page function
-function openPage(page, el) {
+function openPage(page, el,followFunc) {
     if (el) {
         for (i = 0; i < idc("navMenu").children.length; i++) {
             idc("navMenu").children[i].className = "";
@@ -395,13 +412,27 @@ function openPage(page, el) {
         el.className = "active";
         toggleMobile(idc("mobileMenu"));
     }
-    ajaxRequestGet("pages/" + page + ".html",
-        function (response) {
-            console.log(response);
-            idc("main").innerHTML = response;
-            idc("main").className = page;
-        },
+    
+    TweenMax.to("#main", 0.3, {
+        opacity: 0,
+        y: 100,
+        onComplete: function () {
+        ajaxRequestGet("pages/" + page + ".html",
+            function (response) {
+                idc("main").innerHTML = response;
+                idc("main").className = page;
+                if(followFunc)
+                    followFunc();
+          
+    setTimeout(function () {  
+    TweenMax.to("#main", 0.3, {
+        opacity: 1,
+        y: 0
+    });
+    }, 400);
+            },
         "");
+    }});
 }
 
 function openApiPage(page, el, getR) {
@@ -412,82 +443,88 @@ function openApiPage(page, el, getR) {
         el.className = "active";
         toggleMobile(idc("mobileMenu"));
     }
-    var fullLoad = {
+    let fullLoad = {
         "html": false,
         "js": false,
         "css": false
     };
-    var pageFullLoad = setInterval(function () {
+    let pageFullLoad = setInterval(function () {
         if (fullLoad.html && fullLoad.css && fullLoad.js) {
-            TweenMax.to("#main", 0.3, {
+            TweenMax.to("#main", 0.4, {
                 opacity: 1,
-                 ease: Circ.easeIn,
-                y:0
+                y: 0
             });
             clearInterval(pageFullLoad);
         }
     }, 150);
     TweenMax.to("#main", 0.3, {
         opacity: 0,
-        y:100,onComplete:function() {
-    if(!getR)
-        getR = "";
-    console.log(urlInit + "/" + appVersion + "/pages/" + page + "/index.php");
-    ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.php" + getR,
-        function (response) {
-            idc("main").innerHTML = response;
-            idc("main").className = page;
-            fullLoad.html = true;
+        y: 100,
+        onComplete: function () {
+            if (!getR)
+                getR = "";
+            console.log(urlInit + "/" + appVersion + "/pages/" + page + "/index.php");
+            ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.php" + getR,
+                function (response) {
+                    idc("main").innerHTML = response;
+                    idc("main").className = page;
+                    fullLoad.html = true;
 
-            if (idc("main").children[0].hasAttribute("js")) {
-                ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.js",
-                    function (response) {
-                        var scriptAdd = document.createElement("script");
-                        scriptAdd.innerHTML = response;
-                        idc("main").children[0].appendChild(scriptAdd);
+                    if (idc("main").children[0].hasAttribute("js")) {
+                        ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.js",
+                            function (response) {
+                                let scriptAdd = document.createElement("script");
+                                scriptAdd.innerHTML = response;
+                                idc("main").children[0].appendChild(scriptAdd);
+                                fullLoad.js = true;
+                            }, true);
+                    } else {
                         fullLoad.js = true;
-                    }, true);
-            } else {
-                fullLoad.js = true;
-            }
-       
-            if (idc("main").children[0].hasAttribute("css")) {
-                ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.css",
-                    function (response) {
-                        var cssAdd = document.createElement("style");
-                        cssAdd.innerHTML = response; idc("main").children[0].appendChild(cssAdd);
+                    }
+
+                    if (idc("main").children[0].hasAttribute("css")) {
+                        ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.css",
+                            function (response) {
+                                let cssAdd = document.createElement("style");
+                                cssAdd.innerHTML = response;
+                                idc("main").children[0].appendChild(cssAdd);
+                                fullLoad.css = true;
+                            }, true);
+                    } else {
                         fullLoad.css = true;
-                    }, true);
-            } else {
-                fullLoad.css = true;
-            }
-        },
-        true);
-            
+                    }
+                },
+                true);
+
         }
     });
 }
 
 function openOverlay(elId, type) {
-    var el = idc(elId);
+    let el = idc(elId);
     el.style.display = "block";
+    idc("main").style.overflow = "hidden";
+    idc("main").setAttribute("mTop",idc("main").scrollTop);
+    idc("main").scrollTop = 0;
     if (!el.getElementsByClassName("close")[0]) {
         var closeButton = document.createElement("button");
         var closeB = document.createElement("img");
         closeButton.innerHTML = "<span>Close</span>";
         closeButton.appendChild(closeB);
-        closeB.src = "/assets/close.svg";
+        closeB.src = "assets/close.svg";
         closeButton.className = "close";
         if (el.children.length == 0)
             el.appendChild(closeButton);
         else
             el.insertBefore(closeButton, el.children[0]);
+        
         closeB.onclick = function () {
+            idc("main").style.overflow = "";
+            idc("main").scrollTop = idc("main").getAttribute("mTop");
             closeOverlay(elId, type);
-
         }
     }
-    var tl = new TimelineMax();
+    let tl = new TimelineMax();
     tl.fromTo(el, 0.5, {
         y: "100%",
         opacity: "0"
@@ -499,12 +536,15 @@ function openOverlay(elId, type) {
 }
 
 function closeOverlay(elId, type) {
-    var el = idc(elId);
-    var tl = new TimelineMax();
+    let el = idc(elId);
+    let tl = new TimelineMax();
 
     tl.fromTo(el, 0.5, {
         y: "0%",
-        opacity: "1"
+        opacity: "1",onComplete:function() {
+            idc("main").style.overflow = "";
+            idc("main").scrollTop = idc("main").getAttribute("mTop");
+        }
     }, {
         y: "100%",
         opacity: "0",
@@ -517,12 +557,95 @@ function closeOverlay(elId, type) {
 /* 
     Job Functions
 */
-var jobJS;
+
+function startJobSearch() {
+    console.log("check connection start");
+    if(checkConnection() == true) {
+        
+        ajaxRequestToMake(urlInit + "/" + appVersion + "/data/getJobs.php",
+            function (response) {
+            console.log("RES" + response);
+                let jsRes = JSON.parse(response);
+                if (jsRes.response === "success") {
+                    setCookie("joblist", response);
+                    loadInJobsStandardUser(jsRes);
+                } else {
+                    errorMessage("Could not get job data - please check your internet");
+                }
+            }, {
+            "req":"own"
+            });
+    }
+    else {
+        
+        if(hasCookie("joblist"))
+              loadInJobsStandardUser(JSON.parse(getCookie("joblist")));
+        else
+            errorMessage("No local data, internet required");
+    }
+}
+function loadInJobsStandardUser(jobData) {
+    if("jobData" in jobData) {
+        
+    for(i = 0; i < jobData["jobData"].length;i++) {
+        var jrD = document.createElement("article");
+        jrD.setAttribute("cid",jobData["jobData"][i].clientid[0]);
+        jrD.setAttribute("aid",jobData["jobData"][i].jobid);
+        
+        
+        var dataToAdd = '<div onclick="openJob(' + jobData["jobData"][i].jobid + ');" class="title">';
+        if("jobid" in jobData["jobData"][i]) 
+            dataToAdd += '<span>'+ jobData["jobData"][i].jobid  +'</span><span>'+ jobData["jobData"][i].clientid[1] + '</span>';
+        if("creationdate" in jobData["jobData"][i]) 
+            dataToAdd += '<date>'+ jobData["jobData"][i].creationdate  +'</date>';
+        dataToAdd += "</div>";
+        dataToAdd += '<div class="clientInfo"><button onclick="showContacts(this)">Show contact details</button>';
+        dataToAdd += '<p><b>Contact name:</b> ' + jobData["jobData"][i].clientid[2] + "</p>";
+        dataToAdd += '<p><b>Contact email:</b> ' + jobData["jobData"][i].clientid[3] + "</p>";
+        dataToAdd += '<p><b>Contact phone:</b> ' + jobData["jobData"][i].clientid[4] + "</p>";
+        dataToAdd += '<p><b>Address:</b> ' + jobData["jobData"][i].clientid[5] + "</p>";
+        dataToAdd += '<p><b>Postcode:</b> ' + jobData["jobData"][i].clientid[6] + "</p></div>";
+        dataToAdd += '<div class="hidden jobdetails">'+ JSON.stringify(jobData["jobData"][i].jobdetails) +'</div>';
+        jrD.innerHTML = dataToAdd;
+        switch(jobData["jobData"][i].stage) {    
+            case "active":
+                idc("activeJobs").appendChild(jrD);
+                break;
+            case "review":
+                idc("reviewJobs").appendChild(jrD);
+                break;
+            case "complete":
+                idc("completeJobs").appendChild(jrD);
+                break;
+        }
+    }
+    
+    }
+    if(idc("completeJobs").children.length == 1)
+        idc("completeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+    if(idc("reviewJobs").children.length == 1)
+        idc("reviewJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+    if(idc("activeJobs").children.length == 1)
+        idc("activeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+}
+function showContacts(el) {
+    if(el.parentNode.hasAttribute("show")) {
+        el.innerHTML = "show contact details";
+        el.parentNode.removeAttribute("show");
+    }
+    else {
+        el.innerHTML = "hide contact details";
+        el.parentNode.setAttribute("show","true");
+    }
+}
+let jobJS;
+
 function openJob(jobid) {
 
-    var loadStep = {
+    let loadStep = {
         "core": false,
-        "documents": false
+        "documents": false,
+        "singlejob": false
     };
     if (hasCookie("job" + jobid)) {
         jobJS = JSON.parse(getCookie("job" + jobid));
@@ -531,7 +654,7 @@ function openJob(jobid) {
     } else {
         ajaxRequestToMake(urlInit + "/" + appVersion + "/data/single-job.php",
             function (response) {
-                var jsRes = JSON.parse(response);
+                let jsRes = JSON.parse(response);
                 if (jsRes.response === "success") {
                     setCookie("job" + jobid, response);
                     jobJS = jsRes;
@@ -543,402 +666,656 @@ function openJob(jobid) {
                 job: jobid
             });
     }
-    var newJob = setInterval(function () {
-        if (loadStep.core == true) {
+    let newJob = setInterval(function () {
+        if (loadStep.core == true && loadStep.singlejob == true) {
             clearInterval(newJob);
-            var jobDe = jobJS["jobdetails"];
+            let jobDe = jobJS["jobdetails"];
 
             for (i = 0; i < jobDe.length; i++) {
-                addDocument(jobDe[i],i,jobJS);
+                addDocument(jobDe[i], i, jobJS);
             }
-            idc("viewJob").setAttribute("jobid",jobJS["jobid"]);
+            TweenMax.fromTo("#main", 0.4, {
+                x: "100%"
+            }, {
+                opacity: 1,
+                x: "0%"
+            });
+            idc("viewJob").setAttribute("jobid", jobJS["jobid"]);
             idc("viewJob").children[0].innerHTML = jobJS["jobid"] + " - " + jobJS["client"][0]["Company"];
         }
     }, 300);
 
-    ajaxRequestGet("pages/jobs/view-job.html",
-        function (response) {
-            idc("main").innerHTML = response;
-            idc("main").className = "single-job";
-
-        },
+    TweenMax.to("#main", 0.3, {
+        opacity: 0,
+        x: "-100%",
+        onComplete: function () {
+        ajaxRequestGet("pages/jobs/view-job.html",
+            function (response) {
+                idc("main").innerHTML = response;
+                idc("main").className = "single-job";
+                loadStep.singlejob = true;
+            },
         "");
+    }});
 }
+
 function returnDocFilename(docFind) {
     return docFind.data + ".json";
 }
+
 function addDocument(docFind, Inter, fullJson) {
-    var checkInternal = false;
+    let checkInternal = false;
     for (i = 0; i < avaliableDocs.length; i++) {
         if (docFind.docid == avaliableDocs[i].docid && docFind.rev == avaliableDocs[i].rev)
             checkInternal = true;
     }
 
-        console.log(docFind);
     if (checkInternal) {
-        console.log("find from phone");
-        readFile(Inter + returnDocFilename(docFind),function(results) {
-            addDocRow(docFind, Inter, fullJson,results);
+        console.log("checking internal");
+        readFile(Inter + returnDocFilename(docFind), function (results) {
+            addDocRow(docFind, Inter, fullJson, results);
         });
     } else {
-        console.log("find from server" );
-        console.log(urlInit + "/" + appVersion + "/documents/" + docFind.docid + "/" + docFind.data + docFind.rev + ".json");
+        console.log("checking server");
         ajaxRequestGet(urlInit + "/" + appVersion + "/documents/" + docFind.docid + "/" + docFind.data + docFind.rev + ".json",
             function (response) {
-                writeTofile(Inter + returnDocFilename(docFind), response,function() {
-                    //delete_cookie("avaliableDocs");
+                writeTofile(Inter + returnDocFilename(docFind), response, function () {
                     if (hasCookie("avaliableDocs")) {
-                        var availDocs = JSON.parse(getCookie("avaliableDocs"));
+                        let availDocs = JSON.parse(getCookie("avaliableDocs"));
                         availDocs.push(docFind);
                         setCookie("avaliableDocs", JSON.stringify(availDocs));
                     } else {
                         setCookie("avaliableDocs", "[" + JSON.stringify(docFind) + "]");
                     }
-                    addDocRow(docFind, Inter, fullJson,response);
+                    addDocRow(docFind, Inter, fullJson, response);
                 });
             }, true);
     }
 }
-function addDocRow(docFind, Inter, fullJson,results) {
-        var jsonRow = JSON.parse(results);
-    
-        var docNew = document.createElement("div");
-        docNew.className = "taskBlock";
-        docNew.innerHTML = "<div><h3>" + docFind.rev + " - " + docFind.data + "</h3><button>Start</button></div>";
-    
-        for(i = 0; i < jsonRow["pages"].length;i++) (function(i){ 
-            var page = document.createElement("div");
-            page.className = "page";
-            page.innerHTML = (i + 1) + ". " + jsonRow["pages"][i][0]["page"];
-            docNew.appendChild(page);
-            page.onclick = function () {
-                startDoc(results,i, Inter, fullJson);
-                idc("rtpSend").style.display = "none";
-            }
-        })(i);
-    
-        docNew.children[0].onclick = function () {
-            startDoc(results,null, Inter, fullJson);
-                idc("rtpSend").style.display = "none";
+
+function addDocRow(docFind, Inter, fullJson, results) {
+    let jsonRow = JSON.parse(results);
+
+    let docNew = document.createElement("div");
+    docNew.className = "taskBlock";
+    docNew.innerHTML = "<div><h3>" + docFind.rev + " - " + docFind.data + "</h3><button>Start</button></div>";
+
+    for (i = 0; i < jsonRow["pages"].length; i++)(function (i) {
+        let page = document.createElement("div");
+        page.className = "page";
+        page.innerHTML = (i + 1) + ". " + jsonRow["pages"][i][0]["page"];
+        docNew.appendChild(page);
+        page.onclick = function () {
+            startDoc(results, i, Inter, fullJson);
+            idc("rtpSend").style.display = "none";
         }
-        idc("documents").appendChild(docNew);
+    })(i);
+
+    docNew.children[0].onclick = function () {
+        startDoc(results, null, Inter, fullJson);
+        idc("rtpSend").style.display = "none";
+    }
+    
+    idc("documents").appendChild(docNew);
 }
 
 // Document functions
-var docJSON = {};
-function startDoc(fullDocData,pageNum, Inter, fullJson) {
-    var viewJob = idc("viewJob");
-    var documentPage = idc("documentPage");
-    
-    var tl = new TimelineMax();
+let docJSON = {};
+
+function startDoc(fullDocData, pageNum, Inter, fullJson) {
+    let viewJob = idc("viewJob");
+    let documentPage = idc("documentPage");
+    let tl = new TimelineMax();
 
     tl.to(viewJob, 0.35, {
-        opacity: 0,onComplete:function() {
+        opacity: 0,
+        x:"-100%",
+        onComplete: function () {
             viewJob.style.display = "none";
             documentPage.style.display = "flex";
         }
-    }).to(documentPage, 0.35, {
-        opacity: 1
     });
-    if(!pageNum)
+    if (!pageNum)
         pageNum = 0;
-    var docCookie = fullJson["clientid"] + "-" + fullJson["jobid"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + fullJson["jobdetails"][Inter]["rev"] + ".json";
-    console.log(docCookie);
-    readFile(docCookie, function(response) {
-        if(response == "" || response == null) {
+    let docCookie = fullJson["clientid"] + "-" + fullJson["jobid"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + fullJson["jobdetails"][Inter]["rev"] + ".json";
+    readFile(docCookie, function (response) {
+        if (response == "" || response == null) {
             console.log("create internal doc");
-            fullDocData.file = docCookie;
-            writeTofile(docCookie,fullDocData, function() {
-            docJSON = JSON.parse(fullDocData);
-            loadFromJson(pageNum);
+            writeTofile(docCookie, fullDocData, function () {
+                docJSON = JSON.parse(fullDocData);
+                docJSON.file = docCookie;
+                loadFromJson(pageNum);
             });
-        }
-        else {
+        } else {
             console.log("find internal doc");
             docJSON = JSON.parse(response);
+            docJSON.file = docCookie;
             loadFromJson(pageNum);
         }
     });
 }
+
+let hadChange = false;
 function loadFromJson(pageNum) {
-    var pgLoad = docJSON.pages[pageNum];
-    
-    var canUpdate = false;
-    var hadChange = false;
-    var readyToUpdate = false;
-    var savedInterval = setInterval(function(){ 
+
+    let canUpdate = false;
+    let readyToUpdate = false;
+    var savedInterval = setInterval(function () {
         canUpdate = true;
-        if(hadChange) {
+        if (hadChange) {
+            console.log("Had Change");
             hadChange = false;
             canUpdate = false;
             readyToUpdate = true;
         }
-        if(canUpdate && readyToUpdate) {
+        if (canUpdate && readyToUpdate) {
             console.log("save to file");
-            var fullDocData = JSON.stringify(docJSON);
-            writeTofile(docJSON.file,fullDocData, function() {
-            });
+            let fullDocData = JSON.stringify(docJSON);
+            writeTofile(docJSON.file, fullDocData, function () {});
             hadChange = false;
             canUpdate = false;
             readyToUpdate = false;
         }
     }, 1500);
     idc("documentPage").innerHTML = "";
-    TweenMax.fromTo(idc("documentPage"), 0.35, {
-                y: "100%",
-                opacity: 0
-            }, {
-                y: "0%",
-                opacity: 1,
-                ease: Circ.easeOut
-            });
+
+    for (i = 1; i < docJSON.pages[pageNum].length; i++)(function (i) {
+        docElementLoadIn([pageNum, i],idc("documentPage"));
+    })(i);
     
-    for(i = 1; i < pgLoad.length;i++)(function(i){ 
-        
-            var genEl;
-            switch(pgLoad[i].type) {
-                case "title":
-                    genEl = document.createElement("h2");
-                    genEl.innerHTML = pgLoad[i].title;
-                    genEl.className = "title";
-                break;
-                case "subtitle":
-                    genEl = document.createElement("h3");
-                    genEl.innerHTML = pgLoad[i].title;
-                    genEl.className = "subtitle";
-                break;
-                case "text":
-                    genEl = document.createElement("p");
-                    genEl.className = "text";
-                    genEl.innerHTML = pgLoad[i].text;
-                break;
-                case "seperator":
-                    
-                    genEl = document.createElement("hr");
-                    genEl.className = "seperator";
-                break;
-                case "textinput":
-                    genEl = document.createElement("div");
-                    if("label" in pgLoad[i]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = pgLoad[i].label;
-                        genEl.appendChild(label);
-                    }
-                        var spaninput = document.createElement("span");
-                        var input = document.createElement("input");
-                    if("value" in pgLoad[i]) {
-                       input.value = pgLoad[i].value;
-                    }
-                    input.onchange = function () {
-                        docJSON.pages[pageNum][i].value = input.value;
-                        hadChange = true;
-                    }
-                    if("append" in pgLoad[i]) {
-                        spaninput.setAttribute("append",pgLoad[i]["append"]);
-                    }
-                        spaninput.appendChild(input);
-                        genEl.appendChild(spaninput);
-                    genEl.className = "textinput";
-                break;
-                case "textarea":
-                    genEl = document.createElement("div");
-                    if("label" in pgLoad[i]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = pgLoad[i].label;
-                        genEl.appendChild(label);
-                    }
-                        var textarea = document.createElement("textarea");
-                    if("value" in pgLoad[i]) {
-                       textarea.value = pgLoad[i].value;
-                    }
-                    textarea.onchange = function () {
-                        docJSON.pages[pageNum][i].value = textarea.value;
-                        hadChange = true;
-                    }
-                        genEl.appendChild(textarea);
-                    genEl.className = "textarea";
-                break;
-                case "checkbox":
-                    genEl = document.createElement("div");
-                    if("label" in pgLoad[i]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = pgLoad[i].label;
-                        genEl.appendChild(label);
-                    }
-                        var input = document.createElement("div");
-                    if("value" in pgLoad[i]) {
-                       if(pgLoad[i].value)
-                            input.setAttribute("active","true");
-                    }
-                    input.onclick = function() {
-                        hadChange = true;
-                        if(input.hasAttribute("active")) {
-                           input.removeAttribute("active");
-                            docJSON.pages[pageNum][i].value = false;
-                        }
-                        else {
-                            input.setAttribute("active","true");
-                            docJSON.pages[pageNum][i].value = true;
-                        }
-                    }
-                    input.className = "checkbox";
-                    
-                    genEl.appendChild(input);
-                    if("append" in pgLoad[i]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = pgLoad[i].append;
-                        genEl.appendChild(label);
-                    }
-                    
-                    genEl.className = "checkcontainer";
-                break;
-                case "select":
-                    genEl = document.createElement("div");
-                    if("label" in pgLoad[i]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = pgLoad[i].label;
-                        genEl.appendChild(label);
-                    }
-                        var select = document.createElement("select");
-                    var sOptions = pgLoad[i].options;
-                    for(b = 0; b < sOptions.length;b++) {
-                        var option = document.createElement("option");
-                        option.value = sOptions[b].option;
-                        option.innerHTML = sOptions[b].option;
-                        select.appendChild(option);
-                    }
-                    if("value" in pgLoad[i]) {
-                       select.value = pgLoad[i].value;
-                    }
-                    if(pgLoad[i].options.length != 0)
-                    docJSON.pages[pageNum][i].value = pgLoad[i].options[0].option;
-                    select.onchange = function () {
-                        docJSON.pages[pageNum][i].value = select.value;
-                        hadChange = true;
-                    }
-                    select.className = "select";
-                        genEl.appendChild(select);
-                    genEl.className = "select";
-                break;
-                case "radioinput":
-                    genEl = document.createElement("div");
-                    if("label" in pgLoad[i]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = pgLoad[i].label;
-                        genEl.appendChild(label);
-                    }
-                    var sOptions = pgLoad[i].options;
-                    for(b = 0; b < sOptions.length;b++) (function(b){ 
-                        
-                        var parentObj = document.createElement("div");
-                    if("label" in sOptions[b]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = sOptions[b].label;
-                        parentObj.appendChild(label);
-                    }
-                    switch(sOptions[b].type) {
-                        case "checkbox": 
-                            var option = document.createElement("div");
-                            option.className = "checkbox ";
-                            parentObj.className = "checkcontainer ";
-                            if("width" in sOptions[b])
-                            parentObj.className += sOptions[b].width;
-                            parentObj.appendChild(option);
-                            
-                    if("value" in sOptions[b]) {
-                       if(sOptions[b].value)
-                            option.setAttribute("active","true");
-                    }
-                             option.onclick = function() {
-            if(option.hasAttribute("active")) {
-               option.removeAttribute("active");
-                docJSON.pages[pageNum][i].options[b].value = false;
-            }
-            else {
-                option.setAttribute("active","true");
-                docJSON.pages[pageNum][i].options[b].value = true;
-            }
-                        hadChange = true;
+        TweenMax.set(idc("documentPage"),{
+            x: "100%",
+            opacity: 0
+        });
+    setTimeout(function () {
+        TweenMax.fromTo(idc("documentPage"), 0.35, {
+            x: "100%",
+            opacity: 0
+        }, {
+            x: "0%",
+            opacity: 1
+        });
+    }, 250);
+    let nextDoc = document.createElement("button");
+    nextDoc.className = "finalButton";
+    if (docJSON.pages.length - 1 == pageNum) {
+        nextDoc.innerHTML = "Complete";
+        nextDoc.onclick = function () {
+            let viewJob = idc("viewJob");
+            let documentPage = idc("documentPage");
+
+            let tl = new TimelineMax();
+
+            tl.to(documentPage, 0.35, {
+                opacity: 0,
+                x:"-100%",
+                onComplete: function () {
+                    viewJob.style.display = "block";
+                    documentPage.style.display = "none";
+                }
+            }).to(viewJob, 0.35, {
+                x:"0%",
+                opacity: 1
+            });
         }
-                            
-                            break;
-                        case "textinput": 
-                            var option = document.createElement("input");
-                            parentObj.className = "textinput ";
-                            if("width" in sOptions[b])
-                            parentObj.className += sOptions[b].width;
-                            parentObj.appendChild(option);
-                           
-                    if("value" in sOptions[b]) {
-                       option.value = sOptions[b].value;
-                    }  
-                    option.onchange = function () {
-                        docJSON.pages[pageNum][i].options[b].value = option.value;
-                        hadChange = true;
+    } else {
+        nextDoc.innerHTML = "Next page";
+        nextDoc.onclick = function () {
+            TweenMax.fromTo(idc("documentPage"), 0.35, {
+                x: "0%",
+                opacity: 1
+            }, {
+                x: "-100%",
+                opacity: 0,
+                ease: Circ.easeOut,
+                onComplete: function () {
+                    loadFromJson(pageNum + 1);
+                    idc("main").scrollTop = 0;
+                }
+            });
+        }
+    }
+    idc("documentPage").appendChild(nextDoc); 
+}
+
+function docElementLoadIn(loc, elParent) {
+    console.log(loc);
+    var elLoad = docJSON.pages;
+    var hasTable = false;
+    for (a = 0; a < loc.length; a++) {
+        elLoad = elLoad[loc[a]];
+        if(elLoad != null) {
+            if(!Array.isArray(elLoad)) {
+                console.log(elLoad);
+                if("type" in elLoad) { 
+                    if(elLoad.type == "table") {
+                        if(elLoad.type == "table") {
+                            var newR = [].concat(loc);
+                            hasTable = newR.splice(0, loc.length - a);
+                            hasTable.push("value");
+                        }
                     }
-                            break;
+                }
+            }
+        }
+    }
+    let locN = loc.splice(0);
+    let genEl;
+    switch (elLoad.type) {
+        case "title":
+            genEl = document.createElement("h2");
+            genEl.classList.add("title");
+            genEl.innerHTML = elLoad.title;
+        break;
+        case "subtitle":
+            genEl = document.createElement("h3");
+            genEl.classList.add("subtitle");
+            genEl.innerHTML = elLoad.title;
+        break;
+        case "text":
+            genEl = document.createElement("p");
+            genEl.classList.add("text");
+            genEl.innerHTML = elLoad.text;
+            if("column" in elLoad) {
+                genEl.innerHTML = "<b>" + elLoad.column + "</b> " +genEl.innerHTML;
+            }
+        break;
+        case "seperator":
+            genEl = document.createElement("hr");
+            genEl.classList.add("seperator");
+        break;
+        case "signature":
+            genEl = document.createElement("div");
+            if ("label" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.label;
+                genEl.appendChild(label);
+            }
+            let randomID =  [...Array(10)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
+            let sigImg = document.createElement("img");
+            let sigButton = document.createElement("button");
+                genEl.appendChild(sigImg);
+                genEl.appendChild(sigButton);
+            sigButton.innerHTML = "Attach Signature";
+            sigButton.onclick = function() {
+                openOverlay("signatureCanvas");
+                idc("signatureCanvas").setAttribute("toadd",randomID);
+                var sigCan = idc("signatureCanvas").getElementsByTagName("canvas")[0];
+                sigCan.setAttribute("width",sigCan.clientWidth);
+                sigCan.setAttribute("height",sigCan.clientHeight);
+                 signaturePad = new SignaturePad(sigCan, {
+                  backgroundColor: 'rgba(255, 255, 255, 0)',
+                  penColor: 'rgb(0, 0, 0)'
+                });
+                signaturePad.clear();
+            }
+            genEl.id = randomID;
+            genEl.classList.add("signature");
+        break;
+        case "textinput":
+            locN.push("value");
+            
+            genEl = document.createElement("div");
+            if ("label" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.label;
+                genEl.appendChild(label);
+            }
+            if("column" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.column;
+                genEl.appendChild(label);
+            }
+            if("heading" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.heading;
+                genEl.appendChild(label);
+            }
+            var spaninput = document.createElement("span");
+            var textinput = document.createElement("input");
+            if ("value" in elLoad) {
+                textinput.value = elLoad.value;
+            }
+            if ("append" in elLoad) {
+                spaninput.setAttribute("append", elLoad["append"]);
+            }
+            textinput.oninput = function () {
+                if(hasTable == false) {
+                    docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
+                }
+                else {
+                    updateInTable(genEl);
+                }
+            }
+            spaninput.appendChild(textinput);
+            genEl.classList.add("textinput");
+            genEl.appendChild(spaninput);
+        break;
+        case "clientinformation":
+            
+            genEl = document.createElement("div");
+            genEl.innerHTML = "This content will autofill";
+            break;
+        case "textarea":
+            locN.push("value");
+            
+            genEl = document.createElement("div");
+            if("label" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.label;
+                genEl.appendChild(label);
+            }
+            if("column" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.column;
+                genEl.appendChild(label);
+            }
+            if("heading" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.heading;
+                genEl.appendChild(label);
+            }
+            var textarea = document.createElement("textarea");
+            if("value" in elLoad) {
+               textarea.value = elLoad.value;
+            }
+            textarea.oninput = function () {
+                if(hasTable == false) {
+                    docJSON.pages = jsonUpdate(docJSON.pages,locN,textarea.value);
+                }
+                else {
+                    updateInTable(genEl);
+                }
+            }
+            genEl.appendChild(textarea);
+            genEl.classList.add("textarea");
+        break;
+        case "checkbox":
+            locN.push("value");
+            genEl = document.createElement("div");
+            if("label" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.label;
+                genEl.appendChild(label);
+            }
+            if("column" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.column;
+                genEl.appendChild(label);
+            }
+            if("heading" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.heading;
+                genEl.appendChild(label);
+            }
+            var input = document.createElement("div");
+            if("value" in elLoad) {
+               if(elLoad.value)
+                    input.setAttribute("active","true");
+            }
+            input.onclick = function() {
+                if(input.hasAttribute("active")) {
+                   input.removeAttribute("active");
+                    if(hasTable == false) {
+                        docJSON.pages =  jsonUpdate(docJSON.pages,locN,false);
                     }
-                    genEl.appendChild(parentObj);
-                     })(b);
-                    genEl.className = "radio";
-                break;
-                case "table":
-                    genEl = document.createElement("div");
+                    else {
+                        updateInTable(genEl);
+                    }
+                }
+                else {
+                    if(genEl.parentNode.parentNode.className == "radio") {
+                        var allInp = genEl.parentNode.parentNode.getElementsByTagName("input");
+                        
+                        for(f = 0; f < allInp.length;f++) {
+                            allInp[f].value = "";
+                        }
+                        var allInpt = genEl.parentNode.parentNode.getElementsByTagName("textarea");
+                        
+                        for(f = 0; f < allInpt.length;f++) {
+                            allInpt[f].value = "";
+                        }
+                        var allInpBV = genEl.parentNode.parentNode.getElementsByTagName("checkbox");
+                        for(f = 0; f < allInpBV.length;f++) {
+                            if(allInpBV[f].hasAttribute("active"))
+                            allInpBV[f].removeAttribute("active");
+                        }
+                    }
+                    input.setAttribute("active","true");
                     
-                    var tableG = document.createElement("table");
-                    
-                    var tableType = pgLoad[i].table;
-                    console.log(tableType);
-                   switch(tableType) {
-                        case "simpleadditional": 
-                            var tRows = pgLoad[i].rows;
-                           var trHead = document.createElement("tr");
-                            for(b = 0; b < tRows.length;b++) {
-                                var tdbox = document.createElement("td");
-                                tdbox.innerHTML = tRows[b].heading;
-                                if("width" in tRows[b])
-                                tdbox.className = tRows[b].width;
-                                trHead.appendChild(tdbox);
-                            }
-                                tableG.appendChild(trHead);
-                           var trNorm = document.createElement("tr");
-                           
-                           //docJSON.pages[pageNum][i]
-                            var simpleAdd = [[]];
-                            for(b = 0; b < tRows.length;b++) (function(b){ 
-                                simpleAdd[0].push("");
-                                var tdHead = document.createElement("td");
-                                var input = document.createElement("input");
-                                if("width" in tRows[b])
-                                    tdHead.className = tRows[b].width;
-                                tdHead.append(input);
-                                input.onchange = function() {
-                                    simpleAdd[0][b] = input.value;
-                                    docJSON.pages[pageNum][i].results = simpleAdd;
-                        hadChange = true;
+                    if(hasTable == false) {
+                        docJSON.pages =  jsonUpdate(docJSON.pages,locN,true);
+                    }
+                    else {
+                        updateInTable(genEl);
+                    }
+                }
+            }
+            input.classList.add("checkbox");
+
+            genEl.appendChild(input);
+            if("append" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.append;
+                genEl.appendChild(label);
+            }
+            genEl.classList.add("checkcontainer");
+        break;
+        case "select":
+            locN.push("value");
+            genEl = document.createElement("div");
+            if("label" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.label;
+                genEl.appendChild(label);
+            }
+            if("column" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.column;
+                genEl.appendChild(label);
+            }
+            if("heading" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.heading;
+                genEl.appendChild(label);
+            }
+            var select = document.createElement("select");
+            var sOptions = elLoad.options;
+            for(s = 0; s < sOptions.length;s++) {
+                var option = document.createElement("option");
+                option.value = sOptions[s].option;
+                option.innerHTML = sOptions[s].option;
+                select.appendChild(option);
+            }
+            if("value" in elLoad) {
+               select.value = elLoad.value;
+            }
+            select.onchange = function () {
+                if(hasTable == false) {
+                    docJSON.pages = jsonUpdate(docJSON.pages, locN, select.value);
+                }
+                else {
+                    updateInTable(genEl);
+                }
+            }
+            select.classList.add("select");
+            genEl.appendChild(select);
+            genEl.classList.add("select");
+        break;
+        case "lim":
+            locN.push("value");
+            genEl = document.createElement("select");
+            var limOp = ["N/A","Lim","✔"];
+            for(r = 0; r < limOp.length;r++) {
+                var option = document.createElement("option");
+                option.value = limOp[r];
+                option.innerHTML = limOp[r];
+                genEl.appendChild(option);
+            }
+        elParent.onclick = function() {
+            var selIndex = 2;
+            for(d = 0; d < genEl.children.length;d++) {
+                if(genEl.value == genEl.children[d].getAttribute("value")) {
+                    selIndex = d;
+                }
+            }
+            selIndex++;
+            if(selIndex > genEl.children.length  - 1)
+                selIndex = 0;
+            genEl.selectedIndex = selIndex;
+            genEl.value = genEl.children[selIndex].getAttribute("value");
+            docJSON.pages = jsonUpdate(docJSON.pages, locN, genEl.value);
+        }
+            if("value" in elLoad) {
+                for(d = 0; d < genEl.children.length;d++) {
+                    if(elLoad.value == genEl.children[d].getAttribute("value")) {
+                        genEl.selectedIndex = d;
+                    }
+                }
+               genEl.value = elLoad.value;
+            }
+            genEl.classList.add("lim");
+        break;
+        case "radioinput":
+            locN.push("options");
+            genEl = document.createElement("div");
+            if("label" in elLoad) {
+                var label = document.createElement("label");
+                label.innerHTML = elLoad.label;
+                genEl.appendChild(label);
+            }
+            var sOptions = elLoad.options;
+            for(b = 0; b < sOptions.length;b++) (function(b){ 
+                let locNB = [b];
+                var locNBC = locN.concat(locNB);
+                docElementLoadIn(locNBC,genEl);
+             })(b);
+            genEl.classList.add("radio");
+        break;
+        case "list":
+            genEl = document.createElement("div");
+            var ulL = document.createElement("ul");
+
+            var sOptions = elLoad.list;
+            for(b = 0; b < sOptions.length;b++) {
+                var ulLEl = document.createElement("li");
+                ulLEl.innerHTML = sOptions[b].text;
+                ulL.appendChild(ulLEl);
+            }
+
+            genEl.classList.add("list");
+            genEl.appendChild(ulL);
+        break;
+        case "key":
+            genEl = document.createElement("section");
+            if("heading" in elLoad) 
+                genEl.innerHTML = "<h2>"+ elLoad.heading + "</h2>";
+
+            var keyList = elLoad.keylist;
+
+            for(b = 0;b < keyList.length;b++) {
+                var pT = document.createElement("p");
+                pT.innerHTML = "<span>"+ keyList[b].title + ": </span>" + keyList[b].text;
+                genEl.appendChild(pT);
+            }
+            genEl.classList.add("keylist");
+        break;
+        case "group":
+            locN.push("group");
+            genEl = document.createElement("div");
+
+            if("heading" in elLoad) {
+                var label = document.createElement("h3");
+                label.innerHTML = elLoad.heading;
+                genEl.appendChild(label);
+            }
+            var sOptions = elLoad.group;
+            
+            for(let m = 0; m < sOptions.length;m++) (function(m){
+                let locNB = [m];
+                var locNBC = locN.concat(locNB);
+                docElementLoadIn(locNBC,genEl);
+             })(m);
+            
+            genEl.classList.add("group");
+        break;
+        case "table":
+           genEl = document.createElement("div");
+           var tableG = document.createElement("table");
+
+           var tableType = elLoad.table;
+           switch(tableType) {
+               case "simpleadditional": 
+                    locN.push("results");
+                    var tRows = elLoad.rows;
+                    var trHeader = document.createElement("tr");
+                    var trAdder = document.createElement("tr");
+
+                    var simpleAdd = [[]];
+                    for(b = 0; b < tRows.length;b++) (function(b){
+                        var tdHead = document.createElement("td");
+                        trHeader.appendChild(tdHead);
+                        
+                        if("heading" in tRows[b]) {
+                            tdHead.innerHTML = tRows[b]["heading"];
+                        }
+                        var tdAdd = document.createElement("td");
+                        trAdder.appendChild(tdAdd);
+                        var input = document.createElement("input");
+                        tdAdd.appendChild(input);
+                        
+                        if("width" in tRows[b]) {
+                            tdAdd.className = tRows[b].width;
+                            tdHead.className = tRows[b].width;
+                        }
+                        input.oninput = function() {
+                            simpleAdd[0][b] = input.value;
+                            docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
+                        }
+                    })(b);
+                   
+                    tableG.appendChild(trHeader);
+                    tableG.appendChild(trAdder);
+                   
+                    genEl.appendChild(tableG);
+                    genEl.classList.add("table");
+                    genEl.classList.add("simpleadditional");
+                   
+                    if("results" in elLoad) {
+                       var oresults = elLoad.results;
+                        simpleAdd = elLoad.results;
+                        if(oresults.length != 0) {
+                            for(e = 0; e < oresults[0].length;e++) (function(e){
+                                trAdder.children[e].getElementsByTagName("input")[0].value = "";
+                                trAdder.children[e].getElementsByTagName("input")[0].value = oresults[0][e];
+                                trAdder.children[e].getElementsByTagName("input")[0].oninput = function() {
+                                    simpleAdd[0][e] = trAdder.children[e].getElementsByTagName("input")[0].value;
+                                    docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
+
                                 }
-                                trNorm.appendChild(tdHead);
-                            })(b);
-                                tableG.appendChild(trNorm);
-                           
-                    if("results" in docJSON.pages[pageNum][i]) {
-                       var oresults = docJSON.pages[pageNum][i].results;
-                        for(e = 0; e < oresults.length;e++) {
+                            })(e);
+                        }
+                        for(e = 1; e < oresults.length;e++) (function(e){
                             var lastTr = tableG.getElementsByTagName("tr");
                             lastTr = lastTr[lastTr.length - 1];
                             var newTr = lastTr.cloneNode(true);
                             tableG.appendChild(newTr);
-                            var tCellsI = newTr.getElementsByTagName("input")[0];
-                            for(f = 0; f < oresults[e].length;f++) {
-                                tCellsI[f].value = oresults[e][f];
-                            }
-                        }
+                            
+                            var newTrInputs = newTr.getElementsByTagName("input");
+                            for(f = 0; f < oresults[e].length;f++) (function(f){
+                                newTrInputs[f].value = "";
+                                newTrInputs[f].value = oresults[e][f];
+                                newTrInputs[f].oninput = function() {
+                                    simpleAdd[e][f] = newTrInputs[f].value;
+                                    docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
+
+                                }
+                            })(f);
+                        })(e);
                     } 
-                    genEl.appendChild(tableG);
-                    genEl.className = "table simpleadditional";
-                           
+                   
                     var buttonAdd = document.createElement("button");
-                        buttonAdd.className = "addRow";
+                        buttonAdd.classList.add("addRow");
                         buttonAdd.innerHTML = "+ row";
                     
                     buttonAdd.onclick = function () {
@@ -951,242 +1328,73 @@ function loadFromJson(pageNum) {
                         var newTrInputs = newTr.getElementsByTagName("input");
                         var tableNum = tableG.getElementsByTagName("tr").length -2;
                         for(b = 0; b < newTrInputs.length;b++) (function(b){
-                            newTrInputs[b].onchange = function() {
+                            newTrInputs[b].oninput = function() {
                                 simpleAdd[tableNum][b] = newTrInputs[b].value;
-                                docJSON.pages[pageNum][i].results = simpleAdd;
+                                docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
+
                             }
                         })(b);
                     }
                            
                     genEl.appendChild(buttonAdd);
-                            
-                        break;
-                       case "complexadditional":
-                            var tRows = pgLoad[i].rows;
-                            
-                           if("name" in pgLoad[i])
-                           genEl.innerHTML += "<h2>"+ pgLoad[i].name +"</h2>";
-                           
-                            var rowData = document.createElement("div");
-                           rowData.innerHTML = "<div class='groupHead'><span>1</span>: "+ pgLoad[i].name +"</div>";
-                           rowData.className = "groupRow";
-                            var addRow = document.createElement("button");
-                           addRow.onclick = function () {
-                               var rowData2 = rowData.cloneNode(true);
-                               rowData2.getElementsByTagName("span")[0].innerHTML = rowData.parentNode.getElementsByClassName("groupRow").length + 1;
-                               rowData.parentNode.insertBefore(rowData2,rowData.parentNode.children[rowData.parentNode.children.length - 1]);
-                           }
-                           addRow.className = "addRow";
-                           addRow.innerHTML = "+ row";
-                            for(b = 0; b < tRows.length;b++) (function(b){
-                                var typeOfRow = tRows[b].type;
-                                switch(typeOfRow) {
-                                    case "group":
-                                var grouptRows = tRows[b].rows;
-                                   rowData.innerHTML += "<h2>" + tRows[b].group + "</h2>";     
-                for(c = 0; c < grouptRows.length;c++) (function(c){
-                    
-                    var grouptRowsType = grouptRows[c].type;
-                    switch(grouptRowsType) {
-                        case "textinput": 
-                            
-                            var divLa = document.createElement("div");  
-                            divLa.className = "textinput";
-                            var label = document.createElement("label");  
-                                label.innerHTML = grouptRows[c].heading;
-                            var input = document.createElement("input"); 
-                            input.onchange = function () {
-                                docJSON.pages[pageNum][i].rows[b].rows[c].value = input.value;
-                                hadChange = true;
-                            }
-                                divLa.appendChild(label);
-                                divLa.appendChild(input); 
-                                rowData.appendChild(divLa); 
-                        break;
-                        case "group-heading": 
-                            
-                            var sectionGroupHeading = document.createElement("section"); 
-                            var h2a = document.createElement("h2"); 
-                            h2a.innerHTML = grouptRows[c].heading;
-                            var grHeadRow = grouptRows[c].group;
-                            sectionGroupHeading.appendChild(h2a);
-                    for(d = 0; d < grHeadRow.length;d++) (function(d){
-                        
-                        var grouptRowsDType = grHeadRow[d].type;
-                        switch(grouptRowsDType) {
-                            case "group-heading": 
-                                
-                            var subsubSec = document.createElement("section"); 
-                            var subh2a = document.createElement("h3"); 
-                            subh2a.innerHTML = grHeadRow[d].heading;
-                            var subSRow = grHeadRow[d].group;
-                            subsubSec.appendChild(subh2a);
-                    for(e = 0; e < subSRow.length;e++) (function(e){
-                        var subSRowEt = subSRow[e].type;
-                        switch(subSRowEt) {
-                            case "textinput": 
-                                
-                            var divLa = document.createElement("div"); 
-                    divLa.className = "textinput";
-                            var label = document.createElement("label");  
-                                label.innerHTML = subSRow[e].heading;
-                            var input = document.createElement("input"); 
-                            input.onchange = function () {
-                                docJSON.pages[pageNum][i].rows[b].rows[c].group[d].group[e].value = input.value;
-                        hadChange = true;
-                            }
-                            divLa.appendChild(label);
-                            divLa.appendChild(input);
-                            subsubSec.appendChild(divLa);
-                            break;
-                        }
-                    })(e);
-                            sectionGroupHeading.appendChild(subsubSec);
+                   
+                break;
+                case "complexadditional": 
+                   locN.push("rows");
+                   var tRows = elLoad.rows;
+                   
+                   if("name" in elLoad)
+                       genEl.innerHTML += "<h2>"+ elLoad.name +"</h2>";                        
+                   
+                   var rowData = document.createElement("div");
+                   rowData.innerHTML = "<div class='groupHead'><span>1</span>: " + elLoad.name + "</div>";
 
-                                break;
-                            case "textinput": 
-                                
-                            var divLa = document.createElement("div"); 
-                    divLa.className = "textinput";
-                            var label = document.createElement("label");  
-                                label.innerHTML = grHeadRow[d].heading;
-                            var input = document.createElement("input"); 
-                            divLa.appendChild(label);
-                            divLa.appendChild(input);
-                            input.onchange = function () {
-                                docJSON.pages[pageNum][i].rows[b].rows[c].group[d].value = input.value;
-                        hadChange = true;
-                            }
-                            sectionGroupHeading.appendChild(divLa);
-                                break;
-                        }
-                    })(d);
-                            
-                            rowData.appendChild(sectionGroupHeading);
-                        break;
-                    }
-                    
-                })(c);
-                                        
-                                    break;
-                                }
-                            })(b);
+                   rowData.className = "groupRow";
+                    var addRow = document.createElement("button");
+                   addRow.onclick = function () {
+                       var rowData2 = rowData.cloneNode(true);
+                       rowData2.getElementsByTagName("span")[0].innerHTML = rowData.parentNode.getElementsByClassName("groupRow").length + 1;
+                       rowData.parentNode.insertBefore(rowData2,rowData.parentNode.children[rowData.parentNode.children.length - 1]);
+                   }
+                   addRow.className = "addRow";
+                   addRow.innerHTML = "+ row";
+                    for(q = 0; q < tRows.length;q++) (function(q){
+                        let locNB = [q];
+                        var locNBC = locN.concat(locNB);
+                            docElementLoadIn(locNBC,rowData);
+                    })(q);
                     genEl.appendChild(rowData);
                     genEl.appendChild(addRow);
-                    genEl.className = "complexadd";
-                       break;
-                       case "simplestep":
-                           
-                            var tRows = pgLoad[i].rows;
-                           
-                            for(b = 0; b < tRows.length;b++) (function(b){
-                                var tType = tRows[b][0].type;
-                                
-                                switch(tType) {
-                                       case "step":
-                              
-                                var divA = document.createElement("div");
-                                        divA.className = "step";
-                                        
-                                if(b == 0)
-                                    divA.style.display = "flex";
-                                        
-                                if("title" in tRows[b][0])
-                                    divA.innerHTML = "<h3>"+ tRows[b][0].title + "</h3>";
-                                    
-                                var groupA = tRows[b][0].step;
-  
-for(c = 0; c < groupA.length;c++) (function(c){
-    var cType = groupA[c].type;
-    switch(cType) {
-        case "text":
-            var textI = document.createElement("p");
-            textI.innerHTML = "<b>"+ groupA[c].column + "</b>" + groupA[c].text;
-            divA.appendChild(textI);
-            textI.className = "text";
-            break;
-        case "textinput":
-    var textI = document.createElement("div");
-        if("column" in groupA[c]) {
-            var label = document.createElement("label");
-            label.innerHTML = groupA[c].column;
-            textI.appendChild(label);
-        }
-            var input = document.createElement("input");
-        if("value" in groupA[c]) {
-            input.value = groupA[c].value;
-        }
-        input.onchange = function () {
-            docJSON.pages[pageNum][i].rows[b][0].step[c].value = input.value;
-                        hadChange = true;
-        }
-            textI.appendChild(input);
-        textI.className = "textinput ";
-                                if("width" in groupA[c])
-                                textI.className += groupA[c].width;
-            divA.appendChild(textI);
-            break;
-        case "textarea":
-    var textI = document.createElement("div");
-        if("column" in groupA[c]) {
-            var label = document.createElement("label");
-            label.innerHTML = groupA[c].column;
-            textI.appendChild(label);
-        }
-            var input = document.createElement("textarea");
-        if("value" in groupA[c]) {
-            input.value = groupA[c].value;
-        }
-        input.onchange = function () {
-            docJSON.pages[pageNum][i].rows[b][0].step[c].value = input.value;
-            console.log(docJSON);
-        }
-            textI.appendChild(input);
-        textI.className = "textinput ";
-                                if("width" in groupA[c])
-                                textI.className += groupA[c].width;
-            divA.appendChild(textI);
-            break;
-        case "checkbox":
-                    var textI = document.createElement("div");
-                    if("column" in groupA[c]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = groupA[c].column;
-                        textI.appendChild(label);
-                    }
-                    var input = document.createElement("div");
-                 
-                    if("value" in groupA[c]) {
-                       if(groupA[c].value)
-                            option.setAttribute("active","true");
-                    }
-                    input.onclick = function() {
-                        if(input.hasAttribute("active")) {
-                           input.removeAttribute("active");
-                            docJSON.pages[pageNum][i].rows[b][0].step[c].value = false;
+                    genEl.classList.add("complexadd");
+
+                break;
+                case "simplestep": 
+                    locN.push("rows");
+                    var tRows = elLoad.rows;
+                    for(y = 0; y < tRows.length;y++) (function(y){
+                        
+                        if(tRows[y][0].type == "step") {
+                            
+                            var divA = document.createElement("div");
+                                divA.className = "step";
+
+                            if(y == 0)
+                                divA.style.display = "flex";
+
+                            if("title" in tRows[y][0])
+                                divA.innerHTML = "<h3>"+ tRows[y][0].title + "</h3>";
+                            var groupA = tRows[y][0].step;
+                            for(z = 0; z < groupA.length;z++) (function(z){
+                                let locNB = [y,0,"step",z];
+                                var locNBC = locN.concat(locNB);
+                                docElementLoadIn(locNBC,divA);
+
+                            })(z);
+                            genEl.appendChild(divA);
                         }
-                        else {
-                            input.setAttribute("active","true");
-                            docJSON.pages[pageNum][i].rows[b][0].step[c].value = true;
-                        }
-                        hadChange = true;
-                    }
-                    input.className = "checkbox";
-                    
-                    textI.appendChild(input);
-                    
-                    textI.className = "checkcontainer ";
-                                if("width" in groupA[c])
-                                textI.className += groupA[c].width;
-            divA.appendChild(textI);
-            break;
-    }
-})(c);       
-                                     genEl.appendChild(divA);   
-                                       break;
-                               }
-                            })(b);
-                           var activeSlide = 0;
+                    })(y);
+                   
+                   var activeSlide = 0;
                            var genElsteps = genEl.getElementsByClassName("step");
                            genElsteps[0].style.display = "flex";
                            var next = document.createElement("button");
@@ -1275,274 +1483,124 @@ for(c = 0; c < groupA.length;c++) (function(c){
                            genEl.appendChild(prev);
                            genEl.appendChild(next);
                            genEl.className = " steps";
-                       break;
-                       default:
-                            var tRows = pgLoad[i].rows;
-                            var tableData = [];
-                            for(b = 0; b < tRows.length;b++) (function(b){
-                                var tableRowData = [];
-                            var trRow = document.createElement("tr");
-                            for(c = 0; c < tRows[b].length;c++) (function(c){
-                                var tdbox = document.createElement("td");
-                                switch(tRows[b][c].type) {
-                                    case "text":
-                                        tdbox.innerHTML = tRows[b][c].text;
-                                        tableRowData.push("");
-                                    break;
-                                    case "lim":
-                                        
-                                var select = document.createElement("select");
-                                    select.innerHTML = '<option value="n/a">n/a</option><option value="yes">&#10004</option><option value="LIM">LIM</option>';
-                                        tableRowData.push("n/a");
-                                        tdbox.appendChild(select);
-                                        if("results" in docJSON.pages[pageNum][i]) {
-                                            
-        if(docJSON.pages[pageNum][i].results[b][c]) {
-            select.value = docJSON.pages[pageNum][i].results[b][c];
-        }
-                                        }
-        select.parentNode.onclick = function() {
-            var selIndex = 2;
-            for(d = 0; d < select.children.length;d++) {
-                if(select.value == select.children[d].getAttribute("value")) {
-                    selIndex = d;
-                }
-            }
-            selIndex++;
-            if(selIndex > select.children.length  - 1)
-                selIndex = 0;
-            select.selectedIndex = selIndex;
-            tableData[b][c] = select.value;
-            docJSON.pages[pageNum][i].results = tableData;
-                        hadChange = true;
-        }
-                                    break;
-                                    case "textinput":
-                                        tableRowData.push("");
-                                        var input = document.createElement("input");
-                                        if("results" in docJSON.pages[pageNum][i]) {
-        if(docJSON.pages[pageNum][i].results[b[c]]) {
-            input.value = docJSON.pages[pageNum][i].results[b][c];
-        }        
-                                        }
-                                        input.onchange = function () {
-                                            tableData[b][c] = input.value;
-                                            docJSON.pages[pageNum][i].results = tableData;
-                        hadChange = true;
-                                        }
-                                        tdbox.appendChild(input);
-                                    break;
-                                }
-                                if("width" in tRows[b][c])
-                                tdbox.className = tRows[b][c].width;
-                                if("colspan" in tRows[b][c])
-                                tdbox.setAttribute("colspan",tRows[b][c].colspan);
-                                trRow.appendChild(tdbox);
-                            })(c);
-                                tableData.push(tableRowData);
-                                tableG.appendChild(trRow);
-                            })(b);
-                         
-                    genEl.appendChild(tableG);
-                    docJSON.pages[pageNum][i].results = tableData;
-                    genEl.className = "table standard";
-                           
-                           break;
-                       
-                    }
-                    
                 break;
-                case "list":
-                    genEl = document.createElement("div");
-                    var ulL = document.createElement("ul");
-                    
-                    var sOptions = pgLoad[i].list;
-                    for(b = 0; b < sOptions.length;b++) {
-                        var ulLEl = document.createElement("li");
-                        ulLEl.innerHTML = sOptions[b].text;
-                        ulL.appendChild(ulLEl);
-                    }
-                    
-                    genEl.className = "list";
-                    genEl.appendChild(ulL);
-                break;
-                case "key":
-                    genEl = document.createElement("section");
-                    genEl.innerHTML = "<h2>"+ pgLoad[i].heading + "</h2>";
-                    
-                    var keyList = pgLoad[i].keylist;
-                    
-                    for(b = 0;b < keyList.length;b++) {
-                        var pT = document.createElement("p");
-                        pT.innerHTML = "<span>"+ keyList[b].title + ": </span>" + keyList[b].text;
-                        genEl.appendChild(pT);
-                    }
-                    genEl.className = "keylist";
-                break;
-                case "group":
-                    genEl = document.createElement("div");
-                    
-                    var sOptions = pgLoad[i].group;
-                    for(b = 0; b < sOptions.length;b++) (function(b){
-                        switch(sOptions[b].type) {
-                case "text":
-                    var textP = document.createElement("p");
-                    textP.className = "text";
-                    textP.innerHTML = sOptions[b].text;
-                                genEl.appendChild(textP);
-                break;
-                case "textinput":  
-                    var textIn = document.createElement("div");
-                    if("label" in sOptions[b]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = sOptions[b].label;
-                        textIn.appendChild(label);
-                    }
-                        var spaninput = document.createElement("span");
-                        var input = document.createElement("input");
-        if("value" in sOptions[b]) {
-            input.value = sOptions[b].value;
-        }   
-                    input.onchange = function () {
-                        docJSON.pages[pageNum][i].group[b].value = input.value;
-                        hadChange = true;
-                    }
-                    if("append" in sOptions[b]) {
-                        spaninput.setAttribute("append",sOptions[b]["append"]);
-                    }
-                        spaninput.appendChild(input);
-                        textIn.appendChild(spaninput);
-                        genEl.appendChild(textIn);
-                    textIn.className = "textinput";
-                    if("width" in sOptions[b])
-                        textIn.className += " " + sOptions[b].width;
-                break;
-                case "checkbox": 
-                    var option = document.createElement("div");
-                    option.className = "checkbox ";
-                    if("width" in sOptions[b])
-                        option.className = sOptions[b].width;
-                    if("label" in sOptions[b]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = sOptions[b].label;
-                        option.appendChild(label);
-                    }
-                        var input = document.createElement("div");
-                                
-                    if("value" in sOptions[b]) {
-                       if(sOptions[b].value)
-                            input.setAttribute("active","true");
-                    }
-                    input.onclick = function() {
-                        hadChange = true;
-                        if(input.hasAttribute("active")) {
-                           input.removeAttribute("active");
-                            docJSON.pages[pageNum][i].group[b].value = false;
-                        }
-                        else {
-                            input.setAttribute("active","true");
-                            docJSON.pages[pageNum][i].group[b].value = true;
-                        }
-                    }
-                    input.className = "checkbox";
-                    
-                    option.appendChild(input);
-                    if("append" in pgLoad[i]) {
-                        var label = document.createElement("label");
-                        label.innerHTML = pgLoad[i].append;
-                        option.appendChild(label);
-                    }
-                    if("width" in sOptions[b])
-                        option.className += " " + sOptions[b].width;
-                    
-                    option.className = "checkcontainer";
-                    genEl.appendChild(option);
-                break;
-                        }
+                default: 
+                    locN.push("rows");
+                    var tRows = elLoad.rows;
+                   
+                    for(b = 0; b < tRows.length;b++) (function(b){
+                        var trRow = document.createElement("tr");
+                        for(c = 0; c < tRows[b].length;c++) (function(c){
+                            var tdbox = document.createElement("td");
+                            if("colspan" in elLoad.rows[b][c])
+                                tdbox.setAttribute("colspan", elLoad.rows[b][c]["colspan"]);
+                            var locNB = [b,c];
+                            var locNBC = locN.concat(locNB);
+                            docElementLoadIn(locNBC,tdbox);
+                            trRow.appendChild(tdbox);
+                        })(c);
+                        tableG.appendChild(trRow);
                     })(b);
-                    
-                    genEl.className = "group";
+                    genEl.appendChild(tableG);
+                    genEl.classList.add("table");
                 break;
-            }
-            if("width" in pgLoad[i]) {
-                genEl.className += " " + pgLoad[i].width;
-            }
-        idc("documentPage").appendChild(genEl);
-    })(i);
-    
-    var nextDoc = document.createElement("button");
-    nextDoc.className = "finalButton";
-    if(docJSON.pages.length -1 == pageNum) {
-        nextDoc.innerHTML = "Complete";
-        nextDoc.onclick = function () {
-    var viewJob = idc("viewJob");
-    var documentPage = idc("documentPage");
-    
-    var tl = new TimelineMax();
+           }
+        break;
+    }
+    function updateInTable(childE) {
+        let rowDataSet = [];
 
-    tl.to(documentPage, 0.35, {
-        opacity: 0,onComplete:function() {
-            viewJob.style.display = "block";
-            documentPage.style.display = "none";
+        let parentD = childE;
+        while(!parentD.className.includes("groupRow")) {
+            parentD = parentD.parentNode;
         }
-    }).to(viewJob, 0.35, {
-        opacity: 1
-    });
+        var childNum = 0;
+        parentD.children.forEach(function(element) {
+            if(childE == element)
+                break;
+            else
+                childNum++;
+        });
+        let parentDchildDivs = parentD.getElementsByTagName("div");
+        for(ac = 0; ac < parentDchildDivs.length;ac++) {
+            if(parentDchildDivs[ac].classList.contains("textinput"))
+                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("input")[0].value);
+            else if(parentDchildDivs[ac].classList.contains("select"))
+                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("select")[0].value);
+            else if(parentDchildDivs[ac].classList.contains("textarea"))
+                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("textarea")[0].value);
+            else if(parentDchildDivs[ac].classList.contains("checkcontainer")) 
+                rowDataSet.push(parentDchildDivs[ac].getElementsByClassName("checkbox")[0].getAttribute("active"));
         }
+        docJSON.pages = jsonUpdate(docJSON.pages,hasTable,rowDataSet);
+    }
+    
+    if(genEl) {
+        if ("colspan" in elLoad)
+            genEl.setAttribute("colspan", elLoad.colspan);
+
+        if ("width" in elLoad)
+            genEl.classList.add(elLoad.width);
+
+        elParent.appendChild(genEl);
+    }
+}
+var signaturePad;
+function saveSignature() {
+    let sigCanV = idc("signatureCanvas");
+    let dataPng = signaturePad.toDataURL('image/png');
+    
+    let findToAdd = idc(sigCanV.getAttribute("toadd"));
+    findToAdd.getElementsByTagName("img")[0].src = dataPng;
+    console.log("Done>");
+    
+    closeOverlay("signatureCanvas");
+}
+function jsonUpdate(jsToChange, layers,vChange) {
+    var jsToChangeN = jsToChange;
+    if(layers.length != 1) {
+        var layersN = layers.slice(0);
+        layersN.shift();
+        jsToChangeN[layers[0]] = jsonUpdate(jsToChangeN[layers[0]], layersN,vChange);
     }
     else {
-        nextDoc.innerHTML = "Next page";
-        nextDoc.onclick = function () {
-            TweenMax.fromTo(idc("documentPage"), 0.35, {
-                    y: "0%",
-                    opacity: 1
-                }, {
-                    y: "100%",
-                    opacity: 0,
-                    ease: Circ.easeOut,onComplete:function() {
-                        loadFromJson(pageNum + 1);
-                        idc("main").scrollTop = 0;
-                    }
-                });
-        }
+        jsToChangeN[layers[0]] = vChange;
     }
-    idc("documentPage").appendChild(nextDoc);
+    hadChange = true;
+    console.log(hadChange);
+    return jsToChangeN;
 }
 function rtpSend() {
-    var jobData = JSON.parse(getCookie("job" + idc("viewJob").getAttribute("jobid")));
-    console.log(jobData);
-    var rtpSendB = idc("rtpSend");
-    console.log(rtpSendB);
-    if(rtpSendB.className != "pulse") {
-        var filesUploaded = 0;
+    let jobData = JSON.parse(getCookie("job" + idc("viewJob").getAttribute("jobid")));
+    let rtpSendB = idc("rtpSend");
+    if (rtpSendB.className != "pulse") {
+        let filesUploaded = 0;
         rtpSendB.className = "pulse";
-        for(i = 0; i < jobData.jobdetails.length;i++) (function(i){
+        for (i = 0; i < jobData.jobdetails.length; i++)(function (i) {
 
-        var docCookie = jobData["clientid"] + "-" + jobData["jobid"] + "-" + jobData["jobdetails"][i]["docid"] + "-Rev" + jobData["jobdetails"][i]["rev"];
-        readFile(docCookie + ".json", function(response) {
+            let docCookie = jobData["clientid"] + "-" + jobData["jobid"] + "-" + jobData["jobdetails"][i]["docid"] + "-Rev" + jobData["jobdetails"][i]["rev"];
+            readFile(docCookie + ".json", function (response) {
 
-            ajaxRequestToMake(urlInit + "/" + appVersion + "/update/jobdocument",
-                function (ares) {
-                    var resJs = JSON.parse(ares);
-                    if(resJs.response == "success") {
-                        successMessage((i + 1) + "/" + jobData.jobdetails.length);
-                    }
-                else {
-                    errorMessage("Document not sent");
-                }
-                if(filesUploaded == jobData.jobdetails.length - 1) {
-                    successMessage("Complete");
-        rtpSendB.className = "";
-                }
-            }, {
-                filename:docCookie + "-",
-                filedata:response,
-                job:jobData["jobid"]
+                ajaxRequestToMake(urlInit + "/" + appVersion + "/update/jobdocument",
+                    function (ares) {
+                        let resJs = JSON.parse(ares);
+                        if (resJs.response == "success") {
+                            successMessage((i + 1) + "/" + jobData.jobdetails.length);
+                        } else {
+                            errorMessage("Document not sent");
+                        }
+                        if (filesUploaded == jobData.jobdetails.length - 1) {
+                            successMessage("Complete");
+                            rtpSendB.className = "";
+                        }
+                    }, {
+                        filename: docCookie + "-",
+                        filedata: response,
+                        job: jobData["jobid"]
+                    });
             });
-        });
         })(i);
-    }
-    else {
+    } else {
         errorMessage("sending already in progress");
     }
 }
