@@ -1,13 +1,11 @@
 // Navigation 
-/* 
-, {
-    "name": "Account",
-    "link": "account"
-} */
+
 var basicMenuList = [{
     "name": "My Jobs",
-    "link": "jobs/myJobs",
-    "function": "startJobSearch"
+    "link": "jobs/myJobs"
+}, {
+    "name": "Account",
+    "link": "account"
 }];
 var adminMenuList = [{
     "name": "Job Control",
@@ -25,6 +23,6 @@ var adminMenuList = [{
 */
 var avaliableDocs = [];
 
-//delete_cookie("avaliableDocs");
+delete_cookie("avaliableDocs");
 if (hasCookie("avaliableDocs"))
     avaliableDocs = JSON.parse(getCookie("avaliableDocs"));

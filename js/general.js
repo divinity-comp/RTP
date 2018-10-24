@@ -305,27 +305,23 @@ function loading(active) {
 }
 // read or write to file
 function writeTofile(fileName, data,successFunc) {
-    console.log(fileName);
-                let multi = 0;
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
         console.log('file write system open: ' + fs.name);
         fs.root.getFile(fileName, {
             create: true,
             exclusive: false
         }, function (fileEntry) {
+
               fileEntry.createWriter(function (fileWriter) {
+		          fileWriter.seek(0);
                   
                 fileWriter.onwritestart = function () {
                 };
                 fileWriter.onwriteend = function () {
-                    multi++;
-                    
-                    if(successFunc && multi == 2) {
-                        
-                        console.log(data);
-                        console.log("Successful file write...");
+                    console.log(data);
+                    console.log("Successful file write...");
+                    if(successFunc)
                         successFunc();
-                    }
                 };
 
                 fileWriter.onerror = function (e) {
@@ -340,8 +336,6 @@ function writeTofile(fileName, data,successFunc) {
                     });
                 }
 
-                fileWriter.truncate(0);
-                fileWriter.abort();
                 fileWriter.write(data);
             });
 
@@ -385,15 +379,4 @@ function readFile(fileName,successFunc) {
     }, function (e) {
         console.log("Failed file 2 write: " + e.toString());
     });
-}
-
-function checkConnection() {
-    var networkState = navigator.network.connection.type;
-    
-    if(networkState == Connection.NONE) {
-        return false;
-    }
-    else {
-        return true;
-    }
 }

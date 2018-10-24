@@ -181,28 +181,15 @@ body {
 
 /* Login */
 #loginPage {
-    width: 100%;
-    height: 100%;/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ffffff+1,e9e9e9+100 */
-background: #ffffff; /* Old browsers */ /* FF3.6-15 */ /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(135deg, #ffffff 1%,#e9e9e9 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e9e9e9',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
-}
-#loginPage > div {
-    max-width: 350px;
-    max-height: 440px;
+    max-width: 300px;
+    max-height: 400px;
     width: 95%;
     height: 95%;
-    padding: 1em;
 }
 
-#loginPage figure {
-    width:100%;
-    margin:0;
-}
 #loginPage img {
-    max-width: 13em;
-    margin: 0px auto 0;
-    display: block;
+    max-width: 150px;
+    margin-bottom: 30px;
 }
 
 #loginPage input {
@@ -215,7 +202,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
     -webkit-transition: border 0.4s;
     /* Safari */
     transition: border 0.4s;
-    background:transparent;
 }
 
 #loginPage input:hover {
@@ -231,9 +217,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
     padding: 10px 20px;
     border-radius: 8px;
     background: #dc1a35;
-    font-size: 1.5em;
     color: #fff;
-    width:100%;
 }
 
 #loginPage button[waiting="true"] {
@@ -244,8 +228,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 .forgotPass {
     width: 100%;
     text-align: center;
-    font-size:1.3em;
-    margin-top:10px;
 }
 
 #login {
@@ -272,8 +254,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 #navigation {
     width: 100%;
     float: left;
-    -webkit-box-shadow: 0px 0px 1px 1px #c4cdd8;
-    box-shadow: 0px 0px 1px 1px #c4cdd8;
+    -webkit-box-shadow: 0px 0px 1px 1px #0a121d;
+    box-shadow: 0px 0px 1px 1px #0a121d;
     z-index: 99;
     position: relative;
     height: 7vh;
@@ -423,7 +405,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 
 #main {
     width: 100%;
-    background: #fdfdfd;
 }
 
 #panelLinks {
@@ -596,93 +577,24 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 
 /* Jobs */
 #jobScroll {
-    padding: 0 5vw;
-    overflow: auto;
+    padding: 0 2.5vw;
 }
-#jobScroll button#addJob {
+
+#jobScroll #addJob,#jobScroll #addUser {
     float: right;
     color: #3fbd3d;
+    border-radius: 5px;
     border: 2px solid;
-    font-size: 1.26em;
+    padding: 3px 10px;
+    font-size: 1em;
     font-weight: bold;
-    width: 3em;
-    height: 3em;
-    border-radius: 4em;
-    margin-top: 1em;
-    text-align: center;
-    position: relative;
 }
-button#addJob span {
-    position: absolute;
-    top: -0.33em;
-    right: -0.33em;
-    background: #3fbd3d;
-    border-radius: 2em;
-    /* border: 2px solid; */
-    width: 1em;
-    height: 1em;
-    font-size: 1.5em;
-    text-align: center;
-    line-height: 1em;
-    color: #fff;
-}
-#jobScroll > h2 {
-    float: left;
-    color: #3d7de0;
-    padding: 0.5em 0.25em 0;
-    width: 50%;
-    text-transform: uppercase;
-    margin: 1em 0 5px;
-    font-size: 2em;
-    font-weight: 500;
-}
-#jobScroll > h2:nth-child(4) {
-color: #dc1a35; 
-    margin:0.2em 0 5px;
-}
-#jobScroll > h2:nth-child(6) {
-color: #3fbd3d;
-    margin:0.2em 0 5px;
-}
-#jobScroll article {
-    background: #fff;
-    border-radius: 10px;
-    -webkit-box-shadow: 0px 0px 4px 0px #e0e0e0;
-    box-shadow: 0px 0px 4px 0px #e0e0e0;
-    overflow: hidden;
-    margin: 0.5em 0 0.75em;
-}
-#jobScroll article .title {
+
+#jobScroll h2 {
+    margin: 1em 0 0;
     width: 100%;
-    font-weight: bold;
-    float: left;
-    padding: 0.4em 0.75em;
-    font-size: 1.3em;
-    border-bottom: 1px solid #dadada;
 }
-#jobScroll article .title date{
-    float:right;
-    font-weight: 100;
-    font-size: 0.7em;
-    line-height: 2em;
-    color: #0d305d;
-}
-#jobScroll article .title span:nth-child(2) {
-    font-weight: 400;
-    margin-left: 5px;
-}
-#jobScroll article .title span:nth-child(2)::before {
-    content:' | ';
-}
-#jobScroll article div[userid] {
-    padding: 1em;
-    float: left;
-}
-#jobScroll article div[userid] a {
-    color: #d91a35;
-    text-decoration: underline;
-    margin-left:10px;
-}
+
 #documents {
     padding: 1.5em;
 }
@@ -732,13 +644,6 @@ color: #3fbd3d;
     font-size:18px;
     font-weight: 400;
 }
-#documentPage h3 {
-    margin:0;
-}
-#documentPage .group .group {
-    margin-left:2%;
-    margin-bottom: 0;
-}
 #documentPage,.group {
         width: 92%;
     margin: 30px 4% 0;
@@ -759,7 +664,6 @@ color: #3fbd3d;
 }
 .group { 
     margin:0;
-    width:100%;
 }
 #documentPage section > * {
     width:100%;
@@ -842,8 +746,7 @@ color: #3fbd3d;
 }
 .checkcontainer label {
     display: inline-block;
-    width: calc(100% - 3.2em);
-    margin-right:0.5em;
+    width: 80%;
     vertical-align: middle;
 }
 .checkcontainer .checkbox {
@@ -951,7 +854,6 @@ table {
     left: 0;
     top: 0;
     height: 100%;
-    margin:0;
 }
 .table td{
     border: 1px solid;
@@ -971,7 +873,6 @@ table {
     padding: 0.5em 0.5em;
     font-size: 1.5em;
     font-weight: bold;
-    margin-bottom: 0.5em;
 }
 .addRow {
     margin: 10px auto;
@@ -1063,47 +964,6 @@ table {
 }
 #activeJobs,#reviewJobs,#completeJobs {
     width:100%;
-    font-size: 1.2em;
-    display: block;
-    float: left;
-}
-#activeJobs button,#reviewJobs button,#completeJobs button {
-    display: block;
-    float: left;
-    width: 100px;
-    font-size: 1.3em;
-    padding: 0.4em 0.75em;
-    line-height: 1.4em;
-    color:#fff;
-    font-weight: bold;
-background: #3d7de0; /* Old browsers */ /* FF3.6-15 */ /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(135deg, #3d7de0 0%,#0058dd 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3d7de0', endColorstr='#0058dd',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
-    -webkit-box-shadow: 0px 0px 0px 2px #0a5edd;
-    box-shadow: 0px 0px 0px 2px #0a5edd;
-}
-#reviewJobs button {
-    color:#dc1a35;
-}
-#completeJobs button {
-    color:#3fbd3d;
-}
-#jobScroll article .hidden,tr.hidden {
-    display: none;
-}
-.noJobs h2 {
-    margin: 0.5em 0;
-    text-align: center;
-    font-size: 0.9em;
-    padding: 1em 0;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-}
-#activeJobs tr td:nth-child(4),#activeJobs tr td:nth-child(5),#reviewJobs tr td:nth-child(4),#reviewJobs tr td:nth-child(5),#completeJobs tr td:nth-child(4),#completeJobs tr td:nth-child(5) {
-    display: none;
-}
-#activeJobs,#reviewJobs,#completeJobs {
-    width:100%;
     border-collapse: collapse;
     font-size: 1.2em;
 }
@@ -1137,68 +997,22 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3d7de0', end
 #activeJobs td:nth-child(2) span,#reviewJobs td:nth-child(2) span,#completeJobs td:nth-child(2) span {
     display: block;
 }
-#activeJobs td:nth-child(3),#reviewJobs td:nth-child(3) ,#completeJobs td:nth-child(3) {
+#activeJobs button,#reviewJobs button,#completeJobs button {
+    display: block;
     padding: 10px 12px;
+    width: 100%;
+    margin: 0 auto;
     background: #fff;
     color: #3d7de0;
     font-size: 1em;
+    float: left;
     -webkit-box-shadow: inset -2px 0px 0px 0px, inset 2px 0px 0px 0px;
     box-shadow: inset -2px 0px 0px 0px, inset 2px 0px 0px 0px;
     font-weight: bold;
 }
-#reviewJobs td:nth-child(3) {
+#reviewJobs button {
     color:#dc1a35;
 }
-#completeJobs td:nth-child(3) {
+#completeJobs button {
     color:#3fbd3d;
-}
-.signature button {
-    width: 100%;
-    background: #d8364d;
-    color: #fff;
-    padding: 0.75em;
-    font-size: 1.1em;
-    border-radius: 10px;
-    margin: 0.5em 0;
-}
-#signatureCanvas .saveSig,#signatureCanvas .clearSig {
-    width: 40%;
-    margin: 0 5%;
-    background: #d42d2d;
-    font-size: 1.3em;
-    padding: 0.5em;
-    color: #fff;
-    text-transform: uppercase;
-    font-weight: bold;
-    float: right;
-}
-#signatureCanvas .saveSig {
-    background: #2dd441;
-}
-#signatureCanvas canvas {
-    width: 90%;
-    height: 50vw;
-    border: 2px dashed;
-    margin: 2vh 5%;
-}
-/* MEDIA QUIERIES */
-
-@media screen and (orientation: landscape) {
-    #navigation {
-        height: 60px;
-    }
-    #mobileMenu {
-        font-size: 0.75em;
-        margin-top: 0.6em;
-    }
-    #clientDeats figure img {
-        max-height: 40px;
-        margin: 10px 5px; 
-    }
-    #panelLinks, #main,.overlayM {
-        height:calc(100vh - 60px);
-    }
-}
-#signatureCanvas {
-    display: none;
 }
