@@ -306,7 +306,7 @@ function loading(active) {
 // read or write to file
 function writeTofile(fileName, data,successFunc) {
     console.log(fileName);
-                let multi = 0;
+                var multi = 0;
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
         console.log('file write system open: ' + fs.name);
         fs.root.getFile(fileName, {
@@ -316,15 +316,19 @@ function writeTofile(fileName, data,successFunc) {
               fileEntry.createWriter(function (fileWriter) {
                   
                 fileWriter.onwritestart = function () {
+                    console.log("start file write");
                 };
                 fileWriter.onwriteend = function () {
                     multi++;
-                    
+                    console.log("write attempt" + multi);
                     if(successFunc && multi == 2) {
                         
                         console.log(data);
-                        console.log("Successful file write...");
                         successFunc();
+                    }
+                    else if(multi == 1) {
+                        fileWriter.write(data);
+                        console.log("Successful file write...");
                     }
                 };
 
@@ -341,8 +345,6 @@ function writeTofile(fileName, data,successFunc) {
                 }
 
                 fileWriter.truncate(0);
-                fileWriter.abort();
-                fileWriter.write(data);
             });
 
         }, function (e) {

@@ -720,6 +720,7 @@ function addDocument(docFind, Inter, fullJson) {
     if (checkInternal) {
         console.log("checking internal");
         readFile(Inter + returnDocFilename(docFind), function (results) {
+            console.log(fullJson);
             addDocRow(docFind, Inter, fullJson, results);
         });
     } else {
@@ -736,19 +737,19 @@ function addDocument(docFind, Inter, fullJson) {
                     }
                     addDocRow(docFind, Inter, fullJson, response);
                 });
-            }, true);
+        }, true);
     }
 }
 
 function addDocRow(docFind, Inter, fullJson, results) {
-    let jsonRow = JSON.parse(results);
+    var jsonRow = JSON.parse(results);
 
-    let docNew = document.createElement("div");
+    var docNew = document.createElement("div");
     docNew.className = "taskBlock";
     docNew.innerHTML = "<div><h3>" + docFind.rev + " - " + docFind.data + "</h3><button>Start</button></div>";
 
     for (i = 0; i < jsonRow["pages"].length; i++)(function (i) {
-        let page = document.createElement("div");
+        var page = document.createElement("div");
         page.className = "page";
         page.innerHTML = (i + 1) + ". " + jsonRow["pages"][i][0]["page"];
         docNew.appendChild(page);
@@ -767,13 +768,12 @@ function addDocRow(docFind, Inter, fullJson, results) {
 }
 
 // Document functions
-let docJSON = {};
+var docJSON = {};
 
 function startDoc(fullDocData, pageNum, Inter, fullJson) {
-    let viewJob = idc("viewJob");
-    let documentPage = idc("documentPage");
-    let tl = new TimelineMax();
-
+    var viewJob = idc("viewJob");
+    var documentPage = idc("documentPage");
+    var tl = new TimelineMax();
     tl.to(viewJob, 0.35, {
         opacity: 0,
         x:"-100%",
@@ -784,17 +784,18 @@ function startDoc(fullDocData, pageNum, Inter, fullJson) {
     });
     if (!pageNum)
         pageNum = 0;
-    let docCookie = fullJson["clientid"] + "-" + fullJson["jobid"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + fullJson["jobdetails"][Inter]["rev"] + ".json";
+    var docCookie = fullJson["clientid"] + "-" + fullJson["jobid"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + fullJson["jobdetails"][Inter]["rev"] + ".json";
     readFile(docCookie, function (response) {
         if (response == "" || response == null) {
-            console.log("create internal doc");
+            console.log("Create internal doc Cookie: " + docCookie);
             writeTofile(docCookie, fullDocData, function () {
+                console.log("file write to");
                 docJSON = JSON.parse(fullDocData);
                 docJSON.file = docCookie;
                 loadFromJson(pageNum);
             });
         } else {
-            console.log("find internal doc");
+            console.log("Find internal doc Cookie: " + docCookie);
             docJSON = JSON.parse(response);
             docJSON.file = docCookie;
             loadFromJson(pageNum);
@@ -802,9 +803,8 @@ function startDoc(fullDocData, pageNum, Inter, fullJson) {
     });
 }
 
-let hadChange = false;
+var hadChange = false;
 function loadFromJson(pageNum) {
-
     let canUpdate = false;
     let readyToUpdate = false;
     var savedInterval = setInterval(function () {
@@ -817,7 +817,7 @@ function loadFromJson(pageNum) {
         }
         if (canUpdate && readyToUpdate) {
             console.log("save to file");
-            let fullDocData = JSON.stringify(docJSON);
+            var fullDocData = JSON.stringify(docJSON);
             writeTofile(docJSON.file, fullDocData, function () {});
             hadChange = false;
             canUpdate = false;
@@ -825,7 +825,6 @@ function loadFromJson(pageNum) {
         }
     }, 1500);
     idc("documentPage").innerHTML = "";
-
     for (i = 1; i < docJSON.pages[pageNum].length; i++)(function (i) {
         docElementLoadIn([pageNum, i],idc("documentPage"));
     })(i);
@@ -886,21 +885,17 @@ function loadFromJson(pageNum) {
 }
 
 function docElementLoadIn(loc, elParent) {
-    console.log(loc);
     var elLoad = docJSON.pages;
     var hasTable = false;
     for (a = 0; a < loc.length; a++) {
         elLoad = elLoad[loc[a]];
         if(elLoad != null) {
             if(!Array.isArray(elLoad)) {
-                console.log(elLoad);
                 if("type" in elLoad) { 
-                    if(elLoad.type == "table") {
-                        if(elLoad.type == "table") {
-                            var newR = [].concat(loc);
-                            hasTable = newR.splice(0, loc.length - a);
-                            hasTable.push("value");
-                        }
+                    if(elLoad.type == "table" && "table" in elLoad) {
+                        var newR = [].concat(loc);
+                        hasTable = newR.splice(0, loc.length - a);
+                        hasTable.push("value");
                     }
                 }
             }
@@ -1516,9 +1511,10 @@ function docElementLoadIn(loc, elParent) {
     }
     function updateInTable(childE) {
         let rowDataSet = [];
-
-        let parentD = childE;
+        console.log(childE);
+        var parentD = childE;
         while(!parentD.className.includes("groupRow")) {
+            console.log(parentD.parentNode);
             parentD = parentD.parentNode;
         }
         var childNum = 0;
