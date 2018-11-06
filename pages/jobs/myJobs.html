@@ -1,14 +1,19 @@
+
+<div id="jobHeader" jobgroup="0" js="yes">
+    <div id="jobGroups">
+        <h2 onclick="jobGroupSet(0)">Active</h2>
+        <h2 onclick="jobGroupSet(1)">In Review</h2>
+        <h2 onclick="jobGroupSet(2)">Completed</h2>
+    </div>
+</div>
 <div id="jobScroll" class="controlList internalJobs">
-    <h2>Active</h2>
     <section id="activeJobs">
         <article class="noJobs hidden"><h2>No Jobs Found</h2></article>
     </section>
-    <h2>In Review</h2>
-    <section id="reviewJobs">
+    <section id="reviewJobs"  class="hidden">
         <article class="noJobs hidden"><h2>No Jobs Found</h2></article>
     </section>
-    <h2>Completed</h2>
-    <section id="completeJobs">
+    <section id="completeJobs"  class="hidden">
         <article class="noJobs hidden"><h2>No Jobs Found</h2></article>
     </section>
 </div>

@@ -328,6 +328,7 @@ function getMainDashboard() {
                 openApiPage("jobControl");
             } else {
                 openPage("myJobs", null, startJobSearch);
+                document.body.scrollTop = 0;
             }
             idc("navMenu").children[0].className = "active";
         },
@@ -430,6 +431,7 @@ function openPage(page, el,followFunc) {
                 idc("main").className = page;
                 if(followFunc)
                     followFunc();
+                document.body.scrollTop = 0;
           
     setTimeout(function () {  
     TweenMax.to("#main", 0.3, {
@@ -606,12 +608,6 @@ function loadInJobsStandardUser(jobData) {
         if("creationdate" in jobData["jobData"][i]) 
             dataToAdd += '<date>'+ jobData["jobData"][i].creationdate  +'</date>';
         dataToAdd += "</div>";
-        dataToAdd += '<div class="clientInfo"><button onclick="showContacts(this)">Show contact details</button>';
-        dataToAdd += '<p><b>Contact name:</b> ' + jobData["jobData"][i].clientid[2] + "</p>";
-        dataToAdd += '<p><b>Contact email:</b> ' + jobData["jobData"][i].clientid[3] + "</p>";
-        dataToAdd += '<p><b>Contact phone:</b> ' + jobData["jobData"][i].clientid[4] + "</p>";
-        dataToAdd += '<p><b>Address:</b> ' + jobData["jobData"][i].clientid[5] + "</p>";
-        dataToAdd += '<p><b>Postcode:</b> ' + jobData["jobData"][i].clientid[6] + "</p></div>";
         dataToAdd += '<div class="hidden jobdetails">'+ JSON.stringify(jobData["jobData"][i].jobdetails) +'</div>';
         jrD.innerHTML = dataToAdd;
         switch(jobData["jobData"][i].stage) {    
@@ -689,6 +685,7 @@ function openJob(jobid) {
             });
             idc("viewJob").setAttribute("jobid", jobJS["jobid"]);
             idc("viewJob").children[0].innerHTML = jobJS["jobid"] + " - " + jobJS["client"][0]["Company"];
+                loadClientData(jobJS);
         }
     }, 300);
 
@@ -699,13 +696,59 @@ function openJob(jobid) {
         ajaxRequestGet("pages/jobs/view-job.html",
             function (response) {
                 idc("main").innerHTML = response;
-                idc("main").className = "single-job";
+                idc("main").className = "single-job " + jobJS.stage;
                 loadStep.singlejob = true;
             },
         "");
     }});
 }
-
+function jobMenu(jobId) {
+    var jobMenuC = document.getElementsByClassName("jobMenu");
+    var jobMenuOptions = idc("jobMenu").children;
+      for(i = 0; i < jobMenuOptions.length;i++) {
+          jobMenuOptions[i].className = "";
+      }  
+    jobMenuOptions[jobId].className = "active";
+    TweenMax.to(jobMenuC, 0.3, {
+        opacity: 0,
+        x: "-100%",
+        onComplete: function () {
+          for(i = 0; i < jobMenuC.length;i++) {
+              jobMenuC[i].className = "jobMenu hidden";
+          }  
+            jobMenuC[jobId].className = " jobMenu";
+    TweenMax.fromTo(jobMenuC[jobId], 0.3, {
+        opacity: 0,
+        x: "100%"
+            
+    }, {
+        opacity: 1,
+        x: "0%"});
+    }});
+}
+function loadClientData(jobDetails) {
+    if(idc("clientInfo")) {
+        console.log("job data");
+        var clientInfo = idc("clientInfo");
+        var clientJs = jobDetails.client[0];
+        console.log(clientJs);
+        if(clientJs.companylogo)
+            clientInfo.innerHTML = '<img src="'+ clientJs.companylogo +'" />';
+        if(clientJs.Company)
+            clientInfo.innerHTML += '<p><span>Company:</span> <span>'+ clientJs.Company +'</span></p>';
+        if(clientJs.address)
+            clientInfo.innerHTML += '<p><span>Address: </span><span>'+ clientJs.address +'</span></p>';
+        if(clientJs.contact)
+            clientInfo.innerHTML += '<p><span>Contact: </span><span>'+ clientJs.contact +'</span></p>';
+        if(clientJs.email)
+            clientInfo.innerHTML += '<a href="mailto:'+ clientJs.email +'"><p><span>Email: </span><span>'+ clientJs.email +'</span></p></a>';
+        if(clientJs.phone)
+            clientInfo.innerHTML += '<a href="tel:'+ clientJs.phone +'"><p><span>Phone: </span><span>'+ clientJs.phone +'</span></p></a>';
+    }
+    else {
+        console.log("no client data");
+    }
+}
 function returnDocFilename(docFind) {
     return docFind.data + ".json";
 }
@@ -746,7 +789,7 @@ function addDocRow(docFind, Inter, fullJson, results) {
 
     var docNew = document.createElement("div");
     docNew.className = "taskBlock";
-    docNew.innerHTML = "<div><h3>" + docFind.rev + " - " + docFind.data + "</h3><button>Start</button></div>";
+    docNew.innerHTML = "<div><h3>" + docFind.rev + " - " + replaceAll(docFind.data,"-"," ") + "</h3></div>";
 
     for (i = 0; i < jsonRow["pages"].length; i++)(function (i) {
         var page = document.createElement("div");
@@ -1518,11 +1561,14 @@ function docElementLoadIn(loc, elParent) {
             parentD = parentD.parentNode;
         }
         var childNum = 0;
+        var cFind = false;
         parentD.children.forEach(function(element) {
-            if(childE == element)
-                break;
-            else
-                childNum++;
+            if(cFind == false) {
+                if(childE == element)
+                    cFind == true;
+                else
+                    childNum++;
+            }
         });
         let parentDchildDivs = parentD.getElementsByTagName("div");
         for(ac = 0; ac < parentDchildDivs.length;ac++) {

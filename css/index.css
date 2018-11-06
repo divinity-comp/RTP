@@ -353,9 +353,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
     transition-property: transform;
     transition-property: transform, -webkit-transform;
     border-radius: 3em;
-    background-color: #dc1a35;
-    -webkit-box-shadow: 0px 0px 0px 1px #cd1b33;
-    box-shadow: 0px 0px 0px 1px #cd1b33;
+    background-color: #000000;
+    -webkit-box-shadow: 0px 0px 0px 1px #aaa;
+    box-shadow: 0px 0px 0px 1px #aaa;
     left: 0;
     top: 50%;
 }
@@ -430,7 +430,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 
 #main {
     width: 100%;
-    background: #fdfdfd;
+    background: #f9f9f9;
 }
 
 #panelLinks {
@@ -471,7 +471,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 #panelLinks li.active,
 #panelLinks li:hover,
 #panelLinks li.active {
-    background: #dc1a35;
+    background: #232323;
     color: #fff;
 }
 
@@ -602,19 +602,63 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 }
 
 /* Jobs */
+#jobHeader {
+    padding: 1em 5vw;
+    overflow: hidden;
+    -webkit-transition: background 0.4s;
+    transition: background 0.4s;
+}
+#jobHeader[jobgroup="0"] {
+    background:#d61a34;
+}
+#jobHeader[jobgroup="1"] {
+    background:#1a6ed6;
+}
+#jobHeader[jobgroup="2"] {
+    background:#1ad66e;
+}
+#jobGroups h2 {
+    float:left;
+    margin-right:20px;
+    color:#fff;
+    opacity:0.5;
+    -webkit-transition: opacity 0.3s;
+    transition: opacity 0.3s;
+}
+#jobHeader[jobgroup="0"] h2:nth-child(1) {
+    opacity:1;
+}
+#jobHeader[jobgroup="1"] h2:nth-child(2) {
+    opacity:1;
+}
+#jobHeader[jobgroup="2"] h2:nth-child(3) {
+    opacity:1;
+}
+#jobHeader button {
+        color: #d61a34;
+    float: right;
+    font-size: 1.25em;
+    margin-top: 0.75em;
+    padding: 0.5em;
+    background: #ffff;
+    border-radius: 0.5em;
+}
+#jobHeader[jobgroup="1"] button {
+    color:#1a6ed6;
+}
+#jobHeader[jobgroup="2"] button {
+    color:#1ad66e;
+}
 .controlList {
-    padding: 0 5vw;
     overflow: auto;
 }
 .controlList button#addJob,.controlList button#addUser {
     float: right;
-    color: #3fbd3d;
+    color: #fff;
     border: 2px solid;
     font-size: 1.26em;
     font-weight: bold;
-    width: 3em;
-    height: 3em;
-    border-radius: 4em;
+    border-radius: 1em;
     margin-top: 1em;
     text-align: center;
     position: relative;
@@ -632,15 +676,27 @@ button#addJob span,button#addUser span {
     line-height: 1em;
     color: #fff;
 }
-.controlList > h2 {
-    float: left;
-    color: #3d7de0;
-    padding: 0.5em 0.25em 0;
-    width: 50%;
-    text-transform: uppercase;
-    margin: 1em 0 5px;
-    font-size: 2em;
-    font-weight: 500;
+.controlMenu {
+    width:100%;
+    padding:2%;
+    background: #2d2d2d;
+}
+.controlMenu h2 {
+    font-size: 1.7em;
+    padding: 0.5em 1.4em;
+    margin: 0;
+    color: #fff;
+    width: calc(100% - 150px);
+    display: inline-block;
+}
+.controlMenu button {
+    float: right;
+    background: #fff;
+    font-size: 1.3em;
+    margin-top: 0.5em;
+    border-radius: 0.25em;
+    padding: 0.5em 1em;
+    margin-right: 1em;
 }
 .controlList > h2:nth-child(4),.controlList > h2:nth-child(3) {
 color: #dc1a35; 
@@ -653,36 +709,64 @@ color: #3fbd3d;
 .controlList article {
     background: #fff;
     border-radius: 10px;
-    -webkit-box-shadow: 0px 0px 4px 0px #e0e0e0;
-    box-shadow: 0px 0px 4px 0px #e0e0e0;
-    overflow: hidden;
-    margin: 0.5em 0 0.75em;
+    -webkit-box-shadow: 0px 1px 30px 0px #b5b5b521;
+    box-shadow: 0px 1px 30px 0px #b5b5b521;
+    margin: 4.5em 0% 0em 3.5%;
+    width: 45%;
+    float: left;
+    padding-top: 2em;
 }
-.controlList article .title {
+.controlList.full article {
+    margin: 1.5em 0% 0em 2.5%;
+    width: 95%;
+    float: left;
+    padding: 0.5em;
+}
+.controlList article figure { 
+    margin: -5em auto 0;
+    border-radius: 1em;
+    width: inherit;
+}
+.controlList article figure img {
+    -webkit-box-shadow: 0px 0px 2px 0px #e0e0e0;
+    box-shadow: 0px 0px 2px 0px #e0e0e0;
+    background:#fff;
+    max-width: 90%;
+    max-height: 5em;
+    margin: 0 auto;
+    display: block;
+    padding: 0.5em;
+}
+.controlList date:before {
+    content:'Start Date: ';
+    color: #8e8e8e;
+    font-weight: normal;
+}
+.controlList date {
+    padding: 1em 0 ;
+    margin-top: 5px;
+    border-top: 1px solid #dedede;
+    text-align: center;
+    width: 100%;
+    float: left;
+    font-weight: 800;
+}
+.controlList article .title {    
     width: 100%;
     font-weight: bold;
     float: left;
-    padding: 0.4em 0.75em;
-    font-size: 1.3em;
-    border-bottom: 1px solid #dadada;
-}
-.controlList article .title date{
-    float:right;
-    font-weight: 100;
-    font-size: 0.7em;
-    line-height: 2em;
-    color: #0d305d;
-}
-.controlList article .title span:nth-child(2) {
-    font-weight: 400;
-    margin-left: 5px;
+    padding: 0.8em 0.75em 0.8em;
+    font-size: 1.1em;
+    text-align: center;
 }
 .controlList article .title span:nth-child(2)::before {
     content:' | ';
+    margin: 0 5px;
 }
 .controlList article div[userid] {
     padding: 1em;
     float: left;
+    display: none;
 }
 .controlList article div[userid] a {
     color: #d91a35;
@@ -693,15 +777,23 @@ color: #3fbd3d;
     padding: 1.5em;
 }
 #documents > div > div {
-    border-radius: 6px;
-    border: 2px solid;
+    overflow: hidden;
+    border-bottom: 2px solid;
+    margin-bottom: 0.5em;
+}
+.taskBlock {
+    -webkit-box-shadow: 0px 0px 20px 0px #aaaaaa54;
+    box-shadow: 0px 0px 20px 0px #aaaaaa54;
+    border-radius: 8px;
     overflow: hidden;
 }
 #documents div h3{
-    width: calc(100% - 100px);
+    width: 100%;
     float: left;
     margin: 0;
     padding: 0.75em 1em;
+    text-transform: capitalize;
+    font-size: 1.4em;
 }
 #documents div button {
     width: 100px;
@@ -717,7 +809,7 @@ color: #3fbd3d;
 #documents .page {
     padding: 10px;
     width: 80%;
-    font-weight: bold;
+    font-weight: 500;
     color: #5d5d5d;
     border: 0;
     font-size: 1.2em;
@@ -725,13 +817,75 @@ color: #3fbd3d;
     border-bottom: 1px solid;
     border-radius: 0;
 }
-#viewJob h2{
-    text-align: center;
-    margin-bottom: 0;
-    margin-top: 1.25em;
-    font-size: 2em;
+#documents .page:last-child {
+    border-bottom: 0;
 }
-
+#viewJob h2 {
+    font-size: 1.7em;
+    padding: 0.5em 1.4em;
+    margin: 0;
+    background: #2d2d2d;
+    color: #fff;
+}
+#viewJob #clientInfo {
+    padding: 1em 2em;
+    background: #fff;
+    width: 90%;
+    margin: 2em 5%;
+    -webkit-box-shadow: 0px 0px 20px 0px #aaaaaa54;
+    box-shadow: 0px 0px 20px 0px #aaaaaa54;
+}
+#viewJob #clientInfo p {
+    font-weight: 400;
+    font-size: 1.2em;
+}
+#viewJob #clientInfo p span:last-child {
+    
+    display: inline-block;
+    width: calc(100% - 125px);
+}
+#viewJob #clientInfo p span:first-child {
+    font-weight: 900;
+    width:90px;
+    text-align: right;
+    display: inline-block;
+    margin-right:20px;
+    vertical-align: top;
+}
+#viewJob .hidden {
+    display: none;
+}
+.active #viewJob h2 {
+    background: #d61a34;
+}
+.review #viewJob h2 {
+    background: #1a6ed6;
+}
+.complete #viewJob h2 {
+    background: #1ad66e;
+}
+#jobMenu {
+    width: 100%;
+    padding: 1em 1.5em;
+}
+.active #jobMenu {
+    background: #d61a34;
+}
+.review #jobMenu {
+    background: #1a6ed6;
+}
+.complete #jobMenu {
+    background: #1ad66e;
+}
+#jobMenu button {
+    font-size: 1.5em;
+    color: #fff;
+    font-weight: 600;
+    opacity:0.5;
+}
+#jobMenu button.active {
+    opacity:1;
+}
 #documentPage {
     display: none;
     width: 100%;
@@ -1055,13 +1209,23 @@ table {
     color: #369c49;
 }
 #rtpSend {
-    border:2px solid;
-    display: block;
-    margin:30px auto;
-    color: #3fbd3d;
-    padding:8px 15px;
-    border-radius: 6px;
-    font-size:1.2em;
+    background: #1ad66e;
+    margin: 0;
+    color: #fff;
+    padding: 0.5em 15px;
+    font-size: 1.5em;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-transform: uppercase;
+}
+#rtpSend span {
+    margin-right:1em;
+    vertical-align: middle;
+}
+#rtpSend img {
+    max-height: 40px;
+    vertical-align: middle;
 }
 /* Single jobs */
 #activeJobs tr td:nth-child(4),#activeJobs tr td:nth-child(5),#reviewJobs tr td:nth-child(4),#reviewJobs tr td:nth-child(5),#completeJobs tr td:nth-child(4),#completeJobs tr td:nth-child(5) {
@@ -1086,23 +1250,27 @@ table {
 #completeJobs button {
     color:#3fbd3d;
 }
-#jobScroll article .hidden,tr.hidden {
+#jobScroll {
+    width: 100%;
+    padding-bottom: 2em;
+    min-height: 100%;
+}
+#jobScroll .hidden {
     display: none;
 }
 .controlList article.noJobs {
     -webkit-box-shadow: none;
     box-shadow: none;
-}
-.noJobs  {
-    margin: 0.5em 0;
-    text-align: center;
-    font-size: 0.9em;
-    padding: 1em 0.5em;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
+    border-radius: 0;
+    margin-top: 10vh;
+    opacity: 0.25;
+    border: 0;
+    width: 100%;
+    margin-left: 0;
 }
 .noJobs  h2 {
     margin:0;
+    text-align: center;
 }
 
 /* signature */

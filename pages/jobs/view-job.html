@@ -1,11 +1,18 @@
 <div id="viewJob">
     <h2></h2>
-    <div id="documents"></div>
+    <div id="jobMenu">
+        <button onclick="jobMenu(0)" class="active">Documents</button>
+        <button onclick="jobMenu(1)">Client Details</button>
+    </div>
+    <div id="documents" class="jobMenu"></div>
+    <div id="clientInfo" class="jobMenu hidden"></div>
 </div>
 <div id="documentPage">
     
 </div>
-<button id="rtpSend" onclick="rtpSend()">Send to RTP</button>
+<button id="rtpSend" onclick="rtpSend()">
+    <span>Send to RTP</span><img src="assets/send-button.svg"/></button>
+
 
 <div id="signatureCanvas" class="overlay overlayM">
     <canvas></canvas>
