@@ -433,7 +433,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
     background: #f9f9f9;
 }
 
-#main.singleClient {
+#main.singleClient,#main.singleUser {
     background:#fff;
 }
 #panelLinks {
@@ -1343,7 +1343,7 @@ table {
     width: 100%;
     margin: 5px 5%;
 }
-.noJobs.hidden {
+.noJobs.hidden,#addUser #siteLocations {
     display: none;
 }
 @media only screen and (min-width:320px) {
@@ -1359,10 +1359,6 @@ table {
     #jobHeader button {
         font-size:1em;
     }
-    .controlList article {
-     
-        font-size: 0.9em;
-    }
     .controlMenu {
     font-size: 0.7em;
     }
@@ -1370,10 +1366,6 @@ table {
 @media only screen and (min-width:500px) {
     #userlist {
         font-size: 1em;
-    }
-    .controlList article {
-     
-        font-size: 0.95em;
     }
     .controlMenu {
     font-size: 0.85em;
