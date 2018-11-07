@@ -19,10 +19,12 @@
     <preference name="ShowSplashScreenSpinner" value="false" />
     <preference name="SplashScreenDelay" value="0" />
     <preference name="FadeSplashScreenDuration" value="250" />
-
+<platform name="android">
+  <hook type="before_plugin_add" src="js/patch-android-studio-check.js" />
+</platform>
     <icon src="icon.png" />
     <splash src="splash.png" />
-    <plugin name="cordova-plugin-device" source="npm" spec="~2.0.2" />
+    <plugin name="cordova-plugin-device" source="npm" spec="~1.1.1" />
     <plugin name="cordova-plugin-device-motion" source="npm" spec="~1.2.0" />
     <plugin name="cordova-plugin-device-orientation" source="npm" spec="~1.0.2" />
     <plugin name="cordova-plugin-camera" source="npm" spec="~2.3.1" />
