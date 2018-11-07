@@ -9,6 +9,7 @@
     </author>
     <content src="index.html" />
     <preference name='phonegap-version' value='cli-8.0.0' />
+    <preference name='pgb-builder-version' value='1' />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="android-minSdkVersion" value="14" />
     <preference name="fullscreen" value="false" />
@@ -21,19 +22,19 @@
     <icon src="icon.png" />
     <splash src="splash.png" />
     <plugin name="cordova-plugin-device" source="npm"  />
-    <plugin name="cordova-plugin-device-motion" source="npm"  />
-    <plugin name="cordova-plugin-device-orientation" source="npm" />
-    <plugin name="cordova-plugin-camera" source="npm"  />
+    <plugin name="cordova-plugin-device-motion" source="npm"/>
+    <plugin name="cordova-plugin-device-orientation" source="npm"  />
+    <plugin name="cordova-plugin-camera" source="npm" />
     <plugin name="cordova-plugin-dialogs" source="npm"  />
     <plugin name="cordova-plugin-file" source="npm"  />
     <plugin name="cordova-plugin-file-transfer" source="npm"  />
-    <plugin name="cordova-plugin-globalization" source="npm"  />
+    <plugin name="cordova-plugin-globalization" source="npm" />
     <plugin name="cordova-plugin-media" source="npm"  />
-    <plugin name="cordova-plugin-network-information" source="npm"  />
+    <plugin name="cordova-plugin-network-information" source="npm" />
     <plugin name="cordova-plugin-splashscreen" source="npm"  />
     <plugin name="cordova-plugin-statusbar" source="npm"  />
-    <plugin name="cordova-plugin-vibration" source="npm" />
-    <plugin name="cordova-plugin-whitelist" source="npm" />
+    <plugin name="cordova-plugin-vibration" source="npm"  />
+    <plugin name="cordova-plugin-whitelist" source="npm"  />
     
 <platform name="android">
   <hook type="before_plugin_add" src="js/patch-android-studio-check.js" />
