@@ -20,10 +20,8 @@
     <icon src="icon.png" />
     <splash src="splash.png" />
     <plugin name="cordova-plugin-device" source="npm"  />
-    <plugin name="cordova-plugin-device-motion" source="npm"/>
     <plugin name="cordova-plugin-device-orientation" source="npm"  />
     <plugin name="cordova-plugin-camera" source="npm" />
-    <plugin name="cordova-plugin-dialogs" source="npm"  />
     <plugin name="cordova-plugin-file" source="npm"  />
     <plugin name="cordova-plugin-file-transfer" source="npm"  />
     <plugin name="cordova-plugin-globalization" source="npm" />
