@@ -44,7 +44,6 @@ var app = {
             camOptions = {
                 quality: 100,
                 destinationType: destinationType.FILE_URI,
-                    allowEdit: true,
                 sourceType: pictureSource.PHOTOLIBRARY
             };
         }
