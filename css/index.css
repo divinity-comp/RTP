@@ -1353,6 +1353,12 @@ table {
     .controlList .userDetails {
         font-size:1em;
     }
+    #jobGroups {
+        font-size:0.8em;
+    }
+    #jobHeader button {
+        font-size:1em;
+    }
 }
 @media only screen and (min-width:500px) {
     #userlist {
@@ -1360,5 +1366,11 @@ table {
     }
     .controlList .userDetails {
         font-size:1.2em;
+    }
+    #jobGroups {
+        font-size:1em;
+    }
+    #jobHeader button {
+        font-size:1.25em;
     }
 }
