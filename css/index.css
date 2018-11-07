@@ -1363,6 +1363,9 @@ table {
      
         font-size: 0.8em;
     }
+    .controlMenu {
+    font-size: 0.7em;
+    }
 }
 @media only screen and (min-width:500px) {
     #userlist {
@@ -1371,6 +1374,9 @@ table {
     .controlList article {
      
         font-size: 0.9em;
+    }
+    .controlMenu {
+    font-size: 0.85em;
     }
     .controlList .userDetails {
         font-size:1.2em;
