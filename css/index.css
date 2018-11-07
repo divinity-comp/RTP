@@ -1359,10 +1359,18 @@ table {
     #jobHeader button {
         font-size:1em;
     }
+    .controlList article {
+     
+        font-size: 0.8em;
+    }
 }
 @media only screen and (min-width:500px) {
     #userlist {
         font-size: 1em;
+    }
+    .controlList article {
+     
+        font-size: 0.9em;
     }
     .controlList .userDetails {
         font-size:1.2em;
