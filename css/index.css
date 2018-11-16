@@ -898,6 +898,7 @@ color: #3fbd3d;
 }
 #documentPage h3 {
     margin:0;
+    width:100%;
 }
 #documentPage .group .group {
     margin-left:2%;
@@ -1205,12 +1206,13 @@ table {
 }
 .finalButton {
     margin: 30px auto;
-    padding: 10px 15px;
-    font-size: 1.5em;
+    padding: 0.8em 2em;
+    font-size: 1.25em;
     display: block;
     border: 2px solid;
     border-radius: 6px;
-    color: #369c49;
+    color: #fff;
+    background: #1ad66e;
 }
 #rtpSend {
     background: #1ad66e;

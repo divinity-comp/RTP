@@ -890,6 +890,9 @@ function loadFromJson(pageNum) {
     if (docJSON.pages.length - 1 == pageNum) {
         nextDoc.innerHTML = "Complete";
         nextDoc.onclick = function () {
+            validatePage(function() { 
+                
+                
             let viewJob = idc("viewJob");
             let documentPage = idc("documentPage");
 
@@ -906,27 +909,44 @@ function loadFromJson(pageNum) {
                 x:"0%",
                 opacity: 1
             });
+            idc("rtpSend").style.display = "block";
+            },function() {
+            });
         }
     } else {
         nextDoc.innerHTML = "Next page";
+        
         nextDoc.onclick = function () {
-            TweenMax.fromTo(idc("documentPage"), 0.35, {
-                x: "0%",
-                opacity: 1
-            }, {
-                x: "-100%",
-                opacity: 0,
-                ease: Circ.easeOut,
-                onComplete: function () {
-                    loadFromJson(pageNum + 1);
-                    idc("main").scrollTop = 0;
-                }
+            
+            
+        validatePage(
+            function() { 
+                TweenMax.fromTo(idc("documentPage"), 0.35, {
+                    x: "0%",
+                    opacity: 1
+                }, {
+                    x: "-100%",
+                    opacity: 0,
+                    ease: Circ.easeOut,
+                    onComplete: function () {
+                        loadFromJson(pageNum + 1);
+                        idc("main").scrollTop = 0;
+                    }
             });
+            },
+            function() {
+            }
+        ); 
+            
+            
         }
+        
     }
     idc("documentPage").appendChild(nextDoc); 
 }
-
+function validatePage(successF,failedF) {
+    successF();
+}
 function docElementLoadIn(loc, elParent) {
     var elLoad = docJSON.pages;
     var hasTable = false;
@@ -946,6 +966,15 @@ function docElementLoadIn(loc, elParent) {
     }
     let locN = loc.splice(0);
     let genEl;
+    
+    let visible = true;
+    
+    if("visibility" in elLoad) {
+        if(elLoad.visibility == "admin") {
+            visible = false;
+        }
+    }
+    if(visible) {
     switch (elLoad.type) {
         case "title":
             genEl = document.createElement("h2");
@@ -970,6 +999,7 @@ function docElementLoadIn(loc, elParent) {
             genEl.classList.add("seperator");
         break;
         case "signature":
+            locN.push("value");
             genEl = document.createElement("div");
             if ("label" in elLoad) {
                 var label = document.createElement("label");
@@ -978,6 +1008,16 @@ function docElementLoadIn(loc, elParent) {
             }
             let randomID =  [...Array(10)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
             let sigImg = document.createElement("img");
+                
+            if ("value" in elLoad) {
+                randomID = elLoad.value;
+                console.log(elLoad);
+                readFile(randomID, function (response) {
+                console.log("sig has read " + response);
+                    sigImg.src = response;
+
+                });
+            }
             let sigButton = document.createElement("button");
                 genEl.appendChild(sigImg);
                 genEl.appendChild(sigButton);
@@ -995,6 +1035,8 @@ function docElementLoadIn(loc, elParent) {
                 signaturePad.clear();
             }
             genEl.id = randomID;
+            docJSON.pages = jsonUpdate(docJSON.pages,locN,randomID);
+
             genEl.classList.add("signature");
         break;
         case "textinput":
@@ -1025,6 +1067,34 @@ function docElementLoadIn(loc, elParent) {
                 spaninput.setAttribute("append", elLoad["append"]);
             }
             textinput.oninput = function () {
+                if(textinput.value == "ll" || textinput.value == "Ll") {
+                    textinput.value = "LIM";
+                }
+                if(textinput.value == "yy" || textinput.value == "Yy") {
+                    textinput.value = "✔";
+                }
+                if(textinput.value == "nn" || textinput.value == "Nn") {
+                    textinput.value = "N/A";
+                }
+                 if(genEl.parentNode.className == "radio") {
+                    console.log(genEl.parentNode.className);
+                        var allInp = genEl.parentNode.getElementsByTagName("input");
+                        
+                        for(f = 0; f < allInp.length;f++) {
+                            if(allInp[f] != textinput)
+                            allInp[f].value = "";
+                        }
+                        var allInpt = genEl.parentNode.getElementsByTagName("textarea");
+                        
+                        for(f = 0; f < allInpt.length;f++) {
+                            allInpt[f].value = "";
+                        }
+                        var allInpBV = genEl.parentNode.getElementsByClassName("checkbox");
+                        for(f = 0; f < allInpBV.length;f++) {
+                            if(allInpBV[f].hasAttribute("active"))
+                            allInpBV[f].click();
+                        }
+                }
                 if(hasTable == false) {
                     docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
                 }
@@ -1099,6 +1169,28 @@ function docElementLoadIn(loc, elParent) {
                     input.setAttribute("active","true");
             }
             input.onclick = function() {
+                    console.log("clicked");
+                
+                if(genEl.parentNode.className == "radio") {
+                    console.log(genEl.parentNode.className);
+                        var allInp = genEl.parentNode.getElementsByTagName("input");
+                        
+                        for(f = 0; f < allInp.length;f++) {
+                            allInp[f].value = "";
+                        }
+                        var allInpt = genEl.parentNode.getElementsByTagName("textarea");
+                        
+                        for(f = 0; f < allInpt.length;f++) {
+                            allInpt[f].value = "";
+                        }
+                        var allInpBV = genEl.parentNode.getElementsByClassName("checkbox");
+                    console.log(allInpBV);
+                        for(f = 0; f < allInpBV.length;f++) {
+                            if(allInpBV[f].hasAttribute("active"))
+                            allInpBV[f].click();
+                        }
+                }
+                
                 if(input.hasAttribute("active")) {
                    input.removeAttribute("active");
                     if(hasTable == false) {
@@ -1109,25 +1201,8 @@ function docElementLoadIn(loc, elParent) {
                     }
                 }
                 else {
-                    if(genEl.parentNode.parentNode.className == "radio") {
-                        var allInp = genEl.parentNode.parentNode.getElementsByTagName("input");
-                        
-                        for(f = 0; f < allInp.length;f++) {
-                            allInp[f].value = "";
-                        }
-                        var allInpt = genEl.parentNode.parentNode.getElementsByTagName("textarea");
-                        
-                        for(f = 0; f < allInpt.length;f++) {
-                            allInpt[f].value = "";
-                        }
-                        var allInpBV = genEl.parentNode.parentNode.getElementsByTagName("checkbox");
-                        for(f = 0; f < allInpBV.length;f++) {
-                            if(allInpBV[f].hasAttribute("active"))
-                            allInpBV[f].removeAttribute("active");
-                        }
-                    }
-                    input.setAttribute("active","true");
                     
+                    input.setAttribute("active","true");
                     if(hasTable == false) {
                         docJSON.pages =  jsonUpdate(docJSON.pages,locN,true);
                     }
@@ -1584,6 +1659,8 @@ function docElementLoadIn(loc, elParent) {
         docJSON.pages = jsonUpdate(docJSON.pages,hasTable,rowDataSet);
     }
     
+        
+    }
     if(genEl) {
         if ("colspan" in elLoad)
             genEl.setAttribute("colspan", elLoad.colspan);
@@ -1602,6 +1679,10 @@ function saveSignature() {
     let findToAdd = idc(sigCanV.getAttribute("toadd"));
     findToAdd.getElementsByTagName("img")[0].src = dataPng;
     console.log("Done>");
+    
+    writeTofile(sigCanV.getAttribute("toadd"),dataPng,function() {
+        console.log("written signature saved");
+    });
     
     closeOverlay("signatureCanvas");
 }
@@ -1628,6 +1709,7 @@ function rtpSend() {
         for (i = 0; i < jobData.jobdetails.length; i++)(function (i) {
 
             let docCookie = jobData["clientid"] + "-" + jobData["jobid"] + "-" + jobData["jobdetails"][i]["docid"] + "-Rev" + jobData["jobdetails"][i]["rev"];
+            
             readFile(docCookie + ".json", function (response) {
 
                 ajaxRequestToMake(urlInit + "/" + appVersion + "/update/jobdocument",
@@ -1647,6 +1729,40 @@ function rtpSend() {
                         filedata: response,
                         job: jobData["jobid"]
                     });
+                
+                var jobDa = JSON.parse(response)["pages"];
+                
+                for(b = 0; b < jobDa.length;b++) (function (b) {
+                     for(c = 0; c < jobDa[b].length;c++) (function (c) {
+                        if("group" in jobDa[b][c] ) {
+                            
+                    for(d = 0; d < jobDa[b][c]["group"].length;d++) (function (d) {
+                        if("type" in jobDa[b][c]["group"][d] && "value" in jobDa[b][c]["group"][d]) {
+                            console.log(jobDa[b][c]["group"][d].type);
+                            if(jobDa[b][c]["group"][d].type == "signature") {
+                                console.log(jobDa[b][c]["group"][d].type + " sig GEN" + jobDa[b][c]["group"][d].value);
+            readFile(jobDa[b][c]["group"][d].value, function (responseS) {
+                
+                ajaxRequestToMake(urlInit + "/" + appVersion + "/update/jobfile",
+                    function (ares) {
+                    console.log(ares);
+                        let resJs = JSON.parse(ares);
+                        if (resJs.response == "success") {
+                        } else {
+                            errorMessage("File not sent");
+                        }
+                    }, {
+                        filename: jobDa[b][c]["group"][d].value + ".png",
+                        filedata: responseS,
+                        job: jobData["jobid"]
+                    });
+            });
+                            }
+                        }
+                   })(d);
+                        }
+                    })(c);
+                })(b);
             });
         })(i);
     } else {
