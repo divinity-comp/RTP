@@ -8,6 +8,10 @@ var basicMenuList = [{
     "name": "My Jobs",
     "link": "jobs/myJobs",
     "function": "startJobSearch"
+},{
+    "name": "My Test instruments",
+    "link": "test-instruments",
+    "function": "getTestIntruments"
 }];
 var adminMenuList = [{
     "name": "Job Control",

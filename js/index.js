@@ -327,7 +327,7 @@ function getMainDashboard() {
             if (isAdmin()) {
                 openApiPage("jobControl");
             } else {
-                openPage("myJobs", null, startJobSearch);
+                openPage("jobs/myJobs", null, startJobSearch);
                 document.body.scrollTop = 0;
             }
             idc("navMenu").children[0].className = "active";
@@ -564,13 +564,110 @@ function closeOverlay(elId, type) {
     });
 }
 /* 
+    Instrument Functions
+*/
+function getTestIntruments() {
+    if(hasCookie("instruments")) {
+        var instrumentsCookie = JSON.parse(getCookie("instruments"));
+        for(a = 0; a < instrumentsCookie.length;a++) (function(a){ 
+
+            idc("addInstru").children[0].value = instrumentsCookie[a][0];
+            idc("addInstru").children[1].value = instrumentsCookie[a][1];
+            idc("addInstru").children[2].value = instrumentsCookie[a][2];
+            idc("addInstru").children[3].value = instrumentsCookie[a][3];
+            idc("addInstru").children[4].value = instrumentsCookie[a][4];
+
+            var instruSect = document.createElement("section");
+
+            var instruData = document.createElement("p");
+            var instruDataKey = document.createElement("span");
+            var instruDataValue = document.createElement("span");
+            instruDataKey.innerHTML = "Type";
+            instruDataValue.innerHTML = idc("addInstru").children[0].value;
+            instruData.appendChild(instruDataKey);
+            instruData.appendChild(instruDataValue);
+            instruSect.appendChild(instruData);
+
+            var instruInputs = idc("addInstru").getElementsByTagName("input");
+            for(i = 0; i < instruInputs.length;i++) (function(i){ 
+                var instruData = document.createElement("p");
+                var instruDataKey = document.createElement("span");
+                var instruDataValue = document.createElement("span");
+                instruDataKey.innerHTML = instruInputs[i].getAttribute("placeholder");
+                instruDataValue.innerHTML = instruInputs[i].value;
+                instruData.appendChild(instruDataKey);
+                instruData.appendChild(instruDataValue);
+                instruSect.appendChild(instruData);
+                instruInputs[i].value = "";
+            })(i);
+    var instruDel = document.createElement("button");
+    instruDel.className = "delete";
+    instruDel.onclick = function() {
+        instruDel.parentNode.parentNode.removeChild(instruDel.parentNode);
+        updateLocalInstruments();
+    }
+    instruSect.appendChild(instruDel);
+            idc("testInstruments").appendChild(instruSect);
+        })(a);
+    }
+}
+function addInstrument() {
+    var instruSect = document.createElement("section");
+    
+    var instruData = document.createElement("p");
+    var instruDataKey = document.createElement("span");
+    var instruDataValue = document.createElement("span");
+    instruDataKey.innerHTML = "Type";
+    instruDataValue.innerHTML = idc("addInstru").getElementsByTagName("select")[0].value;
+    instruData.appendChild(instruDataKey);
+    instruData.appendChild(instruDataValue);
+    instruSect.appendChild(instruData);
+    
+    var instruInputs = idc("addInstru").getElementsByTagName("input");
+    for(i = 0; i < instruInputs.length;i++) {
+        var instruData = document.createElement("p");
+        var instruDataKey = document.createElement("span");
+        var instruDataValue = document.createElement("span");
+        instruDataKey.innerHTML = instruInputs[i].getAttribute("placeholder");
+        instruDataValue.innerHTML = instruInputs[i].value;
+        instruData.appendChild(instruDataKey);
+        instruData.appendChild(instruDataValue);
+        instruSect.appendChild(instruData);
+        instruInputs[i].value = "";
+    }
+    var instruDel = document.createElement("button");
+    instruDel.className = "delete";
+    instruDel.onclick = function() {
+        instruDel.parentNode.parentNode.removeChild(instruDel.parentNode);
+        updateLocalInstruments();
+    }
+    instruSect.appendChild(instruDel);
+    idc("testInstruments").appendChild(instruSect);
+    updateLocalInstruments();
+    closeOverlay("addInstru");
+}
+function updateLocalInstruments() {
+    var instruList = [];
+    
+    var instruObjs = idc("testInstruments").children;
+    
+    for(i = 0; i < instruObjs.length;i++) {
+        var instruSingle = [];
+        var instruObjsPs = instruObjs[i].getElementsByTagName("p");
+        for(a = 0; a < instruObjsPs.length;a++) {
+            instruSingle.push(instruObjsPs[a].children[1].innerHTML);
+        }
+        instruList.push(instruSingle);
+    }
+    setCookie("instruments",JSON.stringify(instruList));
+}
+/* 
     Job Functions
 */
 
 function startJobSearch() {
     console.log("check connection start");
     if(checkConnection() == true) {
-        
         ajaxRequestToMake(urlInit + "/" + appVersion + "/data/getJobs.php",
             function (response) {
             console.log("RES" + response);
@@ -945,7 +1042,189 @@ function loadFromJson(pageNum) {
     idc("documentPage").appendChild(nextDoc); 
 }
 function validatePage(successF,failedF) {
-    successF();
+    
+    var failedElements = [];
+    var dpVal = idc("documentPage").getElementsByClassName("textinput");
+    for(i = 0;i < dpVal.length;i++) (function(i){
+        if(dpVal[i].getAttribute("required")) {
+            var dpValidate = dpVal[i].getAttribute("required");
+            var inputdp = dpVal[i].getElementsByTagName("input")[0];
+            if(dpValidate == "lim") {
+                if(inputdp.value != "LIM" && inputdp.value != "lim" && inputdp.value != "Lim"
+                  && inputdp.value != "✔" && inputdp.value != "N/a" && inputdp.value != "N/A" && inputdp.value != "n/a")
+                    failedElements.push(dpVal[i]);
+                dpVal[i].setAttribute("error", "Must Contain ✔ or N/A or LIM");
+            }
+            else if(dpValidate == "text") {
+                if(inputdp.value.length < 1)
+                    failedElements.push(dpVal[i]);
+                dpVal[i].setAttribute("error", "This field can not be empty");
+            }
+            else if(dpValidate == "date") {
+                var resDate = inputdp.value.split("/");
+
+                if(resDate.length < 3) {
+                    dpVal[i].setAttribute("error", "Enter Date DD/MM/YYYY");
+                    failedElements.push(dpVal[i]);
+                }
+            }
+        }
+    })(i);
+    var dpVal = idc("documentPage").getElementsByClassName("textarea");
+    for(i = 0;i < dpVal.length;i++) (function(i){
+        if(dpVal[i].getAttribute("required")) {
+            var dpValidate = dpVal[i].getAttribute("required");
+            var inputdp = dpVal[i].getElementsByTagName("textarea")[0];
+            if(dpValidate == "lim") {
+                if(inputdp.value != "LIM" && inputdp.value != "lim" && inputdp.value != "Lim"
+                  && inputdp.value != "✔" && inputdp.value != "N/a" && inputdp.value != "N/A" && inputdp.value != "n/a")
+                    failedElements.push(dpVal[i]);
+                dpVal[i].setAttribute("error", "Must Contain ✔ or N/A or LIM");
+            }
+            else if(dpValidate == "text") {
+                if(inputdp.value.length < 1)
+                    failedElements.push(dpVal[i]);
+                dpVal[i].setAttribute("error", "This field can not be empty");
+            }
+            else if(dpValidate == "date") {
+                var resDate = inputdp.value.split("/");
+
+                if(resDate.length < 3) {
+                    dpVal[i].setAttribute("error", "Enter Date DD/MM/YYYY");
+                    failedElements.push(dpVal[i]);
+                }
+            }
+        }
+    })(i);
+    var dpVal = idc("documentPage").getElementsByClassName("radio");
+    for(i = 0;i < dpVal.length;i++) (function(i){
+        if(dpVal[i].getAttribute("required")) {
+            var dpValidate = dpVal[i].getAttribute("required");
+            var inputdp = dpVal[i].getElementsByTagName("input");
+            var checkboxdp = dpVal[i].getElementsByClassName("checkbox");
+            var filledIn = false;
+    for(a = 0;a < inputdp.length;a++) (function(a){
+        if(inputdp[a].value != "")
+            filledIn = true;
+    })(a);
+    for(b = 0;b < checkboxdp.length;b++) (function(b){
+        if(checkboxdp[b].getAttribute("active") == "true")
+            filledIn = true;
+    })(b);
+             
+            if(!filledIn) {
+                dpVal[i].setAttribute("error", "One of these fields must be selected");
+                failedElements.push(dpVal[i]);
+            }
+                
+        }
+    })(i);
+    var dpVal = idc("documentPage").getElementsByClassName("checkbox");
+    for(i = 0;i < dpVal.length;i++) (function(i){
+        if(dpVal[i].getAttribute("required")) {
+            var dpValidate = dpVal[i].getAttribute("required");
+            if(dpVal[i].hasAttribute("active")) {
+                dpVal[i].setAttribute("error", "You must check this box");
+                failedElements.push(dpVal[i]);
+            }
+        }
+    })(i);
+    var dpVal = idc("documentPage").getElementsByClassName("signature");
+    for(i = 0;i < dpVal.length;i++) (function(i){
+        if(dpVal[i].getAttribute("required")) {
+            if(dpVal[i].getElementsByTagName("img")[0].src != "") {
+                dpVal[i].setAttribute("error", "A signature needs to be entered");
+                failedElements.push(dpVal[i]);
+            }
+        }
+    })(i);
+    var dpVal = idc("documentPage").getElementsByClassName("table");
+    for(i = 0;i < dpVal.length;i++) (function(i){
+        if(dpVal[i].getAttribute("required")) {
+            var valList = dpVal[i].getAttribute("required").split(",");
+            
+    for(a = 0;a < valList.length;a++) (function(a){
+        if(valList[a] == "lim") {
+            var dpValTR = dpVal[i].getElementsByTagName("tr");
+            for(b = 0;b < dpValTR.length;b++) (function(b){
+                if(dpValTR[b].getElementsByTagName("td").length == valList.length) {
+                    if(dpValTR[b].getElementsByTagName("td")[a].getElementsByTagName("input").length == 1) {
+                        var inputTD = dpValTR[b].getElementsByTagName("td")[a].getElementsByTagName("input")[0];
+                        if(inputTD.value != "LIM" && inputTD.value != "lim" && inputTD.value != "Lim"
+                          && inputTD.value != "✔" && inputTD.value != "N/a" && inputTD.value != "N/A" && inputTD.value != "n/a")
+                            failedElements.push(inputTD);
+                        inputTD.setAttribute("error", "Must Contain ✔ or N/A or LIM");
+                    }
+                }
+                
+            })(b);
+        }
+    })(a);
+        }
+    })(i);
+    
+    if(failedElements.length == 0)
+        successF();
+    else {
+        var documentErrors = document.createElement("div");
+        documentErrors.className = "documentErrors";
+
+        documentErrors.setAttribute("num", "0");
+        var countP = document.createElement("p");
+        countP.innerHTML = "1/" + failedElements.length ;
+        documentErrors.appendChild(countP);
+        
+        var specificError = document.createElement("p");
+        if(failedElements[0].hasAttribute("error"))
+            specificError.innerHTML += failedElements[0].getAttribute("error") ;
+        documentErrors.appendChild(specificError);
+        failedElements[0].className += " ehighlight";
+        idc("documentPage").scrollTop = failedElements[0].offsetTop;
+        
+        var buttonLeft = document.createElement("button");
+        buttonLeft.className = "buttonLeft";
+        buttonLeft.onclick = function() {
+            var numLe = parseInt(documentErrors.getAttribute("num"));
+            failedElements[numLe].className = failedElements[numLe].className.replace('ehighlight','')
+            if(numLe > 0)
+                numLe--;
+            
+        failedElements[numLe].className += " ehighlight";
+            documentErrors.children[0].innerHTML = (numLe + 1) + "/" + failedElements.length;
+            documentErrors.setAttribute("num",numLe);
+        if(failedElements[numLe].hasAttribute("error"))
+            specificError.innerHTML = failedElements[numLe].getAttribute("error") ;
+            if(failedElements[numLe].offsetTop == 0)
+                idc("documentPage").scrollTop = failedElements[numLe].parentNode.parentNode.parentNode.offsetTop;
+            else
+                idc("documentPage").scrollTop = failedElements[numLe].offsetTop;
+        }
+        documentErrors.appendChild(buttonLeft);
+        var buttonRight = document.createElement("button");
+        buttonRight.className = "buttonRight";
+        buttonRight.onclick = function() {
+            var numLe = parseInt(documentErrors.getAttribute("num"));
+            failedElements[numLe].className = failedElements[numLe].className.replace('ehighlight','');
+            if(numLe < failedElements.length)
+                numLe++;
+            failedElements[numLe].className += " ehighlight";
+            documentErrors.children[0].innerHTML = (numLe + 1) + "/" + failedElements.length;
+            documentErrors.setAttribute("num",numLe);
+            console.log(failedElements[numLe].offsetTop);
+        if(failedElements[numLe].hasAttribute("error"))
+            specificError.innerHTML = failedElements[numLe].getAttribute("error") ;
+            if(failedElements[numLe].offsetTop == 0)
+                idc("documentPage").scrollTop = failedElements[numLe].parentNode.parentNode.parentNode.offsetTop;
+            else
+                idc("documentPage").scrollTop = failedElements[numLe].offsetTop;
+        }
+        
+        documentErrors.appendChild(buttonRight);
+        
+        if(idc("main").getElementsByClassName("documentErrors")[0])
+            idc("main").removeChild(idc("main").getElementsByClassName("documentErrors")[0]);
+        idc("main").appendChild(documentErrors);
+    }
 }
 function docElementLoadIn(loc, elParent) {
     var elLoad = docJSON.pages;
@@ -1001,6 +1280,7 @@ function docElementLoadIn(loc, elParent) {
         case "signature":
             locN.push("value");
             genEl = document.createElement("div");
+            genEl.setAttribute("required","signature");
             if ("label" in elLoad) {
                 var label = document.createElement("label");
                 label.innerHTML = elLoad.label;
@@ -1043,6 +1323,9 @@ function docElementLoadIn(loc, elParent) {
             locN.push("value");
             
             genEl = document.createElement("div");
+            if ("required" in elLoad) {
+                genEl.setAttribute("required", elLoad.required);
+            }
             if ("label" in elLoad) {
                 var label = document.createElement("label");
                 label.innerHTML = elLoad.label;
@@ -1095,11 +1378,16 @@ function docElementLoadIn(loc, elParent) {
                             allInpBV[f].click();
                         }
                 }
-                if(hasTable == false) {
-                    docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
+                if ("update" in elLoad) {
+                    updateComplexAdditional(elLoad.update);
                 }
                 else {
-                    updateInTable(genEl);
+                    if(hasTable == false) {
+                        docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
+                    }
+                    else {
+                        updateInTable(genEl);
+                    }
                 }
             }
             spaninput.appendChild(textinput);
@@ -1115,6 +1403,9 @@ function docElementLoadIn(loc, elParent) {
             locN.push("value");
             
             genEl = document.createElement("div");
+            if ("required" in elLoad) {
+                genEl.setAttribute("required", elLoad.required);
+            }
             if("label" in elLoad) {
                 var label = document.createElement("label");
                 label.innerHTML = elLoad.label;
@@ -1167,6 +1458,9 @@ function docElementLoadIn(loc, elParent) {
             if("value" in elLoad) {
                if(elLoad.value)
                     input.setAttribute("active","true");
+            }
+            if ("required" in elLoad) {
+                genEl.setAttribute("required", elLoad.required);
             }
             input.onclick = function() {
                     console.log("clicked");
@@ -1240,6 +1534,9 @@ function docElementLoadIn(loc, elParent) {
                 genEl.appendChild(label);
             }
             var select = document.createElement("select");
+            if ("required" in elLoad) {
+                genEl.setAttribute("required", elLoad.required);
+            }
             var sOptions = elLoad.options;
             for(s = 0; s < sOptions.length;s++) {
                 var option = document.createElement("option");
@@ -1299,6 +1596,9 @@ function docElementLoadIn(loc, elParent) {
         case "radioinput":
             locN.push("options");
             genEl = document.createElement("div");
+            if ("required" in elLoad) {
+                genEl.setAttribute("required", elLoad.required);
+            }
             if("label" in elLoad) {
                 var label = document.createElement("label");
                 label.innerHTML = elLoad.label;
@@ -1358,6 +1658,26 @@ function docElementLoadIn(loc, elParent) {
              })(m);
             
             genEl.classList.add("group");
+        break;
+        case "testinstruments":
+            
+           genEl = document.createElement("div");
+            genEl.className = "instrumentList";
+            locN.push("value");
+            if(hasCookie("instruments")) {
+                var instrumentsCookie = JSON.parse(getCookie("instruments"));
+                for(a = 0; a < instrumentsCookie.length;a++) (function(a){ 
+          var intruDi = document.createElement("div");
+              intruDi.innerHTML += "<p><b>Type</b>" + instrumentsCookie[a][0] + "</p>";      
+              intruDi.innerHTML += "<p><b>Make</b>" + instrumentsCookie[a][1] + "</p>";      
+              intruDi.innerHTML += "<p><b>Model</b>" + instrumentsCookie[a][2] + "</p>";      
+              intruDi.innerHTML += "<p><b>Serial No.</b>" + instrumentsCookie[a][3] + "</p>";      
+              intruDi.innerHTML += "<p><b>Calibration expiration date</b>" + instrumentsCookie[a][4] + "</p>"; 
+                    genEl.appendChild(intruDi);
+               })(a);
+                
+                docJSON.pages = jsonUpdate(docJSON.pages,locN,JSON.stringify(instrumentsCookie));
+            }
         break;
         case "table":
            genEl = document.createElement("div");
@@ -1460,6 +1780,13 @@ function docElementLoadIn(loc, elParent) {
                    
                 break;
                 case "complexadditional": 
+                   var comsetAtt = "";
+                   for(z = 0; z < locN.length;z++) {
+                       if(z != 0)
+                       comsetAtt += ",";
+                       comsetAtt += locN[z];
+                   }
+                   genEl.setAttribute("compdata",comsetAtt);
                    locN.push("rows");
                    var tRows = elLoad.rows;
                    
@@ -1486,6 +1813,7 @@ function docElementLoadIn(loc, elParent) {
                     genEl.appendChild(rowData);
                     genEl.appendChild(addRow);
                     genEl.classList.add("complexadd");
+                    genEl.classList.add(elLoad.name.replace(' ', '-'));
 
                 break;
                 case "simplestep": 
@@ -1608,6 +1936,9 @@ function docElementLoadIn(loc, elParent) {
                     locN.push("rows");
                     var tRows = elLoad.rows;
                    
+            if ("required" in elLoad) {
+                genEl.setAttribute("required", elLoad.required);
+            }
                     for(b = 0; b < tRows.length;b++) (function(b){
                         var trRow = document.createElement("tr");
                         for(c = 0; c < tRows[b].length;c++) (function(c){
@@ -1627,6 +1958,25 @@ function docElementLoadIn(loc, elParent) {
            }
         break;
     }
+        function updateComplexAdditional(tableName) {
+            var comtMT = document.getElementsByClassName(tableName)[0];
+            var comT = comtMT.getElementsByClassName("groupRow");
+            var tableD = [];
+            for(i = 0; i < comT.length;i++) (function(i){
+                var getInputs = comT[i].getElementsByTagName("input");
+                var rowD = [];
+                for(b = 0; b < getInputs.length;b++) (function(b){
+                    rowD.push(getInputs[b].value);
+                })(b);
+                tableD.push(rowD);
+            })(i);
+            
+            var comtMTlen = comtMT.getAttribute("compdata");
+            var lens = comtMTlen.split(",");
+            lens.push("value");
+            docJSON.pages = jsonUpdate(docJSON.pages,lens,tableD);
+        }
+        //docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
     function updateInTable(childE) {
         let rowDataSet = [];
         console.log(childE);

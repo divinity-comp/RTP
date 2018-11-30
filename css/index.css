@@ -173,7 +173,51 @@ body {
     position: relative;
     overflow: auto;
 }
-
+#main.single-job {
+    overflow: hidden;
+}
+#main.single-job #viewJob,#main.single-job #documentPage {
+    overflow: auto;
+    height:100%;
+    margin: 0 4%;
+    padding: 30px 0;
+}
+#main.single-job #documentPage {
+    padding-bottom: 100px;
+}
+.documentErrors {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    color: #fff;
+    background: #de2929;
+    left: 0;
+    padding: 15px;
+}
+.documentErrors p {
+    float: left;
+    margin: 0;
+    font-size: 1.2em;
+    margin-left: 0.5em;
+    margin-top: 0.35em;
+}
+.documentErrors .buttonLeft,.documentErrors .buttonRight {
+    background: #fff;
+    padding: 0.5em 1em;
+    font-size: 1.2em;
+    border-radius: 8px;
+    margin-left: 1.5em;
+    font-weight: bold;
+}
+.ehighlight {
+    box-shadow: inset 0px 0px 0px 100px #ffdfdf;
+}
+.documentErrors .buttonLeft::before {
+    content:'PREV';
+}
+.documentErrors .buttonRight::before {
+    content:'NEXT';
+}
 .centerAbs {
     margin: auto;
     position: absolute;
@@ -729,6 +773,7 @@ color: #3fbd3d;
     margin: -5em auto 0;
     border-radius: 1em;
     width: inherit;
+    height:5em;
 }
 .controlList article figure img {
     -webkit-box-shadow: 0px 0px 2px 0px #e0e0e0;
@@ -1204,6 +1249,19 @@ table {
     align-items: flex-end;
     display: none;
 }
+.instrumentList div {
+    background: #fff;
+    padding: 1px 15px;
+    margin: 20px 0;
+    -webkit-box-shadow: 0px 1px 30px 0px #b5b5b521;
+    box-shadow: 0px 1px 30px 0px #b5b5b521;
+}
+.instrumentList p {
+    font-size: 1.2em;
+}
+.instrumentList p b {
+    margin: 0 0.5em 0 0;
+}
 .finalButton {
     margin: 30px auto;
     padding: 0.8em 2em;
@@ -1347,6 +1405,73 @@ table {
 }
 .noJobs.hidden,#addUser #siteLocations {
     display: none;
+}
+#addInstru select {
+    max-width: 450px;
+    width: 100%;
+    padding: 1em;
+    margin: 5em auto 1em;
+    display: block;
+    font-size: 1em;
+}
+#addInstru input {
+    max-width: 450px;
+    width: 100%;
+    padding: 1em;
+    margin: 0 auto 1em;
+    font-size: 1em;
+    display: block;
+}
+#addInstru button:last-child,#addInstrButton {
+    max-width: 300px;
+    width: 100%;
+    display: block;
+    margin: 1em auto;
+    font-size: 1em;
+    background: #4ce281;
+    padding: 1em;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+#testInstruments {
+    float: left;
+    width: 100%;
+    margin-bottom: 3em;
+}
+#testInstruments > section {
+    background: #fff;
+    border-radius: 10px;
+    -webkit-box-shadow: 0px 1px 30px 0px #b5b5b521;
+    box-shadow: 0px 1px 30px 0px #b5b5b521;
+    margin: 2.5em 0% 0em 3.5%;
+    width: 45%;
+    float: left;
+    padding: 2em;
+    position: relative;
+}
+#testInstruments .delete {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1em;
+    background: #de1f1f;
+    font-weight: bold;
+    color: #fff;
+    width: 3em;
+    height: 3em;
+}
+#testInstruments .delete:before {
+    content: "X";
+    color: #fff;
+    font-weight: bold;
+}
+#testInstruments > section p {
+    font-size: 1.2em;
+}
+#testInstruments > section p span:nth-child(1){
+    font-weight: bold;
+    margin-right:1em;
 }
 @media only screen and (min-width:320px) {
     #userlist {

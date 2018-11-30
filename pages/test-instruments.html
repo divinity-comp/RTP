@@ -1,0 +1,20 @@
+<div id="testInstruments">
+    
+</div>    
+<button id="addInstrButton" onclick='openOverlay("addInstru");'>Add Instrument</button>
+
+<div id="addInstru" class="overlay overlayM">
+    <select >
+        <option disabled selected>Type</option>
+        <option value="Earth fault loop impedence">Earth fault loop impedence</option>
+        <option value="Insulation resistance">Insulation resistance</option>
+        <option value="Continuity">Continuity</option>
+        <option value="RCD">RCD</option>
+        <option value="Other">Other</option>
+    </select>
+    <input placeholder="Make" />
+    <input placeholder="Model" />
+    <input placeholder="Serial No." />
+    <input placeholder="Calibration expiration date" />
+    <button onclick="addInstrument()">Add</button>
+</div>
