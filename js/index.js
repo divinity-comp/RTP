@@ -34,10 +34,12 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function () {
         devicePlatform = device.platform;
+        regulatorChecker = setInterval(function () {
+            regulatorCommand();
+        }, 100);
         if (cordova.platformId == 'android') {
             StatusBar.backgroundColorByHexString("#0e0e0e");
         }
-        checkLogin();
         try {
             pictureSource = navigator.camera.PictureSourceType;
             destinationType = navigator.camera.DestinationType;
@@ -56,8 +58,33 @@ var app = {
     receivedEvent: function (id) {}
 };
 var devicePlatform;
+var connectionStatus = {connected:false,connectionChanged:false};
+
+var regulatorChecker ;
+var regulatorFunctionToRun = ["checkConnection","checkLogin"];
+/* 
+
+FUNCTION
+Run functions every 100ms - check connection default and login status
+
+*/
+function regulatorCommand() {
+    for(reg = 0; reg < regulatorFunctionToRun.length;reg++) {
+        window[regulatorFunctionToRun[reg]]();
+    }
+}
+/* 
+
+FUNCTION
+Remove a function from the regulator - must do if not needed - removeFromRegulator("checkLogin")
+
+*/
+function removeFromRegulator(stringToRemove) {
+    regulatorFunctionToRun = regulatorFunctionToRun.filter(v => v !== stringToRemove);
+}
 // Initial Data
 var appVersion = "v1";
+// test site: https://rtp-app.divinitycomputing.com
 var urlInit = "https://rtp-app.divinitycomputing.com";
 // Login
 var test = true;
@@ -65,33 +92,62 @@ var test = true;
 var pictureSource;
 var destinationType;
 var camOptions;
-function checkLogin() {
-    if (hasCookie("user") && hasCookie("pass")) {
-        ajaxRequestToMake(urlInit + "/" + appVersion + "/login",
-            function (response) {
-                console.log(response);
-                let jsRes = JSON.parse(response);
-                if (jsRes.response === "success") {
-                    setCookie("stringUserData", response);
+/* 
 
-                    getMainDashboard();
-                } else {
-                    setTimeout(function () {
-                        loginInit();
-                    }, 2000);
-                }
-            }, {
-                user: getCookie("user"),
-                pass: getCookie("pass")
-            });
+FUNCTION
+Check if user is already logged in
+
+*/
+function checkLogin() {
+    if(getCookie("rememberUser") == "true") {
+        toggleElement(idc("cookieToggle"),true);
+    }
+    
+    if (hasCookie("user") && hasCookie("pass") && hasCookie("stringUserData") && getCookie("rememberUser") == "true") {
+        idc("noInternet").setAttribute("noConnection","false");
+        connectionStatus.connectionChanged = false;
+        updateUserFiles();
     }
     else {
-        loginInit();
+        if(connectionStatus.connected == false) {
+            idc("noInternet").setAttribute("noConnection","true");
+            connectionStatus.connectionChanged = false;
+        }
+        else {
+            idc("noInternet").setAttribute("noConnection","false");
+            if(connectionStatus.connectionChanged == true) {
+                connectionStatus.connectionChanged = false;
+                loginInit();
+            }
+        }
     }
 }
+function checkConnection() {
+    
+    var resetLogin = connectionStatus.connected;
+    connectionStatus.connected = navigator.onLine ? true : false;
+    
+    if(connectionStatus.connected  != resetLogin)
+        connectionStatus.connectionChanged = true;
+}
+function notifyConnectionDown() {
+    if(connectionStatus.connectionChanged == true) {
+        connectionStatus.connectionChanged = false;
+        if(connectionStatus.connected) 
+            successMessage("Internet Connected");
+        else 
+            errorMessage("Internet Disconnected");
+    }
+}
+/* 
 
+FUNCTION
+Enables the login screen
+
+*/
 function loginInit() {
     let loginPage = idc("loginPage").children[0];
+    loginPage.parentNode.style.display = "block";
     let tl = new TimelineMax();
     tl.fromTo(loginPage, 0.35, {
             opacity: 0
@@ -134,6 +190,30 @@ function loginInit() {
             opacity: 1,
             ease: Circ.easeOut
         }, "-=0.25")
+        .fromTo(loginPage.children[1].children[3], 0.4, {
+            y: 30,
+            opacity: 0
+        }, {
+            y: 0,
+            opacity: 1,
+            ease: Circ.easeOut
+        }, "-=0.25")
+        .fromTo(document.getElementsByTagName("small")[0], 0.4, {
+            y: 30,
+            opacity: 0
+        }, {
+            y: 0,
+            opacity: 1,
+            ease: Circ.easeOut
+        }, "-=0.25")
+        .fromTo(gbc("forgotPass"), 0.4, {
+            y: 30,
+            opacity: 0
+        }, {
+            y: 0,
+            opacity: 1,
+            ease: Circ.easeOut
+        }, "-=0.25")
         .fromTo(loginPage.children[2], 0.4, {
             opacity: 0
         }, {
@@ -142,6 +222,12 @@ function loginInit() {
         });
 }
 
+/* 
+
+FUNCTION
+Send server request to login or reset password
+
+*/
 function loginOrPasswordReset(ev) {
     idc("error").className = "";
     ev.preventDefault();
@@ -176,8 +262,8 @@ function loginOrPasswordReset(ev) {
                     buttonE.removeAttribute("clicked");
                     let jsRes = JSON.parse(response);
                     if (jsRes.response === "success") {
-                        getMainDashboard();
                         setCookie("stringUserData", response);
+                        getMainDashboard();
                     } else {
                         idc("error").innerHTML = jsRes.response;
                     }
@@ -189,6 +275,26 @@ function loginOrPasswordReset(ev) {
     }
 }
 
+/* 
+
+FUNCTION
+Toggle cookies
+
+*/
+function toggleCookie(cookieMod, el) {
+    if(getCookie(cookieMod) == "true")
+        delete_cookie(cookieMod);
+    else
+        setCookie(cookieMod,"true");
+    
+    toggleElement(el);
+}
+/* 
+
+FUNCTION
+Switches login screen to forgot password
+
+*/
 function forgotPassword(passwordCheck) {
 
     let tl = new TimelineMax();
@@ -233,16 +339,53 @@ function forgotPassword(passwordCheck) {
         passwordCheck.innerHTML = "Back to login";
     }
 }
+/* 
 
+FUNCTION
+Gathers All information for the user so no internet connection is required.
+
+*/
+function updateUserFiles() {
+    removeFromRegulator("checkLogin");
+    regulatorFunctionToRun.push("notifyConnectionDown");
+    ajaxRequestToMake(urlInit + "/" + appVersion + "/data/user-requirements.php",
+        function (response) {
+        let jsRes = JSON.parse(response);
+        if (jsRes.response === "success") {
+            writeTofile("lastjobcheck",response, function() {
+                getMainDashboard();
+            });
+            getOwnJobs();
+
+        } else {
+            setTimeout(function () {
+                loginInit();
+            }, 2000);
+        }
+    }, {
+        user: getCookie("user"),
+        pass: getCookie("pass")
+    });
+}
+
+//
 // User functions 
+//
+
+/* 
+
+FUNCTION
+Find local user data
+
+*/
 function getUserDataCookie() {
     if (hasCookie("stringUserData"))
         return JSON.parse(getCookie("stringUserData"))["userdata"];
     else
         return null;
 }
-
 function isAdmin() {
+    console.log(getUserDataCookie());
     if (getUserDataCookie()) {
         if (getUserDataCookie()["userlevel"] === "100")
             return true;
@@ -250,7 +393,9 @@ function isAdmin() {
             return false;
     }
 }
-// Menu 
+//
+// Menu
+//
 function logout() {
     ajaxRequestGet("pages/login.html",
         function (response) {
@@ -261,6 +406,12 @@ function logout() {
         "");
 }
 
+/* 
+
+FUNCTION
+Display Standard menu
+
+*/
 function defaultMenu() {
     let navString = "";
     let navAdd = basicMenuList;
@@ -268,51 +419,69 @@ function defaultMenu() {
         let tArg = "";
         if("function" in navAdd[i])
             tArg = "," + navAdd[i].function;
-        navString += "<li onclick='openPage(\"" + navAdd[i].link + "\",this"+ tArg +")'>" + navAdd[i].name + "</li>";
+        navString += "<li onclick='openPage(\"" + navAdd[i].link + "\",this"+ tArg +")'><span>" + navAdd[i].name + "</span>" + '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" mlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"	 width="510px" height="510px" viewBox="0 0 510 510" style="enable-background:new 0 0 510 510;" xml:space="preserve">		<path d="M255,0C114.75,0,0,114.75,0,255s114.75,255,255,255s255-114.75,255-255S395.25,0,255,0z M255,306L153,204h204L255,306z"/></svg>' + "</li>";
     }
     idc("navMenu").innerHTML += navString;
 
 }
 
+/* 
+
+FUNCTION
+Display all menus
+
+*/
 function adminMenu() {
     if (isAdmin()) {
         let navString = "";
         let navAdd = adminMenuList;
         for (i = 0; i < navAdd.length; i++) {
-            navString += "<li onclick='openApiPage(\"" + navAdd[i].link + "\",this)'>" + navAdd[i].name + "</li>";
+            navString += "<li onclick='openApiPage(\"" + navAdd[i].link + "\",this)'><span>" + navAdd[i].name + "</span>" + '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" mlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"	 width="510px" height="510px" viewBox="0 0 510 510" style="enable-background:new 0 0 510 510;" xml:space="preserve">		<path d="M255,0C114.75,0,0,114.75,0,255s114.75,255,255,255s255-114.75,255-255S395.25,0,255,0z M255,306L153,204h204L255,306z"/></svg>' + "</li>";
         }
         idc("navMenu").innerHTML += navString;
     }
 }
+
+//
 // Main Dashboard
+//
 
 function toggleMobile(ele) {
     let pLinks = idc("panelLinks");
     let pLinksLi = idc("panelLinks").getElementsByTagName("li");
     let tl = new TimelineMax();
-    if (ele.getAttribute("active") == "true") {
-        ele.setAttribute("active", "false");
-        tl.fromTo(pLinks, 0.3, {
-            x: "0%",
-            opacity: 1
-        }, {
-            x: "100%",
-            opacity: 0,
-            onComplete: function () {
-                idc("panelLinks").style.display = "none";
-            }
-        });
-    } else {
-        ele.setAttribute("active", "true");
-        pLinks.style.display = "block";
-        tl.fromTo(pLinks, 0.3, {
-            x: "100%",
-            opacity: 0
-        }, {
-            x: "0%",
-            opacity: 1,
-            ease: Circ.easeOut
-        });
+    
+    if(getWidth() < 800) {
+        console.log("width is small enough");
+        if (ele.getAttribute("active") == "true") {
+            ele.setAttribute("active", "false");
+            tl.fromTo(pLinks, 0.3, {
+                x: "0%",
+                opacity: 1
+            }, {
+                x: "100%",
+                opacity: 0,
+                onComplete: function () {
+                    idc("panelLinks").style.display = "none";
+                }
+            });
+        } else {
+            ele.setAttribute("active", "true");
+            pLinks.style.display = "block";
+            tl.fromTo(pLinks, 0.3, {
+                x: "100%",
+                opacity: 0
+            }, {
+                x: "0%",
+                opacity: 1,
+                ease: Circ.easeOut
+            });
+        }
+        
+    }
+    else {
+        
+        console.log("width is large enough");
     }
 }
 
@@ -328,34 +497,59 @@ function getMainDashboard() {
                 openApiPage("jobControl");
             } else {
                 openPage("jobs/myJobs", null, startJobSearch);
-                document.body.scrollTop = 0;
             }
             idc("navMenu").children[0].className = "active";
         },
         "");
 }
+
+//
 // User Message
-function successMessage(messageSuc) {
+//
+
+function successMessage(messageSuc, msgType) {
+    if(msgType == null)
+        msgType = 0;
     let sucMessage = document.createElement("div");
     sucMessage.className = "success";
+    if(msgType == 0)
+        successMessage.className += " normal";
+    else
+        successMessage.className += " central";
     sucMessage.innerHTML = '<span>' + messageSuc + "</span>";
 
     let alertBox = idc("alertBox");
     alertBox.appendChild(sucMessage);
 
-    TweenMax.fromTo(sucMessage, 0.35, {
-        x: "-100%",
-        opacity: 0
-    }, {
-        x: "0%",
-        opacity: 1,
-        ease: Circ.easeOut
-    });
+    if(msgType == 0) {
+        TweenMax.fromTo(sucMessage, 0.35, {
+            x: "-100%",
+            opacity: 0
+        }, {
+            x: "0%",
+            opacity: 1,
+            ease: Circ.easeOut
+        });
+    }
+    else {
+        
+        TweenMax.fromTo(sucMessage, 0.35, {
+            y: 100,
+            opacity: 0
+        }, {
+            y: 0,
+            opacity: 1,
+            ease: Circ.easeOut
+        });
+    }
 
     setTimeout(function () {
         let sucWidth = sucMessage.clientWidth;
         let sucHeight = sucMessage.clientHeight;
         console.log(sucWidth);
+        
+    if(msgType == 0) {
+        
         TweenMax.fromTo(sucMessage, 0.35, {
             x: "0%",
             opacity: 1,
@@ -370,10 +564,26 @@ function successMessage(messageSuc) {
                 sucMessage.style.display = "none";
             }
         });
+    }
+    else {
+        
+        
+        TweenMax.fromTo(sucMessage, 0.35, {
+            y:0,
+            opacity: 1
+        }, {
+            y: -100,
+            opacity: 0,
+            ease: Circ.easeOut,
+            onComplete: function () {
+                sucMessage.style.display = "none";
+            }
+        });
+    }
     }, 2000);
 }
 
-function errorMessage(messageSuc) {
+function errorMessage(messageSuc, msdType) {
     let sucMessage = document.createElement("div");
     sucMessage.className = "error";
     sucMessage.innerHTML = '<span>' + messageSuc + "</span>";
@@ -411,7 +621,10 @@ function errorMessage(messageSuc) {
     }, 6000);
 }
 
+//
 // Page function
+//
+
 function openPage(page, el,followFunc) {
     if (el) {
         for (i = 0; i < idc("navMenu").children.length; i++) {
@@ -486,6 +699,10 @@ function openApiPage(page, el, getR) {
                                 scriptAdd.innerHTML = response;
                                 idc("main").children[0].appendChild(scriptAdd);
                                 fullLoad.js = true;
+                                if(idc("addJob"))
+                                    idc("jobScroll").appendChild(idc("addJob"));
+                                if(idc("addClient"))
+                                    idc("userScroll").appendChild(idc("addClient"));
                             }, true);
                     } else {
                         fullLoad.js = true;
@@ -508,6 +725,7 @@ function openApiPage(page, el, getR) {
         }
     });
 }
+
 
 function openOverlay(elId, type) {
     let el = idc(elId);
@@ -563,6 +781,7 @@ function closeOverlay(elId, type) {
         }
     });
 }
+
 /* 
     Instrument Functions
 */
@@ -664,10 +883,8 @@ function updateLocalInstruments() {
 /* 
     Job Functions
 */
-
-function startJobSearch() {
-    console.log("check connection start");
-    if(checkConnection() == true) {
+function getOwnJobs() {
+    
         ajaxRequestToMake(urlInit + "/" + appVersion + "/data/getJobs.php",
             function (response) {
             console.log("RES" + response);
@@ -681,6 +898,11 @@ function startJobSearch() {
             }, {
             "req":"own"
             });
+}
+function startJobSearch() {
+    console.log("check connection start");
+    if(connectionStatus.connected == true) {
+        getOwnJobs();
     }
     else {
         
@@ -737,6 +959,33 @@ function showContacts(el) {
         el.innerHTML = "hide contact details";
         el.parentNode.setAttribute("show","true");
     }
+}
+function jobGroupSet(num) {
+    idc("jobHeader").setAttribute("jobgroup",num);
+    
+    var jobScroll = idc("jobScroll").getElementsByTagName("section");
+    
+    TweenMax.fromTo(jobScroll, 0.35, {
+        x: "0%",
+        opacity: 1
+    }, {
+        x: "-100%",
+        opacity: 0,
+        onComplete:function() {
+            for(i = 0; i < jobScroll.length;i++) {
+                jobScroll[i].className = "hidden";
+            }
+            
+            jobScroll[num].className = "";
+    TweenMax.fromTo(jobScroll[num], 0.35, {
+        x: "100%",
+        opacity: 0
+    }, {
+        x: "0%",
+        opacity: 1
+    });
+        }
+    });
 }
 let jobJS;
 
@@ -1088,6 +1337,9 @@ function validatePage(successF,failedF) {
             }
             else if(dpValidate == "date") {
                 var resDate = inputdp.value.split("/");
+                if(resDate.length < 3) {
+                    resDate = inputdp.value.split("\\");
+                }
 
                 if(resDate.length < 3) {
                     dpVal[i].setAttribute("error", "Enter Date DD/MM/YYYY");
@@ -1132,7 +1384,7 @@ function validatePage(successF,failedF) {
     var dpVal = idc("documentPage").getElementsByClassName("signature");
     for(i = 0;i < dpVal.length;i++) (function(i){
         if(dpVal[i].getAttribute("required")) {
-            if(dpVal[i].getElementsByTagName("img")[0].src != "") {
+            if(dpVal[i].getElementsByTagName("img")[0].src == "") {
                 dpVal[i].setAttribute("error", "A signature needs to be entered");
                 failedElements.push(dpVal[i]);
             }

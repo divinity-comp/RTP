@@ -42,20 +42,25 @@
 </head>
 
 <body>
-    <div id="centralHub" class="app">
-        <div id="loginPage">
+    <div id="centralHub" class="app">  
+        <div id="loginPage" >
             <div class="alignFlex centerAbs">
-                <figure>
-                <img src="assets/logo.svg" /></figure>
+                <img src="assets/logo.svg" />
                 <form id="login" class="login">
                     <input name="user" type="text" placeholder="Username" required="">
                     <input name="pass" type="password" placeholder="Password" required="">
                     <button class="bWait buttonRed" onclick="loginOrPasswordReset(event)">Login</button>
+                    <button class="bWait buttonRed" id="cookieToggle" onclick="stopEvent(event);toggleCookie('rememberUser',this);">Remember?
+                    <small>Offline needs remember</small></button>
                 </form>
                 <div id="error"></div>
                 <p class="forgotPass" onclick="forgotPassword(this)">Forgot password?</p>
             </div>
         </div>
+             <div id="noInternet">
+                <h2>No Internet Detected</h2>
+                 <p>You'll need to establish an internet connection to continue</p>
+             </div>
     </div>
     <div id="alertBox"></div>
     <div id="loader" class="loader">Loading...</div>

@@ -7,7 +7,18 @@
 var basicMenuList = [{
     "name": "My Jobs",
     "link": "jobs/myJobs",
-    "function": "startJobSearch"
+    "function": "startJobSearch",
+    "options":[
+        {
+            "option":"Active"
+        },
+        {
+            "option":"In Review"
+        },
+        {
+            "option":"Completed"
+        }
+    ]
 },{
     "name": "My Test instruments",
     "link": "test-instruments",
@@ -15,7 +26,18 @@ var basicMenuList = [{
 }];
 var adminMenuList = [{
     "name": "Job Control",
-    "link": "jobControl"
+    "link": "jobControl",
+    "options":[
+        {
+            "option":"Active"
+        },
+        {
+            "option":"In Review"
+        },
+        {
+            "option":"Completed"
+        }
+    ]
 }, {
     "name": "User Control",
     "link": "userControl"
@@ -32,6 +54,7 @@ var adminMenuList = [{
 */
 var avaliableDocs = [];
 
+ //  deleteAllCookies();
 //delete_cookie("avaliableDocs");
 if (hasCookie("avaliableDocs"))
     avaliableDocs = JSON.parse(getCookie("avaliableDocs"));

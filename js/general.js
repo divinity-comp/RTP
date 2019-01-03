@@ -1,3 +1,11 @@
+
+
+/* 
+
+FUNCTION
+Cookie Functions self explanitory 
+
+*/
 function hasCookie(c_name) {
     if (document.cookie.indexOf(c_name + "=") >= 0)
         return true;
@@ -37,10 +45,23 @@ function deleteAllCookies() {
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
 }
+
+/* 
+
+FUNCTION
+Get element by id shorthand
+
+*/
 function idc(id) {
     return document.getElementById(id);
 }
 
+/* 
+
+FUNCTION
+get by classname first element , can focus for speed on parent
+
+*/
 function gbc(id, parentEl) {
     if (parentEl)
         return parentEl.getElementsByClassName(id)[0];
@@ -48,16 +69,63 @@ function gbc(id, parentEl) {
         return document.getElementsByClassName(id)[0];
 }
 
+/* 
+
+FUNCTION
+Caps first letter
+
+*/
 function capitalizeTxt(txt) {
     if (txt != "undefined" && txt != null)
         return txt.charAt(0).toUpperCase() + txt.slice(1);
     else return "";
 }
 
+/* 
+
+FUNCTION
+Replace All occurences in a string
+
+*/
 function replaceAll(str, find, replace) {
     return str.replace(new RegExp(find, 'g'), replace);
 }
+/* 
 
+FUNCTION
+Prevent events from triggering
+
+*/
+function stopEvent(e) {
+    e.preventDefault();
+}
+/* 
+
+FUNCTION
+Toggle Element
+
+*/
+function toggleElement(el,forcedAct) {
+    if(forcedAct == null) {
+        
+    if(el.getAttribute("active") == "true") 
+        el.setAttribute("active","false");
+    else
+        el.setAttribute("active","true");
+    }
+    else {
+        if(forcedAct) 
+            el.setAttribute("active","true");
+        else
+            el.setAttribute("active","false");
+    }
+}
+/* 
+
+FUNCTION
+Make a Ajax Request, first url, function to call on success and data you want to send, finally if you want the program to hang(wait) for request to complete
+
+*/
 function ajaxRequestToMake(url, callback, data, wait) {
     var callback = (typeof callback == 'function' ? callback : false),
         xhr = null;
@@ -106,6 +174,12 @@ function ajaxRequestToMake(url, callback, data, wait) {
     return xhr;
 }
 
+/* 
+
+FUNCTION
+Make a Ajax Request same as above but no data send
+
+*/
 function ajaxRequestGet(url, callback, wait) {
     var callback = (typeof callback == 'function' ? callback : false),
         xhr = null;
@@ -152,6 +226,14 @@ function getHeight() {
     return Math.max(html.clientHeight);
 }
 
+/* 
+
+FUNCTION
+When load happens create list of functions to run when triggered 
+
+same applies for other functions respectively
+
+*/
 function addLoadEvent(func) {
     var oldonload = window.onload;
     if (typeof window.onload != 'function') {
@@ -194,6 +276,12 @@ function addScrollEvent(func) {
     }
 }
 
+/* 
+
+FUNCTION
+Find cords x,y of an element on screen
+
+*/
 function findPos(obj) {
     var curleft = 0,
         curtop = 0;
@@ -210,6 +298,12 @@ function findPos(obj) {
     return undefined;
 }
 
+/* 
+
+FUNCTION
+More precise location, includes specifics like scroll
+
+*/
 function elDimensions(el, dimType) {
     if (!el)
         return undefined;
@@ -259,6 +353,12 @@ function elDimensions(el, dimType) {
     }
 }
 
+/* 
+
+FUNCTION
+check if element is inside another
+
+*/
 function insideOtherArea(overArea, innerArea) {
     var insideTrue = false;
 
@@ -269,6 +369,12 @@ function insideOtherArea(overArea, innerArea) {
     return insideTrue;
 }
 
+/* 
+
+FUNCTION
+Toggle Loading
+
+*/
 function loading(active) {
     var tl = new TimelineMax();
     if (active) {
@@ -387,15 +493,4 @@ function readFile(fileName,successFunc) {
     }, function (e) {
         console.log("Failed file 2 write: " + e.toString());
     });
-}
-
-function checkConnection() {
-    var networkState = navigator.network.connection.type;
-    
-    if(networkState == Connection.NONE) {
-        return false;
-    }
-    else {
-        return true;
-    }
 }
