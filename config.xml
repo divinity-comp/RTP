@@ -84,7 +84,6 @@
 	<splash height="480" platform="ios" src="res/screens/ios/Default~iphone.png" width="320" />
 </platform>
     -->
-    <access origin="*"  subdomains="true" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
@@ -98,6 +97,7 @@
     <access origin="geo:*" launch-external="yes" />
     <access origin="tel:*" launch-external="yes" />
     <access origin="cdvfile://*" />
+    <access origin="*"  subdomains="true" />
     <platform name="android">
         <allow-intent href="market:*" />
     </platform>
