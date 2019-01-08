@@ -1072,12 +1072,12 @@ function openJob(jobid) {
         x: "-100%",
         onComplete: function () {
             idc("main").scrollTop = 0;
-            idc("viewJob").scrollTop = 0;
         ajaxRequestGet("pages/jobs/view-job.html",
             function (response) {
                 idc("main").innerHTML = response;
                 idc("main").className = "single-job " + jobJS.stage;
                 loadStep.singlejob = true;
+            idc("main").scrollTop = 0;
             
             },
         "");
