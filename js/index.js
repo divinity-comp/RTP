@@ -1177,7 +1177,9 @@ function uploadJobFile(imageURI,AltFile) {
     try { 
         var fileDetails = document.createElement("div");
         var filenameAdd = document.createElement("p");
-        filenameAdd.innerHTML = urlStringConVersion(imageURI);
+        filenameAdd.innerHTML = imageURI.substr(imageURI.lastIndexOf('/') + 1);
+        
+        
         var image = document.createElement("img");
         if(AltFile) {
             image = document.createElement("div");
