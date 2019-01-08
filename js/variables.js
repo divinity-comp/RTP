@@ -44,10 +44,11 @@ var adminMenuList = [{
 }, {
     "name": "Client Control",
     "link": "clientControl"
-}, {
+},
+                     /*{
     "name": "Form Creator",
     "link": "formCreator"
-}];
+}*/];
 /*
     DOCUMENTS
 {docid: "1", data: "electrical-installation-condition-report-form", rev: "0"}

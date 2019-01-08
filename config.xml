@@ -17,6 +17,8 @@
     <preference name="ShowSplashScreenSpinner" value="false" />
     <preference name="SplashScreenDelay" value="0" />
     <preference name="FadeSplashScreenDuration" value="250" />
+    <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,assets,root" />
+
     <icon src="icon.png" />
     <splash src="splash.png" />
     <plugin name="cordova-plugin-device" source="npm"  />
@@ -90,7 +92,9 @@
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
     <access origin="mailto:*" launch-external="yes" />
-
+    <access origin="geo:*" launch-external="yes" />
+    <access origin="tel:*" launch-external="yes" />
+    <access origin="cdvfile://*" />
     <platform name="android">
         <allow-intent href="market:*" />
     </platform>

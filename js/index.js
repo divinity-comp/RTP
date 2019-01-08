@@ -699,14 +699,21 @@ function openApiPage(page, el, getR) {
                                 scriptAdd.innerHTML = response;
                                 idc("main").children[0].appendChild(scriptAdd);
                                 fullLoad.js = true;
-                                if(idc("addJob"))
-                                    idc("jobScroll").appendChild(idc("addJob"));
-                                if(idc("addClient"))
-                                    idc("userScroll").appendChild(idc("addClient"));
                             }, true);
                     } else {
                         fullLoad.js = true;
                     }
+try {
+    if(idc("addJob"))        
+        idc("jobScroll").appendChild(idc("addJob"));
+    if(idc("addClient"))
+        idc("userScroll").appendChild(idc("addClient"));
+}
+catch(error) {
+  console.error(error);
+  // expected output: ReferenceError: nonExistentFunction is not defined
+  // Note - error messages will vary depending on browser
+}
 
                     if (idc("main").children[0].hasAttribute("css")) {
                         ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.css",
@@ -906,10 +913,15 @@ function startJobSearch() {
     }
     else {
         
-        if(hasCookie("joblist"))
-              loadInJobsStandardUser(JSON.parse(getCookie("joblist")));
-        else
-            errorMessage("No local data, internet required");
+        try {
+            if(hasCookie("joblist"))
+                  loadInJobsStandardUser(JSON.parse(getCookie("joblist")));
+            else
+                errorMessage("No local data, internet required");
+        }
+        catch(error) {
+          console.error(error);
+        }
     }
 }
 function loadInJobsStandardUser(jobData) {
@@ -942,13 +954,20 @@ function loadInJobsStandardUser(jobData) {
         }
     }
     
+    
+        
+    try {
+        if(idc("completeJobs").children.length == 1)
+            idc("completeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+        if(idc("reviewJobs").children.length == 1)
+            idc("reviewJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+        if(idc("activeJobs").children.length == 1)
+            idc("activeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
     }
-    if(idc("completeJobs").children.length == 1)
-        idc("completeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
-    if(idc("reviewJobs").children.length == 1)
-        idc("reviewJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
-    if(idc("activeJobs").children.length == 1)
-        idc("activeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+    catch(error) {
+      console.error(error);
+    }
+    }
 }
 function showContacts(el) {
     if(el.parentNode.hasAttribute("show")) {
@@ -959,13 +978,19 @@ function showContacts(el) {
         el.innerHTML = "hide contact details";
         el.parentNode.setAttribute("show","true");
     }
-}
-function jobGroupSet(num) {
+}function jobGroupSet(num) {
     idc("jobHeader").setAttribute("jobgroup",num);
     
     var jobScroll = idc("jobScroll").getElementsByTagName("section");
     
-    TweenMax.fromTo(jobScroll, 0.35, {
+    let tl = new TimelineMax();
+    tl
+        .fromTo(idc("addJob"), 0.35, {
+        x: "0%",
+        opacity: 1
+    },{x:"-250%",
+        opacity: 0})
+        .fromTo(jobScroll, 0.35, {
         x: "0%",
         opacity: 1
     }, {
@@ -985,8 +1010,14 @@ function jobGroupSet(num) {
         opacity: 1
     });
         }
-    });
+    },0)
+        .fromTo(idc("addJob"), 0.35, {
+        x: "200%",
+        opacity: 0
+    },{x:"0%",
+        opacity: 1});
 }
+
 let jobJS;
 
 function openJob(jobid) {
@@ -1048,13 +1079,13 @@ function openJob(jobid) {
         "");
     }});
 }
-function jobMenu(jobId) {
+function jobMenu(menuSelected) {
     var jobMenuC = document.getElementsByClassName("jobMenu");
     var jobMenuOptions = idc("jobMenu").children;
       for(i = 0; i < jobMenuOptions.length;i++) {
           jobMenuOptions[i].className = "";
       }  
-    jobMenuOptions[jobId].className = "active";
+    jobMenuOptions[menuSelected].className = "active";
     TweenMax.to(jobMenuC, 0.3, {
         opacity: 0,
         x: "-100%",
@@ -1062,8 +1093,8 @@ function jobMenu(jobId) {
           for(i = 0; i < jobMenuC.length;i++) {
               jobMenuC[i].className = "jobMenu hidden";
           }  
-            jobMenuC[jobId].className = " jobMenu";
-    TweenMax.fromTo(jobMenuC[jobId], 0.3, {
+            jobMenuC[menuSelected].className = " jobMenu";
+    TweenMax.fromTo(jobMenuC[menuSelected], 0.3, {
         opacity: 0,
         x: "100%"
             
@@ -1071,10 +1102,109 @@ function jobMenu(jobId) {
         opacity: 1,
         x: "0%"});
     }});
+    if(menuSelected == 2) {
+        var calcRoom = elDimensions(idc("viewJob").children[0]).y +  elDimensions(idc("viewJob").children[1]).y + 
+            elDimensions(idc("rtpSend")).y ;
+        var fileHub = idc("files");
+        TweenMax.set(fileHub,{
+            height:"calc(100% - " + calcRoom + "px)"
+        });
+        TweenMax.set(idc("files-hub"),{
+            height:"calc(100% - 90px)"
+        });
+        
+        if(devicePlatform == null) {
+            idc("fileAdd").setAttribute("desktop","true");
+        }
+    }
+}
+function openFileAdd(fileAddType) {
+    if(fileAddType == 0) {
+        findLocalJobFiles();
+    }
+    else if(fileAddType == 1) {
+        
+    }
+    else if(fileAddType == 2) {
+        decideJobPictures();
+    }
+}
+/* find local files */ 
+function findLocalJobFiles() {
+    
+    console.log(devicePlatform);
+    if(devicePlatform == null) {
+
+        portalJobFileUpload("/update/job-file-upload.php");
+    }
+    else {
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+    console.log('file system open: ' + fs.name);
+    fs.root.getFile(fs.name, { create: true, exclusive: false }, function (fileEntry) {
+
+        console.log("fileEntry is file?" + fileEntry.isFile.toString());
+        // fileEntry.name == 'someFile.txt'
+        // fileEntry.fullPath == '/someFile.txt'
+       // writeFile(fileEntry, null);
+       // writeTofile(fs.name, fileEntry.)
+
+    }, onErrorCreateFile);
+
+}, onErrorLoadFs);
+    }
+}
+
+/* upload job files */
+function decideJobPictures() {
+    console.log(devicePlatform);
+    if(devicePlatform == null) {
+
+        portalJobFileUpload("/update/job-file-upload.php");
+    }
+    else {
+        navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
+            quality: 100,
+            destinationType: destinationType.FILE_URI,
+            sourceType: pictureSource.PHOTOLIBRARY
+        });
+    }
+}
+function portalJobFileUpload(upURL) {
+    var inputFile = document.createElement("input");
+    inputFile.setAttribute("type","file");
+    inputFile.click();
+    inputFile.onchange = function() {
+        var formaData = new FormData();
+        formaData.append('jobid', idc("viewJob").getAttribute("jobid")); // string
+        formaData.append('file[]', inputFile.files[0]);
+
+        serverImageUpload(inputFile,urlInit + "/" + appVersion + upURL, formaData);
+    }
+}
+function uploadJobFile(imageURI) {
+    try { 
+        var fileDetails = document.createElement("div");
+        var filenameAdd = document.createElement("p");
+        filenameAdd.innerHTML = imageURI;
+        var image = document.createElement("img");
+        image.src = imageURI  + '?' + Math.random();
+        var fHub = idc("files-hub");
+        fileDetails.appendChild(image);
+        fileDetails.appendChild(filenameAdd);
+        fHub.appendChild(fileDetails);
+        
+        successMessage("Job file uploaded");
+    }
+    catch(error) {
+        errorMessage("Job file Upload Failed");
+    }
+}
+
+function onErrorUploadFail(err) {
+    errorMessage(err);
 }
 function loadClientData(jobDetails) {
     if(idc("clientInfo")) {
-        console.log("job data");
         var clientInfo = idc("clientInfo");
         var clientJs = jobDetails.client[0];
         console.log(clientJs);
@@ -1082,8 +1212,10 @@ function loadClientData(jobDetails) {
             clientInfo.innerHTML = '<img src="'+ clientJs.companylogo +'" />';
         if(clientJs.Company)
             clientInfo.innerHTML += '<p><span>Company:</span> <span>'+ clientJs.Company +'</span></p>';
-        if(clientJs.address)
-            clientInfo.innerHTML += '<p><span>Address: </span><span>'+ clientJs.address +'</span></p>';
+        if(clientJs.address) {
+            var streetShort = replaceAll(clientJs.address," ","+");
+            clientInfo.innerHTML += '<p class="address"><span>Address: </span><span><a href="0,0?q='+ streetShort +'"><i class="fas fa-map-marked-alt"></i>'+ clientJs.address +'</a></span></p>';
+        }
         if(clientJs.contact)
             clientInfo.innerHTML += '<p><span>Contact: </span><span>'+ clientJs.contact +'</span></p>';
         if(clientJs.email)
@@ -1122,6 +1254,7 @@ function addDocument(docFind, Inter, fullJson) {
                         availDocs.push(docFind);
                         setCookie("avaliableDocs", JSON.stringify(availDocs));
                     } else {
+                        setCookie("avaliableDocs", "[" + JSON.stringify(docFind) + "]");
                         setCookie("avaliableDocs", "[" + JSON.stringify(docFind) + "]");
                     }
                     addDocRow(docFind, Inter, fullJson, response);
@@ -1218,10 +1351,7 @@ function loadFromJson(pageNum) {
         docElementLoadIn([pageNum, i],idc("documentPage"));
     })(i);
     
-        TweenMax.set(idc("documentPage"),{
-            x: "100%",
-            opacity: 0
-        });
+         
     setTimeout(function () {
         TweenMax.fromTo(idc("documentPage"), 0.35, {
             x: "100%",
@@ -2369,5 +2499,51 @@ function rtpSend() {
         })(i);
     } else {
         errorMessage("sending already in progress");
+    }
+}
+
+
+
+var AjaxFileUploader = function () {
+    this._file = null;
+    var self = this;
+
+    this.uploadFile = function (uploadUrl, file,inputF) {
+        var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.responseText == "" || xhr.responseText.includes("connect ETIMEDOUT"))
+                alert('{"response":"Connection timed out", "result":"error"}');
+            else
+                alert(xhr.responseText);
+            
+            console.log(xhr.responseText);
+        }
+    }
+        xhr.open("post", uploadUrl, true);
+
+        xhr.send(file);
+    };
+};
+            
+AjaxFileUploader.IsAsyncFileUploadSupported = function () {
+    return typeof (new XMLHttpRequest().upload) !== 'undefined';
+}
+
+function serverImageUpload(inputFile,serverLoc,params) {
+     if (AjaxFileUploader.IsAsyncFileUploadSupported) {
+        let ajaxFileUploader = new AjaxFileUploader();
+
+        if (inputFile.files.length == 0) {
+            alert("no file found");
+        } else {
+            ajaxFileUploader.uploadFile(
+                serverLoc,
+                params,
+                inputFile.files[0]
+            );
+        }
+
     }
 }

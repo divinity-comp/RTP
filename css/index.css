@@ -72,16 +72,20 @@ a:hover,
 a:active {
     outline: 0;
 }
-
+input {
+    border: 1px solid #121f32;
+}
 input:focus {
     outline: 0;
-    border: 1px solid #04A4CC;
+    border: 1px solid #121f32;
 }
 
 button {
-    border: 0;
-    background-color: transparent;
     cursor: pointer;
+    border: 2px solid #f9f9f9;
+    border-radius: 5px;
+    background: #121f32;
+    color:#fff;
 }
 
 select {
@@ -427,6 +431,7 @@ button#cookieToggle[active="true"]:before {
     width: 80px;
     height: 100%;
     position: relative;
+    background:transparent;
 }
 
 #mobileMenu:before {
@@ -541,6 +546,7 @@ button#cookieToggle[active="true"]:before {
     border-top: 1px solid;
     color: #6b6b6b;
     line-height: 50px;
+    background: transparent;
 }
 
 #panelLinks,
@@ -610,12 +616,11 @@ button#cookieToggle[active="true"]:before {
     width: 20px;
     height: 20px;
     position: absolute;
-    bottom: 7px;
-    right: 7px;
+    bottom: 5px;
+    right: 5px;
     fill: #0a121d;
 }
 #panelLinks li.active svg {    
-    opacity:1;
 }
 #panelLinks li.active:before,#panelLinks li:hover:before {
     background: #bf1028;
@@ -743,6 +748,8 @@ button#cookieToggle[active="true"]:before {
     font-weight: bold;
     text-transform: uppercase;
     line-height: 1em;
+    background: transparent;
+    border: 0;
 }
 
 .close img {
@@ -829,7 +836,7 @@ button#cookieToggle[active="true"]:before {
 .controlList {
     overflow: auto;
 }
-.controlList button#addJob,.controlList button#addUser,.controlList button#addClient {
+button#addJob, button#addUser, button#addClient {
     color: #fff;
     font-size: 1.35em;
     font-weight: bold;
@@ -843,19 +850,6 @@ button#cookieToggle[active="true"]:before {
     clear: both;
     text-transform: uppercase;
     background: #121f32;
-}
-button#addJob span,button#addUser span {
-    position: absolute;
-    top: -0.33em;
-    right: -0.33em;
-    background: #3fbd3d;
-    border-radius: 2em;
-    width: 1em;
-    height: 1em;
-    font-size: 1.5em;
-    text-align: center;
-    line-height: 1em;
-    color: #fff;
 }
 .controlMenu {
     width:100%;
@@ -905,13 +899,17 @@ color: #3fbd3d;
     margin: 0 auto;
     border-radius: 1em;
     width: inherit;
+    min-height: 120px;
+    position: relative;
 }
 .controlList article figure img {
     background:#fff;
     max-width: 90%;
-    max-height: 5em;
+    max-height: 120px;
     margin: 0 auto;
     display: block;
+    position: absolute;
+    top:0;right:0;bottom:0;left:0;margin:auto;
 }
 .controlList date:before {
     content:'Start Date: ';
@@ -1004,6 +1002,45 @@ color: #3fbd3d;
     background: #2d2d2d;
     color: #fff;
 }
+#files.jobMenu {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+#files-hub {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+#fileAdd {
+    width: 100%;
+    margin: 0 auto;
+    max-width: 160px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: space-evenly;
+    -ms-flex-pack: space-evenly;
+    justify-content: space-evenly;
+    padding: 0.75em 0;
+}
+#fileAdd button:nth-child(2),#fileAdd[desktop="true"] button:nth-child(3),#fileAdd[desktop="true"] button:nth-child(4){
+    display: none;
+}
+#fileAdd button {
+    background: none;
+    border: 0;
+    font-size: 1.75em;
+    width: 2em;
+    height: 2em;
+    text-align: center;
+    border: 0;
+    color: #fff;
+    background: #0a121d;
+    border-radius: 5em;
+    -webkit-box-shadow: inset 0px 0px 18px 0px #000;
+    box-shadow: inset 0px 0px 18px 0px #000;
+}
 #clientInfo img {
     max-height: 200px;
     max-width: 200px;
@@ -1065,6 +1102,8 @@ color: #3fbd3d;
     color: #fff;
     font-weight: 600;
     opacity:0.5;
+    background: transparent;
+    border: 0;
 }
 #jobMenu button.active {
     opacity:1;
@@ -1509,24 +1548,7 @@ table {
     border: 2px dashed;
     margin: 2vh 5%;
 }
-/* MEDIA QUIERIES */
 
-@media screen and (orientation: landscape) {
-    #navigation {
-        height: 60px;
-    }
-    #mobileMenu {
-        font-size: 0.75em;
-        margin-top: 0.6em;
-    }
-    #clientDeats figure img {
-        max-height: 40px;
-        margin: 10px 5px; 
-    }
-    #panelLinks, #main,.overlayM {
-        height:calc(100vh - 60px);
-    }
-}
 #signatureCanvas {
     display: none;
 }
@@ -1544,6 +1566,20 @@ table {
     float: left;
     width: 100%;
     margin: 5px 5%;
+}
+#clientInfo .address i {
+    color: #fff;
+    background: #ea4335;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    text-align: center;
+    border-radius: 1em;
+    font-size: 1.3em;
+    float: left;
+    margin: 0 10px 5px 0;
+    -webkit-box-shadow: -2px 3px 10px 0px #1b0e0e52;
+    box-shadow: -2px 3px 10px 0px #1b0e0e52;
 }
 .noJobs.hidden,#addUser #siteLocations {
     display: none;
@@ -1604,6 +1640,7 @@ table {
     color: #fff;
     width: 3em;
     height: 3em;
+    background: transparent;
 }
 #testInstruments .delete:after {
     content: "X";
@@ -1661,6 +1698,24 @@ table {
     width: 100%;
     margin-top: 0.5em;
 }
+/* MEDIA QUIERIES */
+
+@media screen and (orientation: landscape) {
+    #navigation {
+        height: 60px;
+    }
+    #mobileMenu {
+        font-size: 0.75em;
+        margin-top: 0.6em;
+    }
+    #clientDeats figure img {
+        max-height: 40px;
+        margin: 10px 5px; 
+    }
+    #panelLinks, #main,.overlayM {
+        height:calc(100vh - 60px);
+    }
+}
 @media only screen and (min-width:320px) {
     #userlist {
         font-size: 0.8em;
@@ -1680,6 +1735,9 @@ table {
     #testInstruments > section, .controlList article {
         width: 93%;
     }
+    #rtpSend {
+        font-size:1.15em;
+    }
 }
 @media only screen and (min-width:500px) {
     #userlist {
@@ -1697,15 +1755,37 @@ table {
     #jobHeader button {
         font-size:1.25em;
     }
+    #rtpSend {
+        font-size:1.35em;
+    }
 }
 @media only screen and (min-width:550px) {
     #testInstruments > section, .controlList article {
         width: 45%;
     }
     #mobileMenu {
-    width: 90px;
+        width: 90px;
     }
     .hamburger-box {
         width: 3.4em;
+    }
+    #rtpSend {
+        font-size:1.5em;
+    }
+}
+
+@media screen and (orientation: portrait) and (max-width:430px) {
+    .controlList article figure img {
+    max-height: 80px;
+    max-width: 150px;
+    }
+    .controlList article figure {
+        min-height: 80px;
+    }
+    .controlList button#addJob, .controlList button#addUser, .controlList button#addClient {
+        font-size:1.1em;
+    }
+    #main.single-job #viewJob, #main.single-job #documentPage {
+    font-size: 0.85em;
     }
 }
