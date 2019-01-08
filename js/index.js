@@ -1065,11 +1065,12 @@ function openJob(jobid) {
                 loadClientData(jobJS);
         }
     }, 300);
-
+    
     TweenMax.to("#main", 0.3, {
         opacity: 0,
         x: "-100%",
         onComplete: function () {
+            idc("main").scrollTop = 0;
         ajaxRequestGet("pages/jobs/view-job.html",
             function (response) {
                 idc("main").innerHTML = response;
