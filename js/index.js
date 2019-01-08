@@ -1172,9 +1172,9 @@ function uploadJobFile(imageURI) {
     try { 
         var fileDetails = document.createElement("div");
         var filenameAdd = document.createElement("p");
-        filenameAdd.innerHTML = imageURI;
+        filenameAdd.innerHTML = urlStringConVersion(imageURI);
         var image = document.createElement("img");
-        image.src = imageURI  + '?' + Math.random();
+        image.src =  urlStringConVersion(imageURI)  + '?' + Math.random();
         var fHub = idc("files-hub");
         fileDetails.appendChild(image);
         fileDetails.appendChild(filenameAdd);
