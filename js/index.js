@@ -703,6 +703,8 @@ function openApiPage(page, el, getR) {
                     } else {
                         fullLoad.js = true;
                     }
+                if(!idc("genJob")) {
+                    
 try {
     if(idc("addJob"))        
         idc("jobScroll").appendChild(idc("addJob"));
@@ -714,7 +716,7 @@ catch(error) {
   // expected output: ReferenceError: nonExistentFunction is not defined
   // Note - error messages will vary depending on browser
 }
-
+                }
                     if (idc("main").children[0].hasAttribute("css")) {
                         ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.css",
                             function (response) {
@@ -927,13 +929,16 @@ function startJobSearch() {
 function loadInJobsStandardUser(jobData) {
     if("jobData" in jobData) {
         
-    for(i = 0; i < jobData["jobData"].length;i++) {
+    for(i = 0; i < jobData["jobData"].length;i++) (function(i){ 
         var jrD = document.createElement("article");
         jrD.setAttribute("cid",jobData["jobData"][i].clientid[0]);
         jrD.setAttribute("aid",jobData["jobData"][i].jobid);
         
+        jrD.onclick = function() {
+            openJob(jobData["jobData"][i].jobid);
+        }
         
-        var dataToAdd = '<figure>                <img src="' + jobData["jobData"][i].clientid[7] + '">            </figure><div onclick="openJob(' + jobData["jobData"][i].jobid + ');" class="title">';
+        var dataToAdd = '<figure>                <img src="' + jobData["jobData"][i].clientid[7] + '">            </figure><div  class="title">';
         if("jobid" in jobData["jobData"][i]) 
             dataToAdd += '<span>'+ jobData["jobData"][i].jobid  +'</span><span>'+ jobData["jobData"][i].clientid[1] + '</span>';
         if("creationdate" in jobData["jobData"][i]) 
@@ -941,33 +946,38 @@ function loadInJobsStandardUser(jobData) {
         dataToAdd += "</div>";
         dataToAdd += '<div class="hidden jobdetails">'+ JSON.stringify(jobData["jobData"][i].jobdetails) +'</div>';
         jrD.innerHTML = dataToAdd;
-        switch(jobData["jobData"][i].stage) {    
-            case "active":
-                idc("activeJobs").appendChild(jrD);
-                break;
-            case "review":
-                idc("reviewJobs").appendChild(jrD);
-                break;
-            case "complete":
-                idc("completeJobs").appendChild(jrD);
-                break;
+        if("stage" in jobData["jobData"][i] && idc("activeJobs")) {
+            switch(jobData["jobData"][i].stage) {    
+                case "active":
+                    idc("activeJobs").appendChild(jrD);
+                    break;
+                case "review":
+                    idc("reviewJobs").appendChild(jrD);
+                    break;
+                case "complete":
+                    idc("completeJobs").appendChild(jrD);
+                    break;
+            }
         }
-    }
-    
+            })(i);
     
         
     try {
-        if(idc("completeJobs").children.length == 1)
-            idc("completeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
-        if(idc("reviewJobs").children.length == 1)
-            idc("reviewJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
-        if(idc("activeJobs").children.length == 1)
-            idc("activeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+            if(idc("completeJobs")) {
+
+            if(idc("completeJobs").children.length == 1)
+                idc("completeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+            if(idc("reviewJobs").children.length == 1)
+                idc("reviewJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+            if(idc("activeJobs").children.length == 1)
+                idc("activeJobs").getElementsByClassName("noJobs")[0].classList.remove("hidden");
+            }
+        }
+        catch(error) {
+          console.error(error);
+        }
     }
-    catch(error) {
-      console.error(error);
-    }
-    }
+    
 }
 function showContacts(el) {
     if(el.parentNode.hasAttribute("show")) {
@@ -1683,9 +1693,7 @@ function docElementLoadIn(loc, elParent) {
                 
             if ("value" in elLoad) {
                 randomID = elLoad.value;
-                console.log(elLoad);
                 readFile(randomID, function (response) {
-                console.log("sig has read " + response);
                     sigImg.src = response;
 
                 });
@@ -2179,7 +2187,7 @@ function docElementLoadIn(loc, elParent) {
                        comsetAtt += locN[z];
                    }
                    genEl.setAttribute("compdata",comsetAtt);
-                   locN.push("rows");
+                   locN.push("value");
                    var tRows = elLoad.rows;
                    
                    if("name" in elLoad)
@@ -2366,41 +2374,45 @@ function docElementLoadIn(loc, elParent) {
             var comtMTlen = comtMT.getAttribute("compdata");
             var lens = comtMTlen.split(",");
             lens.push("value");
+            console.log(lens);
             docJSON.pages = jsonUpdate(docJSON.pages,lens,tableD);
         }
         //docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
     function updateInTable(childE) {
         let rowDataSet = [];
         console.log(childE);
-        var parentD = parentD.children.length;
-        while(!parentD.className.includes("groupRow")) {
-            console.log(parentD.parentNode);
-            parentD = parentD.parentNode;
+        if(parentD.children) {
+
+            var parentD = parentD.children.length;
+            while(!parentD.className.includes("groupRow")) {
+                console.log(parentD.parentNode);
+                parentD = parentD.parentNode;
+            }
+            var childNum = 0;
+            var cFind = false;
+
+
+                for(i = 0; i <  parentD.children.length;i++) (function(i){ 
+                        if(cFind == false) {
+                            if(childE == element)
+                                cFind == true;
+                            else
+                                childNum++;
+                        }
+                })(i);
+            let parentDchildDivs = parentD.getElementsByTagName("div");
+            for(ac = 0; ac < parentDchildDivs.length;ac++) {
+                if(parentDchildDivs[ac].classList.contains("textinput"))
+                    rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("input")[0].value);
+                else if(parentDchildDivs[ac].classList.contains("select"))
+                    rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("select")[0].value);
+                else if(parentDchildDivs[ac].classList.contains("textarea"))
+                    rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("textarea")[0].value);
+                else if(parentDchildDivs[ac].classList.contains("checkcontainer")) 
+                    rowDataSet.push(parentDchildDivs[ac].getElementsByClassName("checkbox")[0].getAttribute("active"));
+            }
+            docJSON.pages = jsonUpdate(docJSON.pages,hasTable,rowDataSet);
         }
-        var childNum = 0;
-        var cFind = false;
-        
-        
-            for(i = 0; i <  parentD.children.length;i++) (function(i){ 
-                    if(cFind == false) {
-                        if(childE == element)
-                            cFind == true;
-                        else
-                            childNum++;
-                    }
-            })(i);
-        let parentDchildDivs = parentD.getElementsByTagName("div");
-        for(ac = 0; ac < parentDchildDivs.length;ac++) {
-            if(parentDchildDivs[ac].classList.contains("textinput"))
-                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("input")[0].value);
-            else if(parentDchildDivs[ac].classList.contains("select"))
-                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("select")[0].value);
-            else if(parentDchildDivs[ac].classList.contains("textarea"))
-                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("textarea")[0].value);
-            else if(parentDchildDivs[ac].classList.contains("checkcontainer")) 
-                rowDataSet.push(parentDchildDivs[ac].getElementsByClassName("checkbox")[0].getAttribute("active"));
-        }
-        docJSON.pages = jsonUpdate(docJSON.pages,hasTable,rowDataSet);
     }
     
         
