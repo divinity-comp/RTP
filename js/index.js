@@ -1132,26 +1132,16 @@ function openFileAdd(fileAddType) {
 /* find local files */ 
 function findLocalJobFiles() {
     
+    var inputFile = document.createElement("input");
+    inputFile.setAttribute("type","file");
+    console.log("clickInput");
+    inputFile.click();
     alert(devicePlatform);
-    if(devicePlatform == null) {
-
-        portalJobFileUpload("/update/job-file-upload.php");
-    }
-    else {
-    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-    alert('file system open: ' + fs.name);
-    fs.root.getFile("newfile", { create: true, exclusive: false }, function (fileEntry) {
-
-        console.log("fileEntry is file?" + fileEntry.isFile.toString());
-        // fileEntry.name == 'someFile.txt'
-        // fileEntry.fullPath == '/someFile.txt'
-       // writeFile(fileEntry, null);
-       // writeTofile(fs.name, fileEntry.)
-
-    }, onErrorCreateFile);
-
-}, onErrorUploadFail);
-    }
+    var inputFile = document.createElement("input");
+    inputFile.setAttribute("type","file");
+    console.log("clickInput");
+    inputFile.click();
+    
 }
 
 /* upload job files */
@@ -1180,6 +1170,8 @@ function portalJobFileUpload(upURL) {
 
         serverImageUpload(inputFile,urlInit + "/" + appVersion + upURL, formaData);
     }
+    
+    
 }
 function uploadJobFile(imageURI) {
     try { 
