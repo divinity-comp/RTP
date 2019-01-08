@@ -84,20 +84,20 @@
 	<splash height="480" platform="ios" src="res/screens/ios/Default~iphone.png" width="320" />
 </platform>
     -->
+    <allow-intent href="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
-    <allow-intent href="*" />
     
+    <access origin="*"  subdomains="true" />
     <access origin="content:///*" />
     <access origin="mailto:*" launch-external="yes" />
     <access origin="geo:*" launch-external="yes" />
     <access origin="tel:*" launch-external="yes" />
     <access origin="cdvfile://*" />
-    <access origin="*"  subdomains="true" />
     <platform name="android">
         <allow-intent href="market:*" />
     </platform>
