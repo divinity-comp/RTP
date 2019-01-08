@@ -1148,14 +1148,13 @@ function findLocalJobFiles() {
 function decideJobPictures() {
     console.log(devicePlatform);
     if(devicePlatform == null) {
-        
         portalJobFileUpload("/update/job-file-upload.php");
     }
     else {
         navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
             quality: 100,
             destinationType: destinationType.FILE_URI,
-            sourceType: pictureSource.PHOTOLIBRARY
+            sourceType: pictureSource.PICTURE
         });
     }
 }
@@ -1167,9 +1166,7 @@ function portalJobFileUpload(upURL) {
         
         var files = inputFile.files;
 
-        for (var i = 0; i < files.length; i++) {
-            uploadJobFile(files[i]);
-        }
+            uploadJobFile(inputFile);
     }
     
     
