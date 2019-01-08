@@ -1139,7 +1139,7 @@ function findLocalJobFiles() {
         var files = inputFile.files;
 
         for (var i = 0; i < files.length; i++) {
-            uploadJobFile(inputFile);
+            uploadJobFile(inputFile, );
         }
     }
 }

@@ -410,8 +410,67 @@ function loading(active) {
     }
 }
 // read or write to file
-function writeTofile(fileName, data,successFunc) {
+function writeTofile(fileName, data,successFunc,createDir) {
     console.log(fileName);
+    
+    if(createDir) {
+        
+                var multi = 0;
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+        
+    rootDirEntry.getDirectory(createDir, { create: true }, function (dirEntry) {
+        console.log('file write system open: ' + fs.name);
+        fs.root.getFile(fileName, {
+            create: true,
+            exclusive: false
+        }, function (fileEntry) {
+              fileEntry.createWriter(function (fileWriter) {
+                  
+                fileWriter.onwritestart = function () {
+                    console.log("start file write");
+                };
+                fileWriter.onwriteend = function () {
+                    multi++;
+                    console.log("write attempt" + multi);
+                    if(successFunc && multi == 2) {
+                        
+                        console.log(data);
+                        successFunc();
+                    }
+                    else if(multi == 1) {
+                        fileWriter.write(data);
+                        console.log("Successful file write...");
+                    }
+                };
+
+                fileWriter.onerror = function (e) {
+                    console.log("Failed file write: " + e.toString());
+                };
+
+                // If data object is not passed in,
+                // create a new Blob instead.
+                if (!data) {
+                    data = new Blob(['some file data'], {
+                        type: 'text/plain'
+                    });
+                }
+
+                fileWriter.truncate(0);
+            });
+
+        }, function (e) {
+            console.log("Failed file 1 write: " + e.toString());
+        });
+
+    }, function (e) {
+        console.log("Failed file 2 write: " + e.toString());
+    });
+    }, function (e) {
+        console.log("Failed file 3 write: " + e.toString());
+    });
+    }
+    else {
+    
                 var multi = 0;
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
         console.log('file write system open: ' + fs.name);
@@ -460,6 +519,7 @@ function writeTofile(fileName, data,successFunc) {
     }, function (e) {
         console.log("Failed file 2 write: " + e.toString());
     });
+    }
 }
 
 function readFile(fileName,successFunc) {
