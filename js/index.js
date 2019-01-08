@@ -1148,10 +1148,11 @@ function findLocalJobFiles() {
 function decideJobPictures() {
     console.log(devicePlatform);
     if(devicePlatform == null) {
-
+        
         portalJobFileUpload("/update/job-file-upload.php");
     }
     else {
+        alert("Android uploader");
         navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
             quality: 100,
             destinationType: destinationType.FILE_URI,
@@ -2524,18 +2525,21 @@ AjaxFileUploader.IsAsyncFileUploadSupported = function () {
 }
 
 function serverImageUpload(inputFile,serverLoc,params) {
-     if (AjaxFileUploader.IsAsyncFileUploadSupported) {
-        let ajaxFileUploader = new AjaxFileUploader();
+    if(connectionStatus.connected) {
+        
+         if (AjaxFileUploader.IsAsyncFileUploadSupported) {
+            let ajaxFileUploader = new AjaxFileUploader();
 
-        if (inputFile.files.length == 0) {
-            alert("no file found");
-        } else {
-            ajaxFileUploader.uploadFile(
-                serverLoc,
-                params,
-                inputFile.files[0]
-            );
+            if (inputFile.files.length == 0) {
+                alert("no file found");
+            } else {
+                ajaxFileUploader.uploadFile(
+                    serverLoc,
+                    params,
+                    inputFile.files[0]
+                );
+            }
+
         }
-
     }
 }
