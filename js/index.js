@@ -2372,21 +2372,23 @@ function docElementLoadIn(loc, elParent) {
     function updateInTable(childE) {
         let rowDataSet = [];
         console.log(childE);
-        var parentD = childE;
+        var parentD = parentD.children.length;
         while(!parentD.className.includes("groupRow")) {
             console.log(parentD.parentNode);
             parentD = parentD.parentNode;
         }
         var childNum = 0;
         var cFind = false;
-        parentD.children.forEach(function(element) {
-            if(cFind == false) {
-                if(childE == element)
-                    cFind == true;
-                else
-                    childNum++;
-            }
-        });
+        
+        
+            for(i = 0; i <  parentD.children.length;i++) (function(i){ 
+                    if(cFind == false) {
+                        if(childE == element)
+                            cFind == true;
+                        else
+                            childNum++;
+                    }
+            })(i);
         let parentDchildDivs = parentD.getElementsByTagName("div");
         for(ac = 0; ac < parentDchildDivs.length;ac++) {
             if(parentDchildDivs[ac].classList.contains("textinput"))
