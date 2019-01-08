@@ -1022,6 +1022,8 @@ let jobJS;
 
 function openJob(jobid) {
 
+            idc("main").scrollTop = 0;
+            idc("viewJob").scrollTop = 0;
     let loadStep = {
         "core": false,
         "documents": false,
@@ -1071,6 +1073,7 @@ function openJob(jobid) {
         x: "-100%",
         onComplete: function () {
             idc("main").scrollTop = 0;
+            idc("viewJob").scrollTop = 0;
         ajaxRequestGet("pages/jobs/view-job.html",
             function (response) {
                 idc("main").innerHTML = response;
