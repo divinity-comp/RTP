@@ -933,7 +933,7 @@ function loadInJobsStandardUser(jobData) {
         jrD.setAttribute("aid",jobData["jobData"][i].jobid);
         
         
-        var dataToAdd = '<figure>                <img src="https://rtp-app.divinitycomputing.com/v1/assets/client/rtp-logo.jpg">            </figure><div onclick="openJob(' + jobData["jobData"][i].jobid + ');" class="title">';
+        var dataToAdd = '<figure>                <img src="' + jobData["jobData"][i].clientid[6] + '">            </figure><div onclick="openJob(' + jobData["jobData"][i].jobid + ');" class="title">';
         if("jobid" in jobData["jobData"][i]) 
             dataToAdd += '<span>'+ jobData["jobData"][i].jobid  +'</span><span>'+ jobData["jobData"][i].clientid[1] + '</span>';
         if("creationdate" in jobData["jobData"][i]) 
