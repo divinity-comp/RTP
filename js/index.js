@@ -1079,7 +1079,6 @@ function openJob(jobid) {
                 idc("main").className = "single-job " + jobJS.stage;
                 loadStep.singlejob = true;
             
-            idc("viewJob").scrollTop = 0;
             },
         "");
     }});
