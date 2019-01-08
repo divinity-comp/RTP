@@ -1138,9 +1138,9 @@ function findLocalJobFiles() {
         
         var files = inputFile.files;
 
-        for (var i = 0; i < files.length; i++) {
+        for (var i = 0; i < files.length; i++)  (function(i){
             uploadJobFile(inputFile,"alternativefile");
-        }
+        })(i);
     }
 }
 
