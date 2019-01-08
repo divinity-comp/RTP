@@ -1150,7 +1150,7 @@ function findLocalJobFiles() {
 
     }, onErrorCreateFile);
 
-}, onErrorLoadFs);
+}, onErrorUploadFail);
     }
 }
 
