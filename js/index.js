@@ -988,7 +988,8 @@ function showContacts(el) {
         el.innerHTML = "hide contact details";
         el.parentNode.setAttribute("show","true");
     }
-}function jobGroupSet(num) {
+}
+function jobGroupSet(num) {
     idc("jobHeader").setAttribute("jobgroup",num);
     
     var jobScroll = idc("jobScroll").getElementsByTagName("section");
