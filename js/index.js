@@ -1131,12 +1131,17 @@ function openFileAdd(fileAddType) {
 }
 /* find local files */ 
 function findLocalJobFiles() {
-    
     var inputFile = document.createElement("input");
     inputFile.setAttribute("type","file");
-    console.log("clickInput");
     inputFile.click();
-    
+    inputFile.onchange = function() {
+        
+        var files = inputFile.files;
+
+        for (var i = 0; i < files.length; i++) {
+            uploadJobFile(inputFile);
+        }
+    }
 }
 
 /* upload job files */
@@ -1159,27 +1164,39 @@ function portalJobFileUpload(upURL) {
     inputFile.setAttribute("type","file");
     inputFile.click();
     inputFile.onchange = function() {
-        var formaData = new FormData();
-        formaData.append('jobid', idc("viewJob").getAttribute("jobid")); // string
-        formaData.append('file[]', inputFile.files[0]);
+        
+        var files = inputFile.files;
 
-        serverImageUpload(inputFile,urlInit + "/" + appVersion + upURL, formaData);
+        for (var i = 0; i < files.length; i++) {
+            uploadJobFile(inputFile,"alternativefile");
+        }
     }
     
     
 }
-function uploadJobFile(imageURI) {
+function uploadJobFile(imageURI,AltFile) {
     try { 
         var fileDetails = document.createElement("div");
         var filenameAdd = document.createElement("p");
         filenameAdd.innerHTML = urlStringConVersion(imageURI);
         var image = document.createElement("img");
+        if(AltFile) {
+            image = document.createElement("div");
+            image.innerHTML = '<i class="fas fa-file-alt"></i>';
+        }
         image.src =  urlStringConVersion(imageURI)  + '?' + Math.random();
         var fHub = idc("files-hub");
         fileDetails.appendChild(image);
         fileDetails.appendChild(filenameAdd);
         fHub.appendChild(fileDetails);
-        
+        if(idc("viewJob")) {
+            readFile(imageURI, function(readD) {
+                writeTofile(imageURI.substr(imageURI.lastIndexOf('/') + 1),readD,function() {
+                    successMessage("File added ready to send");
+
+                },"project" + idc("viewJob").getAttribute("jobid"));
+            });
+        }
         successMessage("Job file uploaded");
     }
     catch(error) {
