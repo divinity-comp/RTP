@@ -1168,7 +1168,7 @@ function portalJobFileUpload(upURL) {
         var files = inputFile.files;
 
         for (var i = 0; i < files.length; i++) {
-            uploadJobFile(inputFile);
+            uploadJobFile(files[i]);
         }
     }
     
