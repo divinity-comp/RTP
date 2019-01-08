@@ -494,3 +494,27 @@ function readFile(fileName,successFunc) {
         console.log("Failed file 2 write: " + e.toString());
     });
 }
+function urlStringConVersion(url, success, error) {
+	window.resolveLocalFileSystemURL(
+		url,
+		function (dirEntry) {
+			if(!dirEntry.isFile) {
+				error();
+				return;
+			}
+
+			dirEntry.file(
+				function(file) {
+					success(file);
+				},
+				function() {
+					error();
+				}
+			);
+		},
+		function() {
+			// An error occured.
+			error();
+		}
+	);
+}

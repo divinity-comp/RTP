@@ -1136,11 +1136,6 @@ function findLocalJobFiles() {
     inputFile.setAttribute("type","file");
     console.log("clickInput");
     inputFile.click();
-    alert(devicePlatform);
-    var inputFile = document.createElement("input");
-    inputFile.setAttribute("type","file");
-    console.log("clickInput");
-    inputFile.click();
     
 }
 
@@ -1152,7 +1147,6 @@ function decideJobPictures() {
         portalJobFileUpload("/update/job-file-upload.php");
     }
     else {
-        alert("Android uploader");
         navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
             quality: 100,
             destinationType: destinationType.FILE_URI,
