@@ -1183,7 +1183,8 @@ function uploadJobFile(imageURI,AltFile) {
             image = document.createElement("div");
             image.innerHTML = '<i class="fas fa-file-alt"></i>';
         }
-        image.src =  urlStringConVersion(imageURI)  + '?' + Math.random();
+        else
+            image.src = imageURI  + '?' + Math.random();
         var fHub = idc("files-hub");
         fileDetails.appendChild(image);
         fileDetails.appendChild(filenameAdd);
