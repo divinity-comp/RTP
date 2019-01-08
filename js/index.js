@@ -1139,7 +1139,7 @@ function findLocalJobFiles() {
         var files = inputFile.files;
 
         for (var i = 0; i < files.length; i++)  (function(i){
-            uploadJobFile(inputFile,"alternativefile");
+            uploadJobFile(files[i].name,"alternativefile");
         })(i);
     }
 }
@@ -1166,7 +1166,9 @@ function portalJobFileUpload(upURL) {
         
         var files = inputFile.files;
 
-            uploadJobFile(inputFile);
+        for (var i = 0; i < files.length; i++)  (function(i){
+            uploadJobFile(files[i].name,"alternativefile");
+        })(i);
     }
     
     
