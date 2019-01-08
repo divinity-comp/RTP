@@ -1132,15 +1132,15 @@ function openFileAdd(fileAddType) {
 /* find local files */ 
 function findLocalJobFiles() {
     
-    console.log(devicePlatform);
+    alert(devicePlatform);
     if(devicePlatform == null) {
 
         portalJobFileUpload("/update/job-file-upload.php");
     }
     else {
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-    console.log('file system open: ' + fs.name);
-    fs.root.getFile(fs.name, { create: true, exclusive: false }, function (fileEntry) {
+    alert('file system open: ' + fs.name);
+    fs.root.getFile("newfile", { create: true, exclusive: false }, function (fileEntry) {
 
         console.log("fileEntry is file?" + fileEntry.isFile.toString());
         // fileEntry.name == 'someFile.txt'
