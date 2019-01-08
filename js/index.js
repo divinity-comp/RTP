@@ -1023,7 +1023,6 @@ let jobJS;
 function openJob(jobid) {
 
             idc("main").scrollTop = 0;
-            idc("viewJob").scrollTop = 0;
     let loadStep = {
         "core": false,
         "documents": false,
@@ -1079,6 +1078,8 @@ function openJob(jobid) {
                 idc("main").innerHTML = response;
                 idc("main").className = "single-job " + jobJS.stage;
                 loadStep.singlejob = true;
+            
+            idc("viewJob").scrollTop = 0;
             },
         "");
     }});
