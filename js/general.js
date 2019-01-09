@@ -369,58 +369,20 @@ function insideOtherArea(overArea, innerArea) {
     return insideTrue;
 }
 
-/* 
-
-FUNCTION
-Toggle Loading
-
-*/
-function loading(active) {
-    var tl = new TimelineMax();
-    if (active) {
-        idc("loader").style.display = "block";
-        tl.fromTo(idc("main"), 0.4, {
-                opacity: 1
-            }, {
-                opacity: 0,
-                ease: Circ.easeOut
-            })
-            .fromTo(idc("loader"), 0.4, {
-                opacity: 0
-            }, {
-                opacity: 1,
-                ease: Circ.easeOut
-            });
-    } else {
-        tl.fromTo(idc("loader"), 0.4, {
-                opacity: 1
-            }, {
-                opacity: 0,
-                ease: Circ.easeOut
-            })
-            .fromTo(idc("main"), 0.4, {
-                opacity: 0
-            }, {
-                opacity: 1,
-                ease: Circ.easeOut,
-                onComplete: function () {
-                    idc("loader").style.display = "none";
-                }
-            });
-    }
-}
 // read or write to file
 function writeTofile(fileName, data,successFunc,createDir) {
-    console.log(fileName);
-    
+    console.log(createDir);
     if(createDir) {
         
                 var multi = 0;
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
         
-    rootDirEntry.getDirectory(createDir, { create: true }, function (dirEntry) {
+    fs.root.getDirectory(createDir, { create: true }, function (dirEntry) {
         console.log('file write system open: ' + fs.name);
-        fs.root.getFile(fileName, {
+        
+        
+        
+        dirEntry.getFile(fileName, {
             create: true,
             exclusive: false
         }, function (fileEntry) {
@@ -464,10 +426,10 @@ function writeTofile(fileName, data,successFunc,createDir) {
 
     }, function (e) {
         console.log("Failed file 2 write: " + e.toString());
-    });
-    }, function (e) {
-        console.log("Failed file 3 write: " + e.toString());
-    });
+        });
+        }, function (e) {
+            console.log("Failed file 3 write: " + e.toString());
+        });
     }
     else {
     

@@ -34,11 +34,11 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function () {
         devicePlatform = device.platform;
-        regulatorChecker = setInterval(function () {
-            regulatorCommand();
-        }, 100);
+            regulatorChecker = setInterval(function () {
+                regulatorCommand();
+            }, 500);
         if (cordova.platformId == 'android') {
-            StatusBar.backgroundColorByHexString("#0e0e0e");
+            StatusBar.styleBlackOpaque();
         }
         try {
             pictureSource = navigator.camera.PictureSourceType;
@@ -53,9 +53,7 @@ var app = {
             alert(error);
         }
 
-    },
-    // Update DOM on a Received Event
-    receivedEvent: function (id) {}
+    }
 };
 var devicePlatform;
 var connectionStatus = {connected:false,connectionChanged:false};
@@ -69,7 +67,7 @@ Run functions every 100ms - check connection default and login status
 
 */
 function regulatorCommand() {
-    for(reg = 0; reg < regulatorFunctionToRun.length;reg++) {
+    for(var reg = 0; reg < regulatorFunctionToRun.length;reg++) {
         window[regulatorFunctionToRun[reg]]();
     }
 }
@@ -82,6 +80,7 @@ Remove a function from the regulator - must do if not needed - removeFromRegulat
 function removeFromRegulator(stringToRemove) {
     regulatorFunctionToRun = regulatorFunctionToRun.filter(v => v !== stringToRemove);
 }
+
 // Initial Data
 var appVersion = "v1";
 // test site: https://rtp-app.divinitycomputing.com
@@ -99,11 +98,14 @@ Check if user is already logged in
 
 */
 function checkLogin() {
+    if (!idc("noInternet"))
+        return false;
+    
     if(getCookie("rememberUser") == "true") {
         toggleElement(idc("cookieToggle"),true);
     }
     
-    if (hasCookie("user") && hasCookie("pass") && hasCookie("stringUserData") && getCookie("rememberUser") == "true") {
+    if (hasCookie("user") && hasCookie("pass") && hasCookie("stringUserData") && getCookie("rememberUser") == "true" && connectionStatus.connectionChanged == true) {
         idc("noInternet").setAttribute("noConnection","false");
         connectionStatus.connectionChanged = false;
         updateUserFiles();
@@ -240,8 +242,9 @@ function loginOrPasswordReset(ev) {
         let formL = idc("login").getElementsByTagName("input");
 
         if (passwordCheck.hasAttribute("prevPhrase")) {
-            ajaxRequestToMake(urlInit + "/" + appVersion + "/fgpw",
+            ajaxRequestToMake(urlInit + "/" + appVersion + "/fgpw.php",
                 function (response) {
+                console.log(response);
                     buttonE.removeAttribute("clicked");
                     let jsRes = JSON.parse(response);
                     if (jsRes.response === "success") {
@@ -257,8 +260,9 @@ function loginOrPasswordReset(ev) {
         } else {
             setCookie("user", formL[0].value);
             setCookie("pass", formL[1].value);
-            ajaxRequestToMake(urlInit + "/" + appVersion + "/login",
+            ajaxRequestToMake(urlInit + "/" + appVersion + "/login.php",
                 function (response) {
+                console.log(response);
                     buttonE.removeAttribute("clicked");
                     let jsRes = JSON.parse(response);
                     if (jsRes.response === "success") {
@@ -385,7 +389,6 @@ function getUserDataCookie() {
         return null;
 }
 function isAdmin() {
-    console.log(getUserDataCookie());
     if (getUserDataCookie()) {
         if (getUserDataCookie()["userlevel"] === "100")
             return true;
@@ -397,13 +400,16 @@ function isAdmin() {
 // Menu
 //
 function logout() {
+    regulatorFunctionToRun = ["checkConnection"];
+    connectionStatus.connectionChanged = true;
     ajaxRequestGet("pages/login.html",
         function (response) {
         idc("centralHub").innerHTML = response;
             delete_cookie("user");
             delete_cookie("pass");
+        checkLogin();
         },
-        "");
+    "");
 }
 
 /* 
@@ -415,7 +421,7 @@ Display Standard menu
 function defaultMenu() {
     let navString = "";
     let navAdd = basicMenuList;
-    for (i = 0; i < navAdd.length; i++) {
+    for (var i = 0; i < navAdd.length; i++) {
         let tArg = "";
         if("function" in navAdd[i])
             tArg = "," + navAdd[i].function;
@@ -431,15 +437,17 @@ FUNCTION
 Display all menus
 
 */
-function adminMenu() {
+function adminMenuCreation() {
     if (isAdmin()) {
         let navString = "";
         let navAdd = adminMenuList;
-        for (i = 0; i < navAdd.length; i++) {
+        for (var i = 0; i < navAdd.length; i++) {
             navString += "<li onclick='openApiPage(\"" + navAdd[i].link + "\",this)'><span>" + navAdd[i].name + "</span>" + '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" mlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"	 width="510px" height="510px" viewBox="0 0 510 510" style="enable-background:new 0 0 510 510;" xml:space="preserve">		<path d="M255,0C114.75,0,0,114.75,0,255s114.75,255,255,255s255-114.75,255-255S395.25,0,255,0z M255,306L153,204h204L255,306z"/></svg>' + "</li>";
         }
         idc("navMenu").innerHTML += navString;
     }
+    else {
+return false;}
 }
 
 //
@@ -452,7 +460,6 @@ function toggleMobile(ele) {
     let tl = new TimelineMax();
     
     if(getWidth() < 800) {
-        console.log("width is small enough");
         if (ele.getAttribute("active") == "true") {
             ele.setAttribute("active", "false");
             tl.fromTo(pLinks, 0.3, {
@@ -490,7 +497,7 @@ function getMainDashboard() {
     ajaxRequestGet("pages/dashboard.html",
         function (response) {
             idc("centralHub").innerHTML = response;
-            adminMenu();
+            adminMenuCreation();
             defaultMenu();
 
             if (isAdmin()) {
@@ -546,7 +553,6 @@ function successMessage(messageSuc, msgType) {
     setTimeout(function () {
         let sucWidth = sucMessage.clientWidth;
         let sucHeight = sucMessage.clientHeight;
-        console.log(sucWidth);
         
     if(msgType == 0) {
         
@@ -603,7 +609,6 @@ function errorMessage(messageSuc, msdType) {
     setTimeout(function () {
         let sucWidth = sucMessage.clientWidth;
         let sucHeight = sucMessage.clientHeight;
-        console.log(sucWidth);
         TweenMax.fromTo(sucMessage, 0.35, {
             x: "0%",
             opacity: 1,
@@ -627,7 +632,7 @@ function errorMessage(messageSuc, msdType) {
 
 function openPage(page, el,followFunc) {
     if (el) {
-        for (i = 0; i < idc("navMenu").children.length; i++) {
+        for (var i = 0; i < idc("navMenu").children.length; i++) {
             idc("navMenu").children[i].className = "";
         }
         el.className = "active";
@@ -659,7 +664,7 @@ function openPage(page, el,followFunc) {
 
 function openApiPage(page, el, getR) {
     if (el) {
-        for (i = 0; i < idc("navMenu").children.length; i++) {
+        for (var i = 0; i < idc("navMenu").children.length; i++) {
             idc("navMenu").children[i].className = "";
         }
         el.className = "active";
@@ -685,7 +690,6 @@ function openApiPage(page, el, getR) {
         onComplete: function () {
             if (!getR)
                 getR = "";
-            console.log(urlInit + "/" + appVersion + "/pages/" + page + "/index.php");
             ajaxRequestGet(urlInit + "/" + appVersion + "/pages/" + page + "/index.php" + getR,
                 function (response) {
                     idc("main").innerHTML = response;
@@ -797,7 +801,7 @@ function closeOverlay(elId, type) {
 function getTestIntruments() {
     if(hasCookie("instruments")) {
         var instrumentsCookie = JSON.parse(getCookie("instruments"));
-        for(a = 0; a < instrumentsCookie.length;a++) (function(a){ 
+        for(var a = 0; a < instrumentsCookie.length;a++) (function(a){ 
 
             idc("addInstru").children[0].value = instrumentsCookie[a][0];
             idc("addInstru").children[1].value = instrumentsCookie[a][1];
@@ -817,7 +821,7 @@ function getTestIntruments() {
             instruSect.appendChild(instruData);
 
             var instruInputs = idc("addInstru").getElementsByTagName("input");
-            for(i = 0; i < instruInputs.length;i++) (function(i){ 
+            for(var i = 0; i < instruInputs.length;i++) (function(i){ 
                 var instruData = document.createElement("p");
                 var instruDataKey = document.createElement("span");
                 var instruDataValue = document.createElement("span");
@@ -852,7 +856,7 @@ function addInstrument() {
     instruSect.appendChild(instruData);
     
     var instruInputs = idc("addInstru").getElementsByTagName("input");
-    for(i = 0; i < instruInputs.length;i++) {
+    for(var i = 0; i < instruInputs.length;i++) {
         var instruData = document.createElement("p");
         var instruDataKey = document.createElement("span");
         var instruDataValue = document.createElement("span");
@@ -879,10 +883,10 @@ function updateLocalInstruments() {
     
     var instruObjs = idc("testInstruments").children;
     
-    for(i = 0; i < instruObjs.length;i++) {
+    for(var i = 0; i < instruObjs.length;i++) {
         var instruSingle = [];
         var instruObjsPs = instruObjs[i].getElementsByTagName("p");
-        for(a = 0; a < instruObjsPs.length;a++) {
+        for(var a = 0; a < instruObjsPs.length;a++) {
             instruSingle.push(instruObjsPs[a].children[1].innerHTML);
         }
         instruList.push(instruSingle);
@@ -896,11 +900,10 @@ function getOwnJobs() {
     
         ajaxRequestToMake(urlInit + "/" + appVersion + "/data/getJobs.php",
             function (response) {
-            console.log("RES" + response);
                 let jsRes = JSON.parse(response);
                 if (jsRes.response === "success") {
-                    setCookie("joblist", response);
                     loadInJobsStandardUser(jsRes);
+                    setCookie("joblist", response);
                 } else {
                     errorMessage("Could not get job data - please check your internet");
                 }
@@ -909,7 +912,6 @@ function getOwnJobs() {
             });
 }
 function startJobSearch() {
-    console.log("check connection start");
     if(connectionStatus.connected == true) {
         getOwnJobs();
     }
@@ -929,7 +931,7 @@ function startJobSearch() {
 function loadInJobsStandardUser(jobData) {
     if("jobData" in jobData) {
         
-    for(i = 0; i < jobData["jobData"].length;i++) (function(i){ 
+    for(var i = 0; i < jobData["jobData"].length;i++) (function(i){ 
         var jrD = document.createElement("article");
         jrD.setAttribute("cid",jobData["jobData"][i].clientid[0]);
         jrD.setAttribute("aid",jobData["jobData"][i].jobid);
@@ -938,8 +940,12 @@ function loadInJobsStandardUser(jobData) {
             openJob(jobData["jobData"][i].jobid);
         }
         
-        var dataToAdd = '<figure>                <img src="' + jobData["jobData"][i].clientid[7] + '">            </figure><div  class="title">';
-        if("jobid" in jobData["jobData"][i]) 
+        var jobImage = "assets/image.svg";
+        if(jobData["jobData"][i].clientid[7] != "")
+            jobImage = jobData["jobData"][i].clientid[7] ;
+        
+        var dataToAdd = '<figure>                <img src="' + jobImage + '"/></figure><div  class="title">';
+        if("jobid" in jobData["jobData"][i])  
             dataToAdd += '<span>'+ jobData["jobData"][i].jobid  +'</span><span>'+ jobData["jobData"][i].clientid[1] + '</span>';
         if("creationdate" in jobData["jobData"][i]) 
             dataToAdd += '<date>'+ jobData["jobData"][i].creationdate  +'</date>';
@@ -995,7 +1001,8 @@ function jobGroupSet(num) {
     var jobScroll = idc("jobScroll").getElementsByTagName("section");
     
     let tl = new TimelineMax();
-    tl
+    if(idc("addjob")) {
+         tl
         .fromTo(idc("addJob"), 0.35, {
         x: "0%",
         opacity: 1
@@ -1008,7 +1015,7 @@ function jobGroupSet(num) {
         x: "-100%",
         opacity: 0,
         onComplete:function() {
-            for(i = 0; i < jobScroll.length;i++) {
+            for(var i = 0; i < jobScroll.length;i++) {
                 jobScroll[i].className = "hidden";
             }
             
@@ -1027,6 +1034,31 @@ function jobGroupSet(num) {
         opacity: 0
     },{x:"0%",
         opacity: 1});
+    }
+    else {
+         tl.fromTo(jobScroll, 0.35, {
+        x: "0%",
+        opacity: 1
+    }, {
+        x: "-100%",
+        opacity: 0,
+        onComplete:function() {
+            for(var i = 0; i < jobScroll.length;i++) {
+                jobScroll[i].className = "hidden";
+            }
+            
+            jobScroll[num].className = "";
+    TweenMax.fromTo(jobScroll[num], 0.35, {
+        x: "100%",
+        opacity: 0
+    }, {
+        x: "0%",
+        opacity: 1
+    });
+        }
+    },0);
+    }
+   
 }
 
 let jobJS;
@@ -1041,7 +1073,6 @@ function openJob(jobid) {
     };
     if (hasCookie("job" + jobid)) {
         jobJS = JSON.parse(getCookie("job" + jobid));
-        console.log(jobJS);
         loadStep.core = true;
     } else {
         ajaxRequestToMake(urlInit + "/" + appVersion + "/data/single-job.php",
@@ -1063,7 +1094,7 @@ function openJob(jobid) {
             clearInterval(newJob);
             let jobDe = jobJS["jobdetails"];
 
-            for (i = 0; i < jobDe.length; i++) {
+            for (var i = 0; i < jobDe.length; i++) {
                 addDocument(jobDe[i], i, jobJS);
             }
             TweenMax.fromTo("#main", 0.4, {
@@ -1090,14 +1121,111 @@ function openJob(jobid) {
                 loadStep.singlejob = true;
             idc("main").scrollTop = 0;
             
+        ajaxRequestGet("pages/client/changeJobstatus.html",
+            function (jobstat) {
+               setTimeout(function(){ 
+                   idc("clientInfo").innerHTML += jobstat;
+               }, 1000);
+            
+            },
+        "");
+            
+            findAssociatedJobFiles(jobid);
             },
         "");
     }});
 }
+function findAssociatedJobFiles(jid, requestUpload) {
+    
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+        fs.root.getDirectory('project' + jid, { create: true }, function (subDirEntry) {
+            
+             var directoryReader = subDirEntry.createReader();
+            
+            directoryReader.readEntries(function(entries) {
+                for (i=0; i<entries.length; i++)  (function(i){
+               
+          
+                    var imageURI = entries[i].toURL();
+                    if(requestUpload) {
+                        uploadJobfilesToServer(jid, imageURI); 
+                    }
+                    else {
+                        
+                    
+        var fileDetails = document.createElement("div");
+        var filenameAdd = document.createElement("p");
+        filenameAdd.innerHTML = entries[i].name;
+        
+        
+        var image = document.createElement("img");
+        if(imageURI.indexOf('jpg') === -1&& imageURI.indexOf('jpeg') === -1&& imageURI.indexOf('png') === -1&& imageURI.indexOf('webp') === -1) {
+            image = document.createElement("div");
+            image.innerHTML = '<i class="fas fa-file-alt"></i>';
+        }
+        else
+            image.src = imageURI  + '?' + Math.random();
+        var fHub = idc("files-hub");
+        fileDetails.appendChild(image);
+        fileDetails.appendChild(filenameAdd);
+        fHub.appendChild(fileDetails);
+                    }
+                })(i);  
+            },function() {
+                
+            });
+            
+        }, function() {
+            errorMessage("couldn't locate files");
+        });
+    }, 
+    function (e) {
+            console.log("Failed file 3 write: " + e.toString());
+        });
+}
+function uploadJobfilesToServer(fileurl,jid) {
+        var win = function (r) {
+            successMessage(fileurl + "Uploaded");
+}
+
+var fail = function (error) {
+    errorMessage(fileurl + " couldn't be uploaded");
+}
+
+var options = new FileUploadOptions();
+options.fileKey = "file";
+options.fileName = fileurl;
+options.mimeType = "text/plain";
+
+var params = {};
+params.jobid = jid;
+
+options.params = params;
+
+var ft = new FileTransfer();
+ft.upload(fileURL, encodeURI(urlInit + "/" + appVersion + "/update/job-file-upload.php"), win, fail, options);
+}
+function jobStatusChange(el) {
+    var JobChangeE = idc("JobChange");
+    var jobIdS = idc("viewJob").getAttribute("jobid");
+    ajaxRequestToMake(urlInit + "/" + appVersion + "/update/job-stage.php",
+        function (ares) {
+            let resJs = JSON.parse(ares);
+            if (resJs.response == "success") {
+                openjob(jobIdS);
+                successMessage("Reloading job");
+            } else {
+                errorMessage("Status not updated");
+            }
+        }, {
+            stage: JobChangeE.value,
+            job: jobIdS
+    });
+}
 function jobMenu(menuSelected) {
     var jobMenuC = document.getElementsByClassName("jobMenu");
     var jobMenuOptions = idc("jobMenu").children;
-      for(i = 0; i < jobMenuOptions.length;i++) {
+      for(var i = 0; i < jobMenuOptions.length;i++) {
           jobMenuOptions[i].className = "";
       }  
     jobMenuOptions[menuSelected].className = "active";
@@ -1105,7 +1233,7 @@ function jobMenu(menuSelected) {
         opacity: 0,
         x: "-100%",
         onComplete: function () {
-          for(i = 0; i < jobMenuC.length;i++) {
+          for(var i = 0; i < jobMenuC.length;i++) {
               jobMenuC[i].className = "jobMenu hidden";
           }  
             jobMenuC[menuSelected].className = " jobMenu";
@@ -1138,10 +1266,13 @@ function openFileAdd(fileAddType) {
         findLocalJobFiles();
     }
     else if(fileAddType == 1) {
-        
+        // when google drive is ready
     }
     else if(fileAddType == 2) {
         decideJobPictures();
+    }
+    else if(fileAddType == 2) {
+        decideJobPictures(true);
     }
 }
 /* find local files */ 
@@ -1160,17 +1291,26 @@ function findLocalJobFiles() {
 }
 
 /* upload job files */
-function decideJobPictures() {
+function decideJobPictures(galleryFocus) {
     console.log(devicePlatform);
     if(devicePlatform == null) {
         portalJobFileUpload("/update/job-file-upload.php");
     }
     else {
-        navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
-            quality: 100,
-            destinationType: destinationType.FILE_URI,
-            sourceType: pictureSource.PICTURE
-        });
+        if(galleryFocus) {
+            navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
+                quality: 100,
+                destinationType: destinationType.FILE_URI,
+                sourceType: pictureSource.PHOTOLIBRARY
+            });
+        }
+        else {
+            navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
+                quality: 100,
+                destinationType: destinationType.FILE_URI,
+                sourceType: pictureSource.PICTURE
+            });
+        }
     }
 }
 function portalJobFileUpload(upURL) {
@@ -1185,8 +1325,6 @@ function portalJobFileUpload(upURL) {
             uploadJobFile(files[i].name,"alternativefile");
         })(i);
     }
-    
-    
 }
 function uploadJobFile(imageURI,AltFile) {
     try { 
@@ -1196,7 +1334,8 @@ function uploadJobFile(imageURI,AltFile) {
         
         
         var image = document.createElement("img");
-        if(AltFile) {
+        if(AltFile
+           && imageURI.indexOf('jpg') === -1&& imageURI.indexOf('jpeg') === -1&& imageURI.indexOf('png') === -1&& imageURI.indexOf('webp') === -1) {
             image = document.createElement("div");
             image.innerHTML = '<i class="fas fa-file-alt"></i>';
         }
@@ -1208,19 +1347,106 @@ function uploadJobFile(imageURI,AltFile) {
         fHub.appendChild(fileDetails);
         if(idc("viewJob")) {
             readFile(imageURI, function(readD) {
-                writeTofile(imageURI.substr(imageURI.lastIndexOf('/') + 1),readD,function() {
+               console.log(readD); 
+                
+               var fileNameSaved = imageURI.substr(imageURI.lastIndexOf('/') + 1); writeTofile(fileNameSaved,readD,function() {
                     successMessage("File added ready to send");
 
                 },"project" + idc("viewJob").getAttribute("jobid"));
-            });
+                
+                var jid = idc("viewJob").getAttribute("jobid");
+                
+                updateFileJobJS(jid, fileNameSaved);
+                
+            successMessage("Job file ready for submit");
+        });
         }
-        successMessage("Job file uploaded");
     }
     catch(error) {
         errorMessage("Job file Upload Failed");
     }
 }
+function updateFileJobJS(jid, filesToAdd) {
+    var localjobD = JSON.parse(getCookie("job" + jid));
+    console.log(localjobD);
+    
+    var currentFiles = [];
+    if(localjobD.collectedfiles)  {
+        currentFiles = currentFiles.collectedfiles;
+    }
+        currentFiles.push(filesToAdd);
+        localjobD.collectedfiles = currentFiles;
+    
+    setCookie("job" + jid, JSON.stringify(localjobD));
+    console.log(localjobD);
+}
+/* upload client logo */
+function getLogo() {
+    if(devicePlatform == null) {
 
+        openPortalPhotoUpload("/update/client-logo.php");
+    }
+    else {
+        navigator.camera.getPicture(uploadClientLogo, uploadClientLogoError, {
+            quality: 70,
+            destinationType: destinationType.FILE_URI,
+            sourceType: pictureSource.PHOTOLIBRARY
+        });
+    }
+}
+function openPortalPhotoUpload(upURL) {
+    var inputFile = document.createElement("input");
+    inputFile.setAttribute("type","file");
+    inputFile.click();
+    inputFile.onchange = function() {
+        var formaData = new FormData();
+        formaData.append('clientid', idc("addUser").getAttribute("clientid")); // string
+        formaData.append('file[]', inputFile.files[0]);
+
+        serverImageUpload(inputFile,urlInit + "/" + appVersion + upURL, formaData);
+    }
+}
+function uploadClientLogo(imageURI) {
+    if(idc("addUser").hasAttribute("clientid")) {
+        try { 
+            var image = idc('companyLogo').getElementsByTagName("img")[0];
+            image.src = imageURI  + '?' + Math.random();
+
+            var options = new FileUploadOptions();
+            options.fileKey = "file";
+            options.fileName = imageURI.substr(imageURI.lastIndexOf('/') + 1);
+            options.mimeType = "image/jpeg";
+
+            var params = new Object();
+            params.clientid = idc("addUser").getAttribute("clientid");
+
+            options.params = params;
+            options.chunkedMode = false;
+
+            var ft = new FileTransfer();
+            ft.upload(imageURI, urlInit + "/" + appVersion + "/update/client-logo.php",
+            function (result) {
+                successMessage("image uploaded");
+                alert(JSON.stringify(result));
+            },
+            function (error) {
+                errorMessage("Image Upload Failed");
+                alert(error)
+            }, options);
+        }
+        catch(error) {
+          alert(error);
+        }
+       
+    }
+    else {
+        errorMessage("Please reload the page");
+    }
+}
+
+function uploadClientLogoError(err) {
+    errorMessage(err);
+}
 function onErrorUploadFail(err) {
     errorMessage(err);
 }
@@ -1228,14 +1454,13 @@ function loadClientData(jobDetails) {
     if(idc("clientInfo")) {
         var clientInfo = idc("clientInfo");
         var clientJs = jobDetails.client[0];
-        console.log(clientJs);
         if(clientJs.companylogo)
             clientInfo.innerHTML = '<img src="'+ clientJs.companylogo +'" />';
         if(clientJs.Company)
             clientInfo.innerHTML += '<p><span>Company:</span> <span>'+ clientJs.Company +'</span></p>';
         if(clientJs.address) {
             var streetShort = replaceAll(clientJs.address," ","+");
-            clientInfo.innerHTML += '<p class="address"><span>Address: </span><span><a href="0,0?q='+ streetShort +'"><i class="fas fa-map-marked-alt"></i>'+ clientJs.address +'</a></span></p>';
+            clientInfo.innerHTML += '<p class="address"><span>Address: </span><span><a href="geo:0,0?q='+ streetShort +'"><i class="fas fa-map-marked-alt"></i>'+ clientJs.address +'</a></span></p>';
         }
         if(clientJs.contact)
             clientInfo.innerHTML += '<p><span>Contact: </span><span>'+ clientJs.contact +'</span></p>';
@@ -1254,31 +1479,31 @@ function returnDocFilename(docFind) {
 
 function addDocument(docFind, Inter, fullJson) {
     let checkInternal = false;
-    for (i = 0; i < avaliableDocs.length; i++) {
+    for (var i = 0; i < avaliableDocs.length; i++) {
         if (docFind.docid == avaliableDocs[i].docid && docFind.rev == avaliableDocs[i].rev)
             checkInternal = true;
     }
-
+    console.log("find document");
+    console.log(docFind);
+    console.log(Inter + returnDocFilename(docFind));
     if (checkInternal) {
         console.log("checking internal");
         readFile(Inter + returnDocFilename(docFind), function (results) {
-            console.log(fullJson);
             addDocRow(docFind, Inter, fullJson, results);
         });
     } else {
         console.log("checking server");
         ajaxRequestGet(urlInit + "/" + appVersion + "/documents/" + docFind.docid + "/" + docFind.data + docFind.rev + ".json",
-            function (response) {
-                writeTofile(Inter + returnDocFilename(docFind), response, function () {
+            function (documentServerFind) {
+                writeTofile(Inter + returnDocFilename(docFind), documentServerFind, function () {
                     if (hasCookie("avaliableDocs")) {
                         let availDocs = JSON.parse(getCookie("avaliableDocs"));
                         availDocs.push(docFind);
                         setCookie("avaliableDocs", JSON.stringify(availDocs));
                     } else {
                         setCookie("avaliableDocs", "[" + JSON.stringify(docFind) + "]");
-                        setCookie("avaliableDocs", "[" + JSON.stringify(docFind) + "]");
                     }
-                    addDocRow(docFind, Inter, fullJson, response);
+                    addDocRow(docFind, Inter, fullJson, documentServerFind);
                 });
         }, true);
     }
@@ -1291,7 +1516,7 @@ function addDocRow(docFind, Inter, fullJson, results) {
     docNew.className = "taskBlock";
     docNew.innerHTML = "<div><h3>" + docFind.rev + " - " + replaceAll(docFind.data,"-"," ") + "</h3></div>";
 
-    for (i = 0; i < jsonRow["pages"].length; i++)(function (i) {
+    for (var i = 0; i < jsonRow["pages"].length; i++)(function (i) {
         var page = document.createElement("div");
         page.className = "page";
         page.innerHTML = (i + 1) + ". " + jsonRow["pages"][i][0]["page"];
@@ -1332,7 +1557,6 @@ function startDoc(fullDocData, pageNum, Inter, fullJson) {
         if (response == "" || response == null) {
             console.log("Create internal doc Cookie: " + docCookie);
             writeTofile(docCookie, fullDocData, function () {
-                console.log("file write to");
                 docJSON = JSON.parse(fullDocData);
                 docJSON.file = docCookie;
                 loadFromJson(pageNum);
@@ -1347,10 +1571,13 @@ function startDoc(fullDocData, pageNum, Inter, fullJson) {
 }
 
 var hadChange = false;
+var savedInterval;
 function loadFromJson(pageNum) {
-    let canUpdate = false;
-    let readyToUpdate = false;
-    var savedInterval = setInterval(function () {
+    if(savedInterval)
+        clearInterval(savedInterval);
+    var canUpdate = false;
+    var readyToUpdate = false;
+    savedInterval = setInterval(function () {
         canUpdate = true;
         if (hadChange) {
             console.log("Had Change");
@@ -1367,12 +1594,16 @@ function loadFromJson(pageNum) {
             readyToUpdate = false;
         }
     }, 1500);
+    
     idc("documentPage").innerHTML = "";
     for (i = 1; i < docJSON.pages[pageNum].length; i++)(function (i) {
         docElementLoadIn([pageNum, i],idc("documentPage"));
     })(i);
     
-         
+        TweenMax.set(idc("documentPage"),{
+            x: "100%",
+            opacity: 0
+        });
     setTimeout(function () {
         TweenMax.fromTo(idc("documentPage"), 0.35, {
             x: "100%",
@@ -1445,7 +1676,7 @@ function validatePage(successF,failedF) {
     
     var failedElements = [];
     var dpVal = idc("documentPage").getElementsByClassName("textinput");
-    for(i = 0;i < dpVal.length;i++) (function(i){
+    for(var i = 0;i < dpVal.length;i++) (function(i){
         if(dpVal[i].getAttribute("required")) {
             var dpValidate = dpVal[i].getAttribute("required");
             var inputdp = dpVal[i].getElementsByTagName("input")[0];
@@ -1471,7 +1702,7 @@ function validatePage(successF,failedF) {
         }
     })(i);
     var dpVal = idc("documentPage").getElementsByClassName("textarea");
-    for(i = 0;i < dpVal.length;i++) (function(i){
+    for(var i = 0;i < dpVal.length;i++) (function(i){
         if(dpVal[i].getAttribute("required")) {
             var dpValidate = dpVal[i].getAttribute("required");
             var inputdp = dpVal[i].getElementsByTagName("textarea")[0];
@@ -1500,17 +1731,17 @@ function validatePage(successF,failedF) {
         }
     })(i);
     var dpVal = idc("documentPage").getElementsByClassName("radio");
-    for(i = 0;i < dpVal.length;i++) (function(i){
+    for(var i = 0;i < dpVal.length;i++) (function(i){
         if(dpVal[i].getAttribute("required")) {
             var dpValidate = dpVal[i].getAttribute("required");
             var inputdp = dpVal[i].getElementsByTagName("input");
             var checkboxdp = dpVal[i].getElementsByClassName("checkbox");
             var filledIn = false;
-    for(a = 0;a < inputdp.length;a++) (function(a){
+    for(var a = 0;a < inputdp.length;a++) (function(a){
         if(inputdp[a].value != "")
             filledIn = true;
     })(a);
-    for(b = 0;b < checkboxdp.length;b++) (function(b){
+    for(var b = 0;b < checkboxdp.length;b++) (function(b){
         if(checkboxdp[b].getAttribute("active") == "true")
             filledIn = true;
     })(b);
@@ -1523,7 +1754,7 @@ function validatePage(successF,failedF) {
         }
     })(i);
     var dpVal = idc("documentPage").getElementsByClassName("checkbox");
-    for(i = 0;i < dpVal.length;i++) (function(i){
+    for(var i = 0;i < dpVal.length;i++) (function(i){
         if(dpVal[i].getAttribute("required")) {
             var dpValidate = dpVal[i].getAttribute("required");
             if(dpVal[i].hasAttribute("active")) {
@@ -1533,7 +1764,7 @@ function validatePage(successF,failedF) {
         }
     })(i);
     var dpVal = idc("documentPage").getElementsByClassName("signature");
-    for(i = 0;i < dpVal.length;i++) (function(i){
+    for(var i = 0;i < dpVal.length;i++) (function(i){
         if(dpVal[i].getAttribute("required")) {
             if(dpVal[i].getElementsByTagName("img")[0].src == "") {
                 dpVal[i].setAttribute("error", "A signature needs to be entered");
@@ -1542,14 +1773,14 @@ function validatePage(successF,failedF) {
         }
     })(i);
     var dpVal = idc("documentPage").getElementsByClassName("table");
-    for(i = 0;i < dpVal.length;i++) (function(i){
+    for(var i = 0;i < dpVal.length;i++) (function(i){
         if(dpVal[i].getAttribute("required")) {
             var valList = dpVal[i].getAttribute("required").split(",");
             
-    for(a = 0;a < valList.length;a++) (function(a){
+    for(var a = 0;a < valList.length;a++) (function(a){
         if(valList[a] == "lim") {
             var dpValTR = dpVal[i].getElementsByTagName("tr");
-            for(b = 0;b < dpValTR.length;b++) (function(b){
+            for(var b = 0;b < dpValTR.length;b++) (function(b){
                 if(dpValTR[b].getElementsByTagName("td").length == valList.length) {
                     if(dpValTR[b].getElementsByTagName("td")[a].getElementsByTagName("input").length == 1) {
                         var inputTD = dpValTR[b].getElementsByTagName("td")[a].getElementsByTagName("input")[0];
@@ -1613,7 +1844,6 @@ function validatePage(successF,failedF) {
             failedElements[numLe].className += " ehighlight";
             documentErrors.children[0].innerHTML = (numLe + 1) + "/" + failedElements.length;
             documentErrors.setAttribute("num",numLe);
-            console.log(failedElements[numLe].offsetTop);
         if(failedElements[numLe].hasAttribute("error"))
             specificError.innerHTML = failedElements[numLe].getAttribute("error") ;
             if(failedElements[numLe].offsetTop == 0)
@@ -1631,8 +1861,9 @@ function validatePage(successF,failedF) {
 }
 function docElementLoadIn(loc, elParent) {
     var elLoad = docJSON.pages;
+    console.log(elLoad);
     var hasTable = false;
-    for (a = 0; a < loc.length; a++) {
+    for (var a = 0; a < loc.length; a++) {
         elLoad = elLoad[loc[a]];
         if(elLoad != null) {
             if(!Array.isArray(elLoad)) {
@@ -1695,6 +1926,7 @@ function docElementLoadIn(loc, elParent) {
             if ("value" in elLoad) {
                 randomID = elLoad.value;
                 readFile(randomID, function (response) {
+                console.log("sig has read " + response);
                     sigImg.src = response;
 
                 });
@@ -1760,34 +1992,38 @@ function docElementLoadIn(loc, elParent) {
                 if(textinput.value == "nn" || textinput.value == "Nn") {
                     textinput.value = "N/A";
                 }
-                 if(genEl.parentNode.className == "radio") {
+                
+                if ("update" in elLoad) {
+                    updateComplexAdditional(elLoad.update);
+                } 
+                else {
+                    
+                    if(genEl.parentNode.className == "radio") {
                     console.log(genEl.parentNode.className);
                         var allInp = genEl.parentNode.getElementsByTagName("input");
                         
-                        for(f = 0; f < allInp.length;f++) {
+                        for(var f = 0; f < allInp.length;f++) {
                             if(allInp[f] != textinput)
                             allInp[f].value = "";
                         }
                         var allInpt = genEl.parentNode.getElementsByTagName("textarea");
                         
-                        for(f = 0; f < allInpt.length;f++) {
+                        for(var f = 0; f < allInpt.length;f++) {
                             allInpt[f].value = "";
                         }
                         var allInpBV = genEl.parentNode.getElementsByClassName("checkbox");
-                        for(f = 0; f < allInpBV.length;f++) {
+                        for(var f = 0; f < allInpBV.length;f++) {
                             if(allInpBV[f].hasAttribute("active"))
                             allInpBV[f].click();
                         }
-                }
-                if ("update" in elLoad) {
-                    updateComplexAdditional(elLoad.update);
-                }
-                else {
-                    if(hasTable == false) {
-                        docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
                     }
                     else {
-                        updateInTable(genEl);
+                        if(hasTable == false) {
+                            docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
+                        }
+                        else {
+                            updateInTable(genEl);
+                        }
                     }
                 }
             }
@@ -1864,23 +2100,21 @@ function docElementLoadIn(loc, elParent) {
                 genEl.setAttribute("required", elLoad.required);
             }
             input.onclick = function() {
-                    console.log("clicked");
                 
                 if(genEl.parentNode.className == "radio") {
                     console.log(genEl.parentNode.className);
                         var allInp = genEl.parentNode.getElementsByTagName("input");
                         
-                        for(f = 0; f < allInp.length;f++) {
+                        for(var f = 0; f < allInp.length;f++) {
                             allInp[f].value = "";
                         }
                         var allInpt = genEl.parentNode.getElementsByTagName("textarea");
                         
-                        for(f = 0; f < allInpt.length;f++) {
+                        for(var f = 0; f < allInpt.length;f++) {
                             allInpt[f].value = "";
                         }
                         var allInpBV = genEl.parentNode.getElementsByClassName("checkbox");
-                    console.log(allInpBV);
-                        for(f = 0; f < allInpBV.length;f++) {
+                        for(var f = 0; f < allInpBV.length;f++) {
                             if(allInpBV[f].hasAttribute("active"))
                             allInpBV[f].click();
                         }
@@ -1939,7 +2173,7 @@ function docElementLoadIn(loc, elParent) {
                 genEl.setAttribute("required", elLoad.required);
             }
             var sOptions = elLoad.options;
-            for(s = 0; s < sOptions.length;s++) {
+            for(var s = 0; s < sOptions.length;s++) {
                 var option = document.createElement("option");
                 option.value = sOptions[s].option;
                 option.innerHTML = sOptions[s].option;
@@ -1964,7 +2198,7 @@ function docElementLoadIn(loc, elParent) {
             locN.push("value");
             genEl = document.createElement("select");
             var limOp = ["N/A","Lim","✔"];
-            for(r = 0; r < limOp.length;r++) {
+            for(var r = 0; r < limOp.length;r++) {
                 var option = document.createElement("option");
                 option.value = limOp[r];
                 option.innerHTML = limOp[r];
@@ -1972,7 +2206,7 @@ function docElementLoadIn(loc, elParent) {
             }
         elParent.onclick = function() {
             var selIndex = 2;
-            for(d = 0; d < genEl.children.length;d++) {
+            for(var d = 0; d < genEl.children.length;d++) {
                 if(genEl.value == genEl.children[d].getAttribute("value")) {
                     selIndex = d;
                 }
@@ -1985,7 +2219,7 @@ function docElementLoadIn(loc, elParent) {
             docJSON.pages = jsonUpdate(docJSON.pages, locN, genEl.value);
         }
             if("value" in elLoad) {
-                for(d = 0; d < genEl.children.length;d++) {
+                for(var d = 0; d < genEl.children.length;d++) {
                     if(elLoad.value == genEl.children[d].getAttribute("value")) {
                         genEl.selectedIndex = d;
                     }
@@ -2006,7 +2240,7 @@ function docElementLoadIn(loc, elParent) {
                 genEl.appendChild(label);
             }
             var sOptions = elLoad.options;
-            for(b = 0; b < sOptions.length;b++) (function(b){ 
+            for(var b = 0; b < sOptions.length;b++) (function(b){ 
                 let locNB = [b];
                 var locNBC = locN.concat(locNB);
                 docElementLoadIn(locNBC,genEl);
@@ -2018,7 +2252,7 @@ function docElementLoadIn(loc, elParent) {
             var ulL = document.createElement("ul");
 
             var sOptions = elLoad.list;
-            for(b = 0; b < sOptions.length;b++) {
+            for(var b = 0; b < sOptions.length;b++) {
                 var ulLEl = document.createElement("li");
                 ulLEl.innerHTML = sOptions[b].text;
                 ulL.appendChild(ulLEl);
@@ -2034,7 +2268,7 @@ function docElementLoadIn(loc, elParent) {
 
             var keyList = elLoad.keylist;
 
-            for(b = 0;b < keyList.length;b++) {
+            for(var b = 0;b < keyList.length;b++) {
                 var pT = document.createElement("p");
                 pT.innerHTML = "<span>"+ keyList[b].title + ": </span>" + keyList[b].text;
                 genEl.appendChild(pT);
@@ -2052,7 +2286,7 @@ function docElementLoadIn(loc, elParent) {
             }
             var sOptions = elLoad.group;
             
-            for(let m = 0; m < sOptions.length;m++) (function(m){
+            for( let m = 0; m < sOptions.length;m++) (function(m){
                 let locNB = [m];
                 var locNBC = locN.concat(locNB);
                 docElementLoadIn(locNBC,genEl);
@@ -2067,7 +2301,7 @@ function docElementLoadIn(loc, elParent) {
             locN.push("value");
             if(hasCookie("instruments")) {
                 var instrumentsCookie = JSON.parse(getCookie("instruments"));
-                for(a = 0; a < instrumentsCookie.length;a++) (function(a){ 
+                for(var a = 0; a < instrumentsCookie.length;a++) (function(a){ 
           var intruDi = document.createElement("div");
               intruDi.innerHTML += "<p><b>Type</b>" + instrumentsCookie[a][0] + "</p>";      
               intruDi.innerHTML += "<p><b>Make</b>" + instrumentsCookie[a][1] + "</p>";      
@@ -2093,7 +2327,7 @@ function docElementLoadIn(loc, elParent) {
                     var trAdder = document.createElement("tr");
 
                     var simpleAdd = [[]];
-                    for(b = 0; b < tRows.length;b++) (function(b){
+                    for(var b = 0; b < tRows.length;b++) (function(b){
                         var tdHead = document.createElement("td");
                         trHeader.appendChild(tdHead);
                         
@@ -2126,7 +2360,7 @@ function docElementLoadIn(loc, elParent) {
                        var oresults = elLoad.results;
                         simpleAdd = elLoad.results;
                         if(oresults.length != 0) {
-                            for(e = 0; e < oresults[0].length;e++) (function(e){
+                            for(var e = 0; e < oresults[0].length;e++) (function(e){
                                 trAdder.children[e].getElementsByTagName("input")[0].value = "";
                                 trAdder.children[e].getElementsByTagName("input")[0].value = oresults[0][e];
                                 trAdder.children[e].getElementsByTagName("input")[0].oninput = function() {
@@ -2136,14 +2370,14 @@ function docElementLoadIn(loc, elParent) {
                                 }
                             })(e);
                         }
-                        for(e = 1; e < oresults.length;e++) (function(e){
+                        for(var e = 1; e < oresults.length;e++) (function(e){
                             var lastTr = tableG.getElementsByTagName("tr");
                             lastTr = lastTr[lastTr.length - 1];
                             var newTr = lastTr.cloneNode(true);
                             tableG.appendChild(newTr);
                             
                             var newTrInputs = newTr.getElementsByTagName("input");
-                            for(f = 0; f < oresults[e].length;f++) (function(f){
+                            for(var f = 0; f < oresults[e].length;f++) (function(f){
                                 newTrInputs[f].value = "";
                                 newTrInputs[f].value = oresults[e][f];
                                 newTrInputs[f].oninput = function() {
@@ -2168,7 +2402,7 @@ function docElementLoadIn(loc, elParent) {
                         
                         var newTrInputs = newTr.getElementsByTagName("input");
                         var tableNum = tableG.getElementsByTagName("tr").length -2;
-                        for(b = 0; b < newTrInputs.length;b++) (function(b){
+                        for(var b = 0; b < newTrInputs.length;b++) (function(b){
                             newTrInputs[b].oninput = function() {
                                 simpleAdd[tableNum][b] = newTrInputs[b].value;
                                 docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
@@ -2182,17 +2416,18 @@ function docElementLoadIn(loc, elParent) {
                 break;
                 case "complexadditional": 
                    var comsetAtt = "";
-                   for(z = 0; z < locN.length;z++) {
+                   for(var z = 0; z < locN.length;z++) {
                        if(z != 0)
                        comsetAtt += ",";
                        comsetAtt += locN[z];
                    }
                    genEl.setAttribute("compdata",comsetAtt);
-                   locN.push("value");
+                   locN.push("rows");
                    var tRows = elLoad.rows;
                    
                    if("name" in elLoad)
-                       genEl.innerHTML += "<h2>"+ elLoad.name +"</h2>";                        
+                       genEl.innerHTML += "<h2>"+ elLoad.name +"</h2>";  
+                                     
                    
                    var rowData = document.createElement("div");
                    rowData.innerHTML = "<div class='groupHead'><span>1</span>: " + elLoad.name + "</div>";
@@ -2203,10 +2438,19 @@ function docElementLoadIn(loc, elParent) {
                        var rowData2 = rowData.cloneNode(true);
                        rowData2.getElementsByTagName("span")[0].innerHTML = rowData.parentNode.getElementsByClassName("groupRow").length + 1;
                        rowData.parentNode.insertBefore(rowData2,rowData.parentNode.children[rowData.parentNode.children.length - 1]);
+                       
+                       
+                       var rowData2Inputs = rowData2.getElementsByTagName("input");
+                    for(var y = 0; y < rowData2Inputs.length;y++) (function(y){
+                        rowData2Inputs[y].oninput = function() {
+                            updateComplexAdditional(elLoad.name.replace(' ', '-'));
+                        }
+                    })(y);
+                       
                    }
                    addRow.className = "addRow";
                    addRow.innerHTML = "+ row";
-                    for(q = 0; q < tRows.length;q++) (function(q){
+                    for(var q = 0; q < tRows.length;q++) (function(q){
                         let locNB = [q];
                         var locNBC = locN.concat(locNB);
                             docElementLoadIn(locNBC,rowData);
@@ -2214,13 +2458,33 @@ function docElementLoadIn(loc, elParent) {
                     genEl.appendChild(rowData);
                     genEl.appendChild(addRow);
                     genEl.classList.add("complexadd");
+                   
+                   if("value" in elLoad) {
+                       
+                       var complexValues = elLoad.value;
+                        for(var q = 0; q < complexValues.length;q++) (function(q){
+                            addRow.click();
+                        })(q);
+                       var complexInputs = genEl.getElementsByTagName("input");
+                       
+                       
+                       var totalperrow = parseInt(complexInputs.length / complexValues.length);
+                       
+                        for(var q = 0; q < complexValues.length;q++) (function(q){
+                            for(var h = 0; h < complexValues[q].length;h++) (function(h){
+                                let inputCount = (q * totalperrow) + h;
+                                complexInputs[inputCount].value = complexValues[q][h];
+                            })(h);
+                        })(q);
+                   }   
+                   
                     genEl.classList.add(elLoad.name.replace(' ', '-'));
 
                 break;
                 case "simplestep": 
                     locN.push("rows");
                     var tRows = elLoad.rows;
-                    for(y = 0; y < tRows.length;y++) (function(y){
+                    for(var y = 0; y < tRows.length;y++) (function(y){
                         
                         if(tRows[y][0].type == "step") {
                             
@@ -2233,7 +2497,7 @@ function docElementLoadIn(loc, elParent) {
                             if("title" in tRows[y][0])
                                 divA.innerHTML = "<h3>"+ tRows[y][0].title + "</h3>";
                             var groupA = tRows[y][0].step;
-                            for(z = 0; z < groupA.length;z++) (function(z){
+                            for(var z = 0; z < groupA.length;z++) (function(z){
                                 let locNB = [y,0,"step",z];
                                 var locNBC = locN.concat(locNB);
                                 docElementLoadIn(locNBC,divA);
@@ -2271,7 +2535,7 @@ function docElementLoadIn(loc, elParent) {
              TweenMax.set(genElsteps,  {
                  display:"none"
              });
-           for(h = 0; h < genElsteps.length;h++) {
+           for(var h = 0; h < genElsteps.length;h++) {
 
                if(h == activeSlide) {
                     TweenMax.set(genElsteps[activeSlide],  {
@@ -2310,7 +2574,7 @@ function docElementLoadIn(loc, elParent) {
              TweenMax.set(genElsteps,  {
                  display:"none"
              });
-           for(h = 0; h < genElsteps.length;h++) {
+           for(var h = 0; h < genElsteps.length;h++) {
 
                if(h == activeSlide) {
                     TweenMax.set(genElsteps[activeSlide],  {
@@ -2340,9 +2604,9 @@ function docElementLoadIn(loc, elParent) {
             if ("required" in elLoad) {
                 genEl.setAttribute("required", elLoad.required);
             }
-                    for(b = 0; b < tRows.length;b++) (function(b){
+                    for(var b = 0; b < tRows.length;b++) (function(b){
                         var trRow = document.createElement("tr");
-                        for(c = 0; c < tRows[b].length;c++) (function(c){
+                        for(var c = 0; c < tRows[b].length;c++) (function(c){
                             var tdbox = document.createElement("td");
                             if("colspan" in elLoad.rows[b][c])
                                 tdbox.setAttribute("colspan", elLoad.rows[b][c]["colspan"]);
@@ -2359,62 +2623,7 @@ function docElementLoadIn(loc, elParent) {
            }
         break;
     }
-        function updateComplexAdditional(tableName) {
-            var comtMT = document.getElementsByClassName(tableName)[0];
-            var comT = comtMT.getElementsByClassName("groupRow");
-            var tableD = [];
-            for(i = 0; i < comT.length;i++) (function(i){
-                var getInputs = comT[i].getElementsByTagName("input");
-                var rowD = [];
-                for(b = 0; b < getInputs.length;b++) (function(b){
-                    rowD.push(getInputs[b].value);
-                })(b);
-                tableD.push(rowD);
-            })(i);
-            
-            var comtMTlen = comtMT.getAttribute("compdata");
-            var lens = comtMTlen.split(",");
-            lens.push("value");
-            console.log(lens);
-            docJSON.pages = jsonUpdate(docJSON.pages,lens,tableD);
-        }
-        //docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
-    function updateInTable(childE) {
-        let rowDataSet = [];
-        console.log(childE);
-        if(parentD.children) {
-
-            var parentD = parentD.children.length;
-            while(!parentD.className.includes("groupRow")) {
-                console.log(parentD.parentNode);
-                parentD = parentD.parentNode;
-            }
-            var childNum = 0;
-            var cFind = false;
-
-
-                for(i = 0; i <  parentD.children.length;i++) (function(i){ 
-                        if(cFind == false) {
-                            if(childE == element)
-                                cFind == true;
-                            else
-                                childNum++;
-                        }
-                })(i);
-            let parentDchildDivs = parentD.getElementsByTagName("div");
-            for(ac = 0; ac < parentDchildDivs.length;ac++) {
-                if(parentDchildDivs[ac].classList.contains("textinput"))
-                    rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("input")[0].value);
-                else if(parentDchildDivs[ac].classList.contains("select"))
-                    rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("select")[0].value);
-                else if(parentDchildDivs[ac].classList.contains("textarea"))
-                    rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("textarea")[0].value);
-                else if(parentDchildDivs[ac].classList.contains("checkcontainer")) 
-                    rowDataSet.push(parentDchildDivs[ac].getElementsByClassName("checkbox")[0].getAttribute("active"));
-            }
-            docJSON.pages = jsonUpdate(docJSON.pages,hasTable,rowDataSet);
-        }
-    }
+        
     
         
     }
@@ -2435,13 +2644,68 @@ function saveSignature() {
     
     let findToAdd = idc(sigCanV.getAttribute("toadd"));
     findToAdd.getElementsByTagName("img")[0].src = dataPng;
-    console.log("Done>");
     
     writeTofile(sigCanV.getAttribute("toadd"),dataPng,function() {
         console.log("written signature saved");
     });
     
     closeOverlay("signatureCanvas");
+}
+function updateComplexAdditional(tableName) {
+    var comtMT = document.getElementsByClassName(tableName)[0];
+    var comT = comtMT.getElementsByClassName("groupRow");
+    var tableD = [];
+    for(var i = 0; i < comT.length;i++) (function(i){
+        var getInputs = comT[i].getElementsByTagName("input");
+        var rowD = [];
+        for(var b = 0; b < getInputs.length;b++) (function(b){
+            rowD.push(getInputs[b].value);
+        })(b);
+        tableD.push(rowD);
+    })(i);
+
+    var comtMTlen = comtMT.getAttribute("compdata");
+    var lens = comtMTlen.split(",");
+    lens.push("value");
+    console.log("complex thing changed!");
+    docJSON.pages = jsonUpdate(docJSON.pages,lens,tableD);
+}
+        //docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
+function updateInTable(childE) {
+    let rowDataSet = [];
+    console.log(childE);
+        var parentD = childE;
+    if(parentD.children) {
+
+        while(!parentD.className.includes("groupRow")) {
+            console.log(parentD.parentNode);
+            parentD = parentD.parentNode;
+        }
+        var childNum = 0;
+        var cFind = false;
+
+
+        for(var i = 0; i <  parentD.children.length;i++) (function(i){ 
+            if(cFind == false) {
+                if(childE == element)
+                    cFind == true;
+                else
+                    childNum++;
+            }
+        })(i);
+        let parentDchildDivs = parentD.getElementsByTagName("div");
+        for(var ac = 0; ac < parentDchildDivs.length;ac++) {
+            if(parentDchildDivs[ac].classList.contains("textinput"))
+                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("input")[0].value);
+            else if(parentDchildDivs[ac].classList.contains("select"))
+                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("select")[0].value);
+            else if(parentDchildDivs[ac].classList.contains("textarea"))
+                rowDataSet.push(parentDchildDivs[ac].getElementsByTagName("textarea")[0].value);
+            else if(parentDchildDivs[ac].classList.contains("checkcontainer")) 
+                rowDataSet.push(parentDchildDivs[ac].getElementsByClassName("checkbox")[0].getAttribute("active"));
+        }
+        docJSON.pages = jsonUpdate(docJSON.pages,hasTable,rowDataSet);
+    }
 }
 function jsonUpdate(jsToChange, layers,vChange) {
     var jsToChangeN = jsToChange;
@@ -2454,7 +2718,6 @@ function jsonUpdate(jsToChange, layers,vChange) {
         jsToChangeN[layers[0]] = vChange;
     }
     hadChange = true;
-    console.log(hadChange);
     return jsToChangeN;
 }
 function rtpSend() {
@@ -2463,7 +2726,7 @@ function rtpSend() {
     if (rtpSendB.className != "pulse") {
         let filesUploaded = 0;
         rtpSendB.className = "pulse";
-        for (i = 0; i < jobData.jobdetails.length; i++)(function (i) {
+        for (var i = 0; i < jobData.jobdetails.length; i++)(function (i) {
 
             let docCookie = jobData["clientid"] + "-" + jobData["jobid"] + "-" + jobData["jobdetails"][i]["docid"] + "-Rev" + jobData["jobdetails"][i]["rev"];
             
@@ -2489,20 +2752,17 @@ function rtpSend() {
                 
                 var jobDa = JSON.parse(response)["pages"];
                 
-                for(b = 0; b < jobDa.length;b++) (function (b) {
-                     for(c = 0; c < jobDa[b].length;c++) (function (c) {
+                for(var b = 0; b < jobDa.length;b++) (function (b) {
+                     for(var c = 0; c < jobDa[b].length;c++) (function (c) {
                         if("group" in jobDa[b][c] ) {
                             
-                    for(d = 0; d < jobDa[b][c]["group"].length;d++) (function (d) {
+                    for(var d = 0; d < jobDa[b][c]["group"].length;d++) (function (d) {
                         if("type" in jobDa[b][c]["group"][d] && "value" in jobDa[b][c]["group"][d]) {
-                            console.log(jobDa[b][c]["group"][d].type);
                             if(jobDa[b][c]["group"][d].type == "signature") {
-                                console.log(jobDa[b][c]["group"][d].type + " sig GEN" + jobDa[b][c]["group"][d].value);
             readFile(jobDa[b][c]["group"][d].value, function (responseS) {
                 
                 ajaxRequestToMake(urlInit + "/" + appVersion + "/update/jobfile",
                     function (ares) {
-                    console.log(ares);
                         let resJs = JSON.parse(ares);
                         if (resJs.response == "success") {
                         } else {
@@ -2522,6 +2782,7 @@ function rtpSend() {
                 })(b);
             });
         })(i);
+        
     } else {
         errorMessage("sending already in progress");
     }
@@ -2543,7 +2804,6 @@ var AjaxFileUploader = function () {
             else
                 alert(xhr.responseText);
             
-            console.log(xhr.responseText);
         }
     }
         xhr.open("post", uploadUrl, true);
