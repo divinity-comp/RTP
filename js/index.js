@@ -1271,7 +1271,7 @@ function openFileAdd(fileAddType) {
     else if(fileAddType == 2) {
         decideJobPictures();
     }
-    else if(fileAddType == 2) {
+    else if(fileAddType == 3) {
         decideJobPictures(true);
     }
 }
