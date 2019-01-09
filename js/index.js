@@ -1299,15 +1299,15 @@ function decideJobPictures(galleryFocus) {
     else {
         if(galleryFocus) {
             navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
-                quality: 100,
-                destinationType: destinationType.FILE_URI,
+                quality: 50,
+                destinationType: Camera.DestinationType.DATA_URL,
                 sourceType: pictureSource.PHOTOLIBRARY
             });
         }
         else {
             navigator.camera.getPicture(uploadJobFile, onErrorUploadFail, {
-                quality: 100,
-                destinationType: destinationType.FILE_URI,
+                quality: 50,
+                destinationType: Camera.DestinationType.DATA_URL,
                 sourceType: pictureSource.PICTURE
             });
         }
@@ -1339,7 +1339,7 @@ function uploadJobFile(imageURI,AltFile) {
             image.innerHTML = '<i class="fas fa-file-alt"></i>';
         }
         else
-            image.src = imageURI  + '?' + Math.random();
+            image.src = "data:image/jpeg;base64," + imageURI ;
         var fHub = idc("files-hub");
         fileDetails.appendChild(image);
         fileDetails.appendChild(filenameAdd);
