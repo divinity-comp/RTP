@@ -1206,7 +1206,7 @@ var ft = new FileTransfer();
 ft.upload(fileURL, encodeURI(urlInit + "/" + appVersion + "/update/job-file-upload.php"), win, fail, options);
 }
 function jobStatusChange(el) {
-    var JobChangeE = idc("JobChange");
+    var JobChangeE = idc("JobChange").children[0];
     var jobIdS = idc("viewJob").getAttribute("jobid");
     ajaxRequestToMake(urlInit + "/" + appVersion + "/update/job-stage.php",
         function (ares) {
@@ -1334,8 +1334,7 @@ function uploadJobFile(imageURI,AltFile) {
         
         
         var image = document.createElement("img");
-        if(AltFile
-           && imageURI.indexOf('jpg') === -1&& imageURI.indexOf('jpeg') === -1&& imageURI.indexOf('png') === -1&& imageURI.indexOf('webp') === -1) {
+        if(AltFile) {
             image = document.createElement("div");
             image.innerHTML = '<i class="fas fa-file-alt"></i>';
         }
