@@ -1212,7 +1212,7 @@ function jobStatusChange(el) {
         function (ares) {
             let resJs = JSON.parse(ares);
             if (resJs.response == "success") {
-                openjob(jobIdS);
+                openJob(jobIdS);
                 successMessage("Reloading job");
             } else {
                 errorMessage("Status not updated");
