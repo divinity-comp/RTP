@@ -1354,7 +1354,7 @@ function uploadJobFile(imageURI,AltFile) {
                 },"project" + idc("viewJob").getAttribute("jobid"));
                 
                 var jid = idc("viewJob").getAttribute("jobid");
-                
+var fileNameSaved = imageURI.toURL();
                 updateFileJobJS(jid, fileNameSaved);
                 
             successMessage("Job file ready for submit");
