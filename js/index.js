@@ -1184,26 +1184,26 @@ function findAssociatedJobFiles(jid, requestUpload) {
         });
 }
 function uploadJobfilesToServer(fileurl,jid) {
-        var win = function (r) {
-            successMessage(fileurl + "Uploaded");
-}
+    var win = function (r) {
+        successMessage(fileurl + "Uploaded");
+    }
 
-var fail = function (error) {
-    errorMessage(fileurl + " couldn't be uploaded");
-}
+    var fail = function (error) {
+        errorMessage(fileurl + " couldn't be uploaded");
+    }
 
-var options = new FileUploadOptions();
-options.fileKey = "file";
-options.fileName = fileurl;
-options.mimeType = "text/plain";
+    var options = new FileUploadOptions();
+    options.fileKey = "file";
+    options.fileName = fileurl;
+    options.mimeType = "text/plain";
 
-var params = {};
-params.jobid = jid;
+    var params = {};
+    params.jobid = jid;
 
-options.params = params;
+    options.params = params;
 
-var ft = new FileTransfer();
-ft.upload(fileURL, encodeURI(urlInit + "/" + appVersion + "/update/job-file-upload.php"), win, fail, options);
+    var ft = new FileTransfer();
+    ft.upload(fileURL, encodeURI(urlInit + "/" + appVersion + "/update/job-file-upload.php"), win, fail, options);
 }
 function jobStatusChange(el) {
     var JobChangeE = idc("JobChange").children[0];
@@ -1330,12 +1330,12 @@ function uploadJobFile(imageURI,AltFile) {
     try { 
         var fileDetails = document.createElement("div");
         var filenameAdd = document.createElement("p");
-        filenameAdd.innerHTML = imageURI.substr(imageURI.lastIndexOf('/') + 1);
         
         
         var image = document.createElement("img");
         if(AltFile) {
             image = document.createElement("div");
+        filenameAdd.innerHTML = imageURI.substr(imageURI.lastIndexOf('/') + 1);
             image.innerHTML = '<i class="fas fa-file-alt"></i>';
         }
         else
@@ -1345,20 +1345,16 @@ function uploadJobFile(imageURI,AltFile) {
         fileDetails.appendChild(filenameAdd);
         fHub.appendChild(fileDetails);
         if(idc("viewJob")) {
-            readFile(imageURI, function(readD) {
-               console.log(readD); 
+            var jid = idc("viewJob").getAttribute("jobid");
                 
-               var fileNameSaved = imageURI.substr(imageURI.lastIndexOf('/') + 1); writeTofile(fileNameSaved,readD,function() {
-                    successMessage("File added ready to send");
+           var fileNameSaved = imageURI.substr(imageURI.lastIndexOf('/') + 1); writeTofile(fileNameSaved,imageURI,function() {
+                successMessage("File added ready to send");
 
-                },"project" + idc("viewJob").getAttribute("jobid"));
+            },"project" + idc("viewJob").getAttribute("jobid"));
+
+            var fileNameSaved = imageURI.toURL();
+            updateFileJobJS(jid, fileNameSaved);
                 
-                var jid = idc("viewJob").getAttribute("jobid");
-var fileNameSaved = imageURI.toURL();
-                updateFileJobJS(jid, fileNameSaved);
-                
-            successMessage("Job file ready for submit");
-        });
         }
     }
     catch(error) {
