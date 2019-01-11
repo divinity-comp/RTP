@@ -1362,10 +1362,22 @@ function uploadJobFile(imageURI,AltFile) {
             var jid = idc("viewJob").getAttribute("jobid");
                 let r = Math.random().toString(36).substring(7);
            var fileNameSaved = jid + r;
+            
+        if(AltFile) {
+            readFile(imageURI, function(fileD) {
+                writeTofile(fileNameSaved,fileD,function() {
+                    successMessage("File added ready to send");
+
+                },"project" + idc("viewJob").getAttribute("jobid"));
+            });
+        }
+        else {
+            
             writeTofile(fileNameSaved,imageURI,function() {
                 successMessage("File added ready to send");
 
             },"project" + idc("viewJob").getAttribute("jobid"));
+        }
 
             //var fileNameSaved = imageURI.toURL();
             updateFileJobJS(jid, fileNameSaved);
