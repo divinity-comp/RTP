@@ -1125,6 +1125,15 @@ function openJob(jobid) {
             function (jobstat) {
                setTimeout(function(){ 
                    idc("clientInfo").innerHTML += jobstat;
+                   if(jobJS.stage == "complete") {
+                       idc("JobChange").children[0].value = 1;
+                   }
+                   else if(jobJS.stage == "review") {
+                       idc("JobChange").children[0].value = 2;
+                   }
+                   else if(jobJS.stage == "active") {
+                       idc("JobChange").children[0].value = 3;
+                   }
                }, 1000);
             
             },
@@ -1136,7 +1145,11 @@ function openJob(jobid) {
     }});
 }
 function findAssociatedJobFiles(jid, requestUpload) {
-    
+    if(devicePlatform == null) {
+        getAllActiveFiles(jid);
+    }
+    else {
+        
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
         fs.root.getDirectory('project' + jid, { create: true }, function (subDirEntry) {
             
@@ -1182,6 +1195,7 @@ function findAssociatedJobFiles(jid, requestUpload) {
     function (e) {
             console.log("Failed file 3 write: " + e.toString());
         });
+    }
 }
 function uploadJobfilesToServer(fileurl,jid) {
     var win = function (r) {
@@ -1352,8 +1366,8 @@ function uploadJobFile(imageURI,AltFile) {
 
             },"project" + idc("viewJob").getAttribute("jobid"));
 
-            var fileNameSaved = imageURI.toURL();
-            updateFileJobJS(jid, fileNameSaved);
+            //var fileNameSaved = imageURI.toURL();
+            //updateFileJobJS(jid, fileNameSaved);
                 
         }
     }
@@ -1455,7 +1469,11 @@ function loadClientData(jobDetails) {
             clientInfo.innerHTML += '<p><span>Company:</span> <span>'+ clientJs.Company +'</span></p>';
         if(clientJs.address) {
             var streetShort = replaceAll(clientJs.address," ","+");
-            clientInfo.innerHTML += '<p class="address"><span>Address: </span><span><a href="geo:0,0?q='+ streetShort +'"><i class="fas fa-map-marked-alt"></i>'+ clientJs.address +'</a></span></p>';
+            if(devicePlatform == null)
+                streetShort = "https://maps.google.com/?q=" + streetShort;
+            else
+                streetShort = "geo:0,0?q=" + streetShort;
+            clientInfo.innerHTML += '<p class="address"><span>Address: </span><span><a href="'+ streetShort +'" target="_blank"><i class="fas fa-map-marked-alt"></i>'+ clientJs.address +'</a></span></p>';
         }
         if(clientJs.contact)
             clientInfo.innerHTML += '<p><span>Contact: </span><span>'+ clientJs.contact +'</span></p>';
@@ -1920,11 +1938,14 @@ function docElementLoadIn(loc, elParent) {
                 
             if ("value" in elLoad) {
                 randomID = elLoad.value;
-                readFile(randomID, function (response) {
-                console.log("sig has read " + response);
-                    sigImg.src = response;
+                if(devicePlatform != null) {
+                    
+                    readFile(randomID, function (response) {
+                    console.log("sig has read " + response);
+                        sigImg.src = response;
 
-                });
+                    });
+                } 
             }
             let sigButton = document.createElement("button");
                 genEl.appendChild(sigImg);
@@ -2813,7 +2834,6 @@ AjaxFileUploader.IsAsyncFileUploadSupported = function () {
 
 function serverImageUpload(inputFile,serverLoc,params) {
     if(connectionStatus.connected) {
-        
          if (AjaxFileUploader.IsAsyncFileUploadSupported) {
             let ajaxFileUploader = new AjaxFileUploader();
 
@@ -2826,7 +2846,6 @@ function serverImageUpload(inputFile,serverLoc,params) {
                     inputFile.files[0]
                 );
             }
-
         }
     }
 }

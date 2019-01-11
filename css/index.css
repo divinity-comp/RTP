@@ -1607,7 +1607,7 @@ table {
     background: #ffffff;
     color: #000;
 }
-#JobChange select,#JobChange button{
+#JobChange select,#JobChange button {
     width:50%;
     float:left;
     padding:0.5em;
