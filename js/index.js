@@ -1675,9 +1675,12 @@ function loadFromJson(pageNum) {
             
         validatePage(
             function() { 
-                var documentErrors = document.getElementsByClassName("documentErrors")[0];
-                
-                documentErrors.parentNode.removeChild(documentErrors);
+                if(document.getElementsByClassName("documentErrors").length != 0) {
+                    
+                    var documentErrors = document.getElementsByClassName("documentErrors")[0];
+
+                    documentErrors.parentNode.removeChild(documentErrors);
+                }
                 TweenMax.fromTo(idc("documentPage"), 0.35, {
                     x: "0%",
                     opacity: 1

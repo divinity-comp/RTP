@@ -1126,6 +1126,7 @@ button#addJob, button#addUser, button#addClient,.singleClient #addUser button {
     width: 100%;
     font-size:18px;
     font-weight: 400;
+    padding-bottom: 5em;
 }
 #documentPage h3 {
     margin:0;
