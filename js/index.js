@@ -1675,6 +1675,9 @@ function loadFromJson(pageNum) {
             
         validatePage(
             function() { 
+                var documentErrors = document.getElementsByClassName("documentErrors")[0];
+                
+                documentErrors.parentNode.removeChild(documentErrors);
                 TweenMax.fromTo(idc("documentPage"), 0.35, {
                     x: "0%",
                     opacity: 1
@@ -2788,8 +2791,9 @@ function rtpSend() {
                     for(var d = 0; d < jobDa[b][c]["group"].length;d++) (function (d) {
                         if("type" in jobDa[b][c]["group"][d] && "value" in jobDa[b][c]["group"][d]) {
                             if(jobDa[b][c]["group"][d].type == "signature") {
+                console.log(jobDa[b][c]["group"][d].value);
             readFile(jobDa[b][c]["group"][d].value, function (responseS) {
-                
+                console.log(responseS);
                 ajaxRequestToMake(urlInit + "/" + appVersion + "/update/jobfile",
                     function (ares) {
                         let resJs = JSON.parse(ares);
