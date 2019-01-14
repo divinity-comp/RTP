@@ -2052,13 +2052,11 @@ function docElementLoadIn(loc, elParent) {
                             allInpBV[f].click();
                         }
                     }
+                    if(hasTable == false) {
+                        docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
+                    }
                     else {
-                        if(hasTable == false) {
-                            docJSON.pages = jsonUpdate(docJSON.pages,locN,textinput.value);
-                        }
-                        else {
-                            updateInTable(genEl);
-                        }
+                        updateInTable(genEl);
                     }
                 }
             }
