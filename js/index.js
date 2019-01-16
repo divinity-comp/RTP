@@ -1817,7 +1817,7 @@ function validatePage(successF,failedF) {
                     if(dpValTR[b].getElementsByTagName("td")[a].getElementsByTagName("input").length == 1) {
                         var inputTD = dpValTR[b].getElementsByTagName("td")[a].getElementsByTagName("input")[0];
                         if(inputTD.value != "LIM" && inputTD.value != "lim" && inputTD.value != "Lim"
-                          && inputTD.value != "✔" && inputTD.value != "N/a" && inputTD.value != "N/A" && inputTD.value != "n/a"  && inputdp.value != "x" && inputdp.value != "X")
+                          && inputTD.value != "✔" && inputTD.value != "N/a" && inputTD.value != "N/A" && inputTD.value != "n/a"  && inputTD.value != "x" && inputTD.value != "X")
                             failedElements.push(inputTD);
                         inputTD.setAttribute("error", "Must Contain ✔ or N/A or LIM or X");
                     }
