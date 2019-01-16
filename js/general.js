@@ -535,7 +535,6 @@ function urlStringConVersion(url, success, error) {
 			);
 		},
 		function() {
-			// An error occured.
 			error();
 		}
 	);

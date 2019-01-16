@@ -1714,9 +1714,9 @@ function validatePage(successF,failedF) {
             var inputdp = dpVal[i].getElementsByTagName("input")[0];
             if(dpValidate == "lim") {
                 if(inputdp.value != "LIM" && inputdp.value != "lim" && inputdp.value != "Lim"
-                  && inputdp.value != "✔" && inputdp.value != "N/a" && inputdp.value != "N/A" && inputdp.value != "n/a")
+                  && inputdp.value != "✔" && inputdp.value != "N/a" && inputdp.value != "N/A" && inputdp.value != "n/a" && inputdp.value != "x" && inputdp.value != "X")
                     failedElements.push(dpVal[i]);
-                dpVal[i].setAttribute("error", "Must Contain ✔ or N/A or LIM");
+                dpVal[i].setAttribute("error", "Must Contain ✔ or N/A or LIM or X");
             }
             else if(dpValidate == "text") {
                 if(inputdp.value.length < 1)
