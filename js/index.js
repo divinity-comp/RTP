@@ -1704,17 +1704,18 @@ function loadFromJson(pageNum) {
     }
     idc("documentPage").appendChild(nextDoc); 
 }
-function validatePage(successF,failedF) {
-    
-    var failedElements = [];
+var failedElements = [];
+function validatePage(successF,failedF,dontScroll) {
+    failedElements = [];
     var dpVal = idc("documentPage").getElementsByClassName("textinput");
     for(var i = 0;i < dpVal.length;i++) (function(i){
         if(dpVal[i].getAttribute("required")) {
             var dpValidate = dpVal[i].getAttribute("required");
             var inputdp = dpVal[i].getElementsByTagName("input")[0];
+            
+            var qualifiedString = inputdp.value.toLowerCase().trim();
             if(dpValidate == "lim") {
-                if(inputdp.value != "LIM" && inputdp.value != "lim" && inputdp.value != "Lim"
-                  && inputdp.value != "✔" && inputdp.value != "N/a" && inputdp.value != "N/A" && inputdp.value != "n/a" && inputdp.value != "x" && inputdp.value != "X")
+                if(qualifiedString != "lim" && !qualifiedString.includes("✔")  && qualifiedString != "n/a" && qualifiedString != "x")
                     failedElements.push(dpVal[i]);
                 dpVal[i].setAttribute("error", "Must Contain ✔ or N/A or LIM or X");
             }
@@ -1727,6 +1728,9 @@ function validatePage(successF,failedF) {
                 var resDate = inputdp.value.split("/");
 
                 if(resDate.length < 3) {
+                    resDate = inputdp.value.split("\\");
+                }
+                if(resDate.length < 3) {
                     dpVal[i].setAttribute("error", "Enter Date DD/MM/YYYY");
                     failedElements.push(dpVal[i]);
                 }
@@ -1738,9 +1742,10 @@ function validatePage(successF,failedF) {
         if(dpVal[i].getAttribute("required")) {
             var dpValidate = dpVal[i].getAttribute("required");
             var inputdp = dpVal[i].getElementsByTagName("textarea")[0];
+            var qualifiedString = inputdp.value.toLowerCase().trim();
+            
             if(dpValidate == "lim") {
-                if(inputdp.value != "LIM" && inputdp.value != "lim" && inputdp.value != "Lim"
-                  && inputdp.value != "✔" && inputdp.value != "N/a" && inputdp.value != "N/A" && inputdp.value != "n/a" != "X" && inputdp.value != "x" )
+                if(qualifiedString != "lim" && !qualifiedString.includes("✔")  && qualifiedString != "n/a" && qualifiedString != "x")
                     failedElements.push(dpVal[i]);
                 dpVal[i].setAttribute("error", "Must Contain ✔ or N/A or LIM or X");
             }
@@ -1816,8 +1821,8 @@ function validatePage(successF,failedF) {
                 if(dpValTR[b].getElementsByTagName("td").length == valList.length) {
                     if(dpValTR[b].getElementsByTagName("td")[a].getElementsByTagName("input").length == 1) {
                         var inputTD = dpValTR[b].getElementsByTagName("td")[a].getElementsByTagName("input")[0];
-                        if(inputTD.value != "LIM" && inputTD.value != "lim" && inputTD.value != "Lim"
-                          && inputTD.value != "✔" && inputTD.value != "N/a" && inputTD.value != "N/A" && inputTD.value != "n/a"  && inputTD.value != "x" && inputTD.value != "X")
+            var qualifiedString = inputTD.value.toLowerCase().trim();
+                if(qualifiedString != "lim" && !qualifiedString.includes("✔")  && qualifiedString != "n/a" && qualifiedString != "x")
                             failedElements.push(inputTD);
                         inputTD.setAttribute("error", "Must Contain ✔ or N/A or LIM or X");
                     }
@@ -1829,8 +1834,12 @@ function validatePage(successF,failedF) {
         }
     })(i);
     
-    if(failedElements.length == 0)
+    if(failedElements.length == 0) {
+        if(document.getElementsByClassName("documentErrors").length != 0) {
+            document.getElementsByClassName("documentErrors")[0].parentNode.removeChild(document.getElementsByClassName("documentErrors")[0]);
+        }
         successF();
+    }
     else {
         var documentErrors = document.createElement("div");
         documentErrors.className = "documentErrors";
@@ -1845,6 +1854,7 @@ function validatePage(successF,failedF) {
             specificError.innerHTML += failedElements[0].getAttribute("error") ;
         documentErrors.appendChild(specificError);
         failedElements[0].className += " ehighlight";
+        if(dontScroll == null)
         idc("documentPage").scrollTop = failedElements[0].offsetTop;
         
         var buttonLeft = document.createElement("button");
@@ -1870,6 +1880,11 @@ function validatePage(successF,failedF) {
         buttonRight.className = "buttonRight";
         buttonRight.onclick = function() {
             var numLe = parseInt(documentErrors.getAttribute("num"));
+            if(failedElements.length == numLe + 1) {
+                buttonLeft.click();
+            }
+            else {
+                
             failedElements[numLe].className = failedElements[numLe].className.replace('ehighlight','');
             if(numLe < failedElements.length)
                 numLe++;
@@ -1882,6 +1897,7 @@ function validatePage(successF,failedF) {
                 idc("documentPage").scrollTop = failedElements[numLe].parentNode.parentNode.parentNode.offsetTop;
             else
                 idc("documentPage").scrollTop = failedElements[numLe].offsetTop;
+            }
         }
         
         documentErrors.appendChild(buttonRight);
@@ -2027,7 +2043,22 @@ function docElementLoadIn(loc, elParent) {
                 if(textinput.value == "nn" || textinput.value == "Nn") {
                     textinput.value = "N/A";
                 }
-                
+                if(genEl.classList.contains("ehighlight")) {
+                    var qualifiedString = textinput.value.toLowerCase().trim();
+                    
+                    if(qualifiedString == "lim" || qualifiedString.includes("✔")  || qualifiedString == "n/a" || qualifiedString == "x") {
+                        genEl.classList.remove("ehighlight");
+validatePage(function() {}, function() {},true);
+                    }
+                }
+                if(textinput.classList.contains("ehighlight")) {
+                    var qualifiedString = textinput.value.toLowerCase().trim();
+                    
+                    if(qualifiedString == "lim" || qualifiedString.includes("✔")  || qualifiedString == "n/a" || qualifiedString == "x") {
+                        textinput.classList.remove("ehighlight");
+validatePage(function() {}, function() {},true);
+                    }
+                }
                 if ("update" in elLoad) {
                     updateComplexAdditional(elLoad.update);
                 } 
@@ -2096,6 +2127,15 @@ function docElementLoadIn(loc, elParent) {
                textarea.value = elLoad.value;
             }
             textarea.oninput = function () {
+                
+                if(genEl.classList.contains("ehighlight")) {
+                    var qualifiedString = textarea.value.toLowerCase().trim();
+                    
+                    if(qualifiedString == "lim" || qualifiedString.includes("✔")  || qualifiedString == "n/a" || qualifiedString == "x") {
+                        genEl.classList.remove("ehighlight");
+validatePage(function() {}, function() {},true);
+                    }
+                }
                 if(hasTable == false) {
                     docJSON.pages = jsonUpdate(docJSON.pages,locN,textarea.value);
                 }
@@ -2134,6 +2174,10 @@ function docElementLoadIn(loc, elParent) {
             }
             input.onclick = function() {
                 
+                if(genEl.classList.contains("ehighlight")) {
+                        genEl.classList.remove("ehighlight");
+validatePage(function() {}, function() {}, true);
+                }
                 if(genEl.parentNode.className == "radio") {
                     console.log(genEl.parentNode.className);
                         var allInp = genEl.parentNode.getElementsByTagName("input");
