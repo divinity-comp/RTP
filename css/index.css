@@ -427,15 +427,26 @@ button#cookieToggle[active="true"]:before {
     -webkit-transition-property: opacity;
     transition-property: opacity;
     text-transform: none;
-    padding: 0.7vh 25px;
+    padding: 0 0em 0 2em;
     font-size: 1.25vh;
     width: 80px;
     height: 100%;
     position: relative;
-    background:transparent;
 }
 
 #mobileMenu:before {
+    content:'';
+    z-index: 5;
+    background: #0a121d;
+    position: absolute;
+    left: -33%;
+    top: -33%;
+    width: 133%;
+    height: 150%;
+    -webkit-transform: rotate(-15deg);
+    transform: rotate(-15deg);
+}
+#mobileMenu:after {
     content:'';
     z-index: 5;
     background: #0a121d;
@@ -946,10 +957,7 @@ button#addJob, button#addUser, button#addClient,.singleClient #addUser button {
     text-decoration: underline;
     margin-left:10px;
 }
-#documents {
-    padding: 1.5em;
-}
-#documents > div > div {
+#jobdocs > div > div {
     overflow: hidden;
     border-bottom: 2px solid;
     margin-bottom: 0.5em;
@@ -961,7 +969,7 @@ button#addJob, button#addUser, button#addClient,.singleClient #addUser button {
     overflow: hidden;
     background:#fff;
 }
-#documents div h3{
+#jobdocs div h3{
     width: 100%;
     float: left;
     margin: 0;
@@ -969,7 +977,7 @@ button#addJob, button#addUser, button#addClient,.singleClient #addUser button {
     text-transform: capitalize;
     font-size: 1.4em;
 }
-#documents div button {
+#jobdocs div button {
     width: 100px;
     margin: 0;
     background: #2d2d2d;
@@ -980,7 +988,7 @@ button#addJob, button#addUser, button#addClient,.singleClient #addUser button {
     font-weight: bold;
     font-size: 1.25em;
 }
-#documents .page {
+#jobdocs .page {
     padding: 10px;
     width: 80%;
     font-weight: 500;
@@ -991,7 +999,7 @@ button#addJob, button#addUser, button#addClient,.singleClient #addUser button {
     border-bottom: 1px solid;
     border-radius: 0;
 }
-#documents .page:last-child {
+#jobdocs .page:last-child {
     border-bottom: 0;
 }
 #viewJob h2 {
@@ -1470,7 +1478,6 @@ table {
     color: #fff;
     padding: 0.5em 15px;
     font-size: 1.5em;
-    position: fixed;
     bottom: 0;
     width: 100%;
     text-transform: uppercase;
@@ -1867,4 +1874,67 @@ table {
     #main.single-job #viewJob, #main.single-job #documentPage {
     font-size: 0.85em;
     }
+}
+#breadcrums i[active="false"] {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#pageJob #singleDoc {
+    display: none;
+}
+
+
+#breadcrums {
+    margin: 0;
+    padding: 1em;
+    background: #0a121d;
+    color: #fff;
+}
+#breadcrums * {
+
+    vertical-align: middle;
+}
+#breadcrums i {
+    margin: 0 5px;
+}
+#clientspage[display="false"],#locations[display="false"],#documents[display="false"],#viewJob[display="false"],#editDocs[display="false"] {
+    display: none;
+}
+
+#pageJob {
+    height: 100%;
+    overflow: auto;
+}
+#reload {
+    display:none;
+}
+
+#clientspage,#locations,#documents,#viewJob,#editDocs {
+    height: calc(100% - 52px);
+    overflow: auto;
+    padding-bottom: 15px;
+}
+#clientspage button,#locations button,#documents button {
+    width: 100%;
+    padding: 1em;
+    text-align: left;
+    background: #e2e2e2;
+    color: #000;
+    font-size: 1.25em;
+    font-weight: bold;
+    margin: 0.5em 0 0;
+}
+#pageJob button.addButton {
+    border: 2px solid;
+    border-left: 0;
+    width: initial;
+    margin: 2em 0 0 0;
+    display: block;
+    background: initial;
+    text-transform: uppercase;
+    padding: 1em 1em 1em 2em;
+    text-align: left;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }

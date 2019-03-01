@@ -82,7 +82,7 @@ function removeFromRegulator(stringToRemove) {
 }
 
 // Initial Data
-var appVersion = "v1";
+var appVersion = "v1.2";
 // test site: https://rtp-app.divinitycomputing.com
 var urlInit = "https://rtp-app.divinitycomputing.com";
 // Login
@@ -497,17 +497,13 @@ function getMainDashboard() {
     ajaxRequestGet("pages/dashboard.html",
         function (response) {
             idc("centralHub").innerHTML = response;
-            adminMenuCreation();
             defaultMenu();
+            adminMenuCreation();
 
-            if (isAdmin()) {
-                openApiPage("jobControl");
-            } else {
-                openPage("jobs/myJobs", null, startJobSearch);
-            }
+            openPage("user/pages", null, function() { syncDownload(loadPageSystem);  });
             idc("navMenu").children[0].className = "active";
         },
-        "");
+    "");
 }
 
 //
@@ -894,10 +890,445 @@ function updateLocalInstruments() {
     setCookie("instruments",JSON.stringify(instruList));
 }
 /* 
+    Sync  Functions
+*/
+
+function syncDownload(afterSync) {
+    if(connectionStatus.connected == true) {
+        ajaxRequestToMake(urlInit + "/" + appVersion + "/data/all-list.php",
+            function (response) {
+                let jsRes = JSON.parse(response);
+                if (jsRes.response === "success") {
+                    if(jsRes["alllist"][0].response == "success") {
+                        writeTofile("maindocuments", JSON.stringify(jsRes["alllist"][3]), function () {
+                            let availDocs = [];
+                            let availDocsDown = jsRes["alllist"][3]["maindocuments"];
+                            if (hasCookie("avaliableDocs")) {
+                                availDocs = JSON.parse(getCookie("avaliableDocs"));
+                            }
+                            var findDocs = [];
+                            
+                            for(i =0; i < availDocsDown.length;i++) (function(i){ 
+                                var matchingFound = false;
+                                for(a =0; a < availDocs.length;a++) (function(a){ 
+                                    if(availDocsDown[i] == avaliableDocs[a])
+                                        matchingFound = true;
+                                })(a);
+
+                                if(!matchingFound)
+                                    findDocs.push(availDocsDown[i]);
+                            })(i);
+                            
+                            
+                            writeTofile("clientlist", JSON.stringify(jsRes["alllist"][0]), function () {
+
+                                writeTofile("folderlist", JSON.stringify(jsRes["alllist"][1]), function () {
+
+                                    writeTofile("joblist", JSON.stringify(jsRes["alllist"][2]), function () {
+                                        console.log(findDocs);
+                                        if(afterSync)
+                                            afterSync(findDocs);
+                                        
+                                        referenceTreeUpdate();
+                                    });
+                                });
+                            });
+                        });
+                    }
+                } else {
+                    errorMessage("Could not sync - please check your internet");
+                }
+            }, {
+            "req":"all"
+        });
+    }
+    else {
+        try {
+            errorMessage("No local data, internet required");
+            idc("reload").style.display = "block";
+            idc("reload").onclick = function() {
+                syncDownload(afterSync);
+            }
+        }
+        catch(error) {
+          console.error(error);
+        }
+    }
+}
+function downloadTemplateDoc(docFind,arrayL) {
+    ajaxRequestGet(urlInit + "/documents/" + docFind.docid + "/" + docFind.data + docFind.revision + ".json",
+        function (documentServerFind) {
+            writeTofile(docFind.data + docFind.rev + ".json", documentServerFind, function () {
+                if (hasCookie("avaliableDocs")) {
+                    let availDocs = JSON.parse(getCookie("avaliableDocs"));
+                    availDocs.push(docFind);
+                    setCookie("avaliableDocs", JSON.stringify(availDocs));
+                } else {
+                    setCookie("avaliableDocs", "[" + JSON.stringify(docFind) + "]");
+                    if(arrayL)
+                        successMessage("Doc " + (arrayL.ilen + 1) + "/" + arrayL.alen);
+                    else {
+                        successMessage("Document template downloaded");
+                    }
+
+                }
+            });
+    }, true);
+}
+var referenceTree = {maindocuments:[],clientlist:[],folderlist:[],joblist:[]};
+function referenceTreeUpdate() {
+    
+    readFile("referenceTree", function(response) {
+        if(response != "")
+            referenceTree = JSON.parse(response);
+        readFile("maindocuments", function(rect) {
+            var mainDocs = JSON.parse(rect);
+            for(i =0; i < mainDocs.maindocuments.length;i++) (function(i){ 
+                var matchingFound = false;
+                for(a =0; a < referenceTree.maindocuments.length;a++) (function(a){ 
+                    if(referenceTree.maindocuments[a] == mainDocs.maindocuments[i])
+                        matchingFound = true;
+                })(a);
+
+                if(!matchingFound)
+                    referenceTree.maindocuments.push(mainDocs.maindocuments[i]);
+            })(i);
+        });
+        readFile("clientlist", function(rect) {
+            var mainDocs = JSON.parse(rect);
+            for(i =0; i < mainDocs.clientlist.length;i++) (function(i){ 
+                var matchingFound = false;
+                for(a =0; a < referenceTree.clientlist.length;a++) (function(a){ 
+                    if(referenceTree.clientlist[a] == mainDocs.clientlist[i])
+                        matchingFound = true;
+                })(a);
+
+                if(!matchingFound)
+                    referenceTree.clientlist.push(mainDocs.clientlist[i]);
+            })(i);
+        });
+        readFile("folderlist", function(rect) {
+            var mainDocs = JSON.parse(rect);
+            for(i =0; i < referenceTree.folderlist.length;i++) (function(i){ 
+                var matchingFound = false;
+                for(a =0; a < referenceTree.folderlist.length;a++) (function(a){ 
+                    if(referenceTree.folderlist[a] == mainDocs.folderlist[i])
+                        matchingFound = true;
+                })(a);
+
+                if(!matchingFound)
+                    referenceTree.folderlist.push(mainDocs.folderlist[i]);
+            })(i);
+        });
+        readFile("joblist", function(rect) {
+            var mainDocs = JSON.parse(rect);
+            for(i =0; i < referenceTree.joblist.length;i++) (function(i){ 
+                var matchingFound = false;
+                for(a =0; a < availDocs.length;a++) (function(a){ 
+                    if(referenceTree.joblist[a] == mainDocs.joblist[i])
+                        matchingFound = true;
+                })(a);
+
+                if(!matchingFound)
+                    referenceTree.joblist.push(mainDocs.joblist[i]);
+            })(i);
+        });
+        
+        writeTofile("referenceTree", JSON.stringify(referenceTree), function () {
+           
+        });
+    });
+        
+}
+function deleteAttribution(el) {
+    
+}
+function loadPageSystem(docsToDownload) {
+    if(docsToDownload) {
+        if(docsToDownload.length !== 0) {
+            successMessage("Document template downloading");
+            for(i = 0; i < docsToDownload.length;i++) {
+                downloadTemplateDoc(docsToDownload[i], {alen:docsToDownload.length,ilen:i});
+            }
+        }
+        else {
+            successMessage("Initial Sync Complete");
+        }
+    }
+    
+    readFile("clientlist", function(response) {
+            var clientEle = idc("clientspage");
+        var clientList = JSON.parse(response)["clientlist"];
+        
+        for(i =0; i < clientList.length;i++) (function(i){ 
+            var cButton = document.createElement("button");
+            
+            cButton.innerHTML = clientList[i].company;
+            cButton.onclick = function() {
+                openClientFolder(clientList[i]);
+            }
+            clientEle.appendChild(cButton);
+        })(i);
+        
+    });
+}
+/* 
+    Folder Functions
+*/
+var allowC = true;
+function createClient() {
+    var addUser = idc("addUser");
+    
+    var companyDetails = {
+        company: idc("addUser").getElementsByTagName("input")[0].value,
+        conName: idc("addUser").getElementsByTagName("input")[1].value,
+        conEmail: idc("addUser").getElementsByTagName("input")[2].value,
+        conPhone: idc("addUser").getElementsByTagName("input")[3].value,
+        address: idc("addUser").getElementsByTagName("textarea")[0].value,
+        postcode: idc("addUser").getElementsByTagName("input")[4].value,
+        website: idc("addUser").getElementsByTagName("input")[5].value,
+        reg: idc("addUser").getElementsByTagName("input")[6].value,
+        vat: idc("addUser").getElementsByTagName("input")[7].value
+    }
+    
+}
+function openClientFolder(clientData) {
+    idc("breadcrums").getElementsByTagName("span")[0].onclick = function() {
+        var moveLeft = [idc("clientspage"),idc("locations"),idc("documents"),idc("viewJob"),idc("editDocs")];
+        
+        TweenMax.fromTo(moveLeft, 0.35, {
+            x: "0%",
+            opacity: 0
+        }, {
+            x: "100%",
+            opacity: 1,
+            onComplete:function() {
+        for(i =1; i < moveLeft.length;i++) (function(i){ 
+            moveLeft[i].setAttribute("display","false");
+            moveLeft[i].innerHTML = "";
+        })(i);
+        var iTags = idc("breadcrums").getElementsByTagName("i");
+        var spanTags = idc("breadcrums").getElementsByTagName("span");
+        for(i = 1; i < spanTags.length;i++) (function(i){ 
+            iTags[i - 1].setAttribute("active","false");
+            spanTags[i].innerHTML = "";
+            
+        })(i);
+                idc("clientspage").setAttribute("display","true");
+                TweenMax.fromTo(idc("clientspage"), 0.35, {
+                    x: "-100%",
+                    opacity: 0
+                },{
+                    x:"0%",
+                    opacity: 1
+                });
+            }
+        });
+    }
+    idc("breadcrums").getElementsByTagName("i")[0].setAttribute("active","true");
+    idc("breadcrums").getElementsByTagName("span")[1].innerHTML = clientData.company;
+    
+    idc("locations").innerHTML = "";
+    readFile("folderlist", function(response) {
+        var folderList = JSON.parse(response)["folderlist"];
+        
+        for(i =0; i < folderList.length;i++) (function(i){ 
+            var cButton = document.createElement("button");
+            
+            var locationsEle = idc("locations");
+            cButton.innerHTML = folderList[i].company;
+            cButton.onclick = function() {
+                openJobFolder(folderList[i],clientData);
+            }
+            locationsEle.appendChild(cButton);
+        })(i);
+    });
+    
+    
+    readFile("joblist", function(response) {
+        var joblist = JSON.parse(response)["joblist"];
+        var needsUnassigned = 0;
+        var jobList = {jobs:[], folder:"Unassigned"};
+        for(i =0; i < joblist.length;i++) (function(i){ 
+            if(joblist[i].clientid == clientData.id) {
+                jobList.jobs.push(joblist[i]);
+                needsUnassigned++;
+            }
+        })(i);
+        if(needsUnassigned != 0) {
+            var cButton = document.createElement("button");
+            
+            var locationsEle = idc("locations");
+            cButton.innerHTML = "Unassigned (" + needsUnassigned + ")" ;
+            cButton.onclick = function() {
+                openJobFolder(jobList, clientData);
+            }
+            locationsEle.appendChild(cButton);
+        }
+    });
+    TweenMax.fromTo(idc("clientspage"), 0.35, {
+            x: "0%",
+            opacity: 0
+        },{x:"-100%",
+            opacity: 1,
+           onComplete:function() {
+               
+            idc("clientspage").setAttribute("display","false");
+            idc("locations").setAttribute("display","true");
+            TweenMax.fromTo(idc("locations"), 0.35, {
+                    x: "100%",
+                    opacity: 0
+                }, {
+                    x: "0%",
+                    opacity: 1
+                });
+           }
+    });
+}
+function openJobFolder(locationData,clientData) {
+    idc("breadcrums").getElementsByTagName("span")[1].onclick = function() {
+        var moveLeft = [idc("clientspage"),idc("locations"),idc("documents"),idc("viewJob"),idc("editDocs")];
+        
+        TweenMax.fromTo(moveLeft, 0.35, {
+            x: "0%",
+            opacity: 0
+        }, {
+            x: "100%",
+            opacity: 1,
+            onComplete:function() {
+        for(i = 2; i < moveLeft.length;i++) (function(i){ 
+            moveLeft[i].setAttribute("display","false");
+            moveLeft[i].innerHTML = "";
+        })(i);
+        var iTags = idc("breadcrums").getElementsByTagName("i");
+        var spanTags = idc("breadcrums").getElementsByTagName("span");
+        for(i = 2; i < spanTags.length;i++) (function(i){ 
+            iTags[i - 1].setAttribute("active","false");
+            spanTags[i].innerHTML = "";
+            
+        })(i);
+                idc("locations").setAttribute("display","true");
+                TweenMax.fromTo(idc("locations"), 0.35, {
+                    x: "-100%",
+                    opacity: 0
+                },{
+                    x:"0%",
+                    opacity: 1
+                });
+            }
+        });
+    }
+    idc("breadcrums").getElementsByTagName("i")[1].setAttribute("active","true");
+    idc("breadcrums").getElementsByTagName("span")[2].innerHTML = locationData.folder;
+    
+    
+    var folderList = locationData["jobs"];
+
+    for(i =0; i < folderList.length;i++) (function(i) { 
+        var cButton = document.createElement("button");
+
+        var documentsEle = idc("documents");
+        cButton.innerHTML = folderList[i].id;
+        cButton.onclick = function() {
+            openSingleJob(folderList[i],clientData);
+        }
+        documentsEle.appendChild(cButton);
+    })(i);
+    
+    TweenMax.fromTo(idc("locations"), 0.35, {
+            x: "0%",
+            opacity: 0
+        },{x:"-100%",
+            opacity: 1,
+           onComplete:function() {
+               
+            idc("locations").setAttribute("display","false");
+            idc("documents").setAttribute("display","true");
+            TweenMax.fromTo(idc("documents"), 0.35, {
+                    x: "100%",
+                    opacity: 0
+                }, {
+                    x: "0%",
+                    opacity: 1
+                });
+           }
+    });
+}
+
+function openSingleJob(jobdata,clientdata) {
+    jobdata.client = clientdata;
+    jobJS = jobdata;
+    console.log(jobdata);
+    idc("breadcrums").getElementsByTagName("span")[2].onclick = function() {
+        var moveLeft = [idc("clientspage"),idc("locations"),idc("documents"),idc("viewJob"),idc("editDocs")];
+        
+        
+        TweenMax.fromTo(moveLeft, 0.35, {
+            x: "0%",
+            opacity: 0
+        }, {
+            x: "100%",
+            opacity: 1,
+            onComplete:function() {
+        for(i =0; i < moveLeft.length;i++) (function(i){ 
+            moveLeft[i].setAttribute("display","false");
+        })(i);
+        var iTags = idc("breadcrums").getElementsByTagName("i");
+        var spanTags = idc("breadcrums").getElementsByTagName("span");
+        for(i = 3; i < spanTags.length;i++) (function(i){ 
+            //iTags[i - 1].setAttribute("active","false");
+            spanTags[i].innerHTML = "";
+            
+        })(i);
+                idc("documents").setAttribute("display","true");
+                TweenMax.fromTo(idc("documents"), 0.35, {
+                    x: "-100%",
+                    opacity: 0
+                },{
+                    x:"0%",
+                    opacity: 1
+                });
+            }
+        });
+    }
+    idc("breadcrums").getElementsByTagName("i")[2].setAttribute("active","true");
+    idc("breadcrums").getElementsByTagName("span")[3].innerHTML = jobdata.id;
+    
+    TweenMax.fromTo(idc("documents"), 0.35, {
+            x: "0%",
+            opacity: 0
+        },{x:"-100%",
+            opacity: 1,
+           onComplete:function() {
+               
+            let jobDe = jobJS["jobdetails"];
+            for (i = 0; i < jobDe.length; i++) {
+                addDocument(jobDe[i], i, jobJS);
+            }
+            idc("documents").setAttribute("display","false");
+            idc("viewJob").setAttribute("display","true");
+            //findAssociatedJobFiles(jobid);
+            TweenMax.fromTo(idc("viewJob"), 0.35, {
+                    x: "100%",
+                    opacity: 0
+                }, {
+                    x: "0%",
+                    opacity: 1
+                });
+           }
+           
+    });
+    idc("viewJob").setAttribute("jobid", jobJS["id"]);
+    //idc("viewJob").children[0].innerHTML = jobJS["id"] + " - " + jobJS["client"]["company"];
+    loadClientData(jobJS);
+    
+}
+
+/* 
     Job Functions
 */
 function getOwnJobs() {
-    
+    console.log("get own jobs");
         ajaxRequestToMake(urlInit + "/" + appVersion + "/data/getJobs.php",
             function (response) {
                 let jsRes = JSON.parse(response);
@@ -909,19 +1340,24 @@ function getOwnJobs() {
                 }
             }, {
             "req":"own"
-            });
+        });
 }
 function startJobSearch() {
+    idc("reload").style.display = "none";
     if(connectionStatus.connected == true) {
         getOwnJobs();
     }
     else {
-        
         try {
             if(hasCookie("joblist"))
                   loadInJobsStandardUser(JSON.parse(getCookie("joblist")));
-            else
+            else {
                 errorMessage("No local data, internet required");
+                idc("reload").style.display = "block";
+                idc("reload").onclick = function() {
+                    startJobSearch();
+                }
+            }
         }
         catch(error) {
           console.error(error);
@@ -1019,7 +1455,7 @@ function jobGroupSet(num) {
                 jobScroll[i].className = "hidden";
             }
             
-            jobScroll[num].className = "";
+    jobScroll[num].className = "";
     TweenMax.fromTo(jobScroll[num], 0.35, {
         x: "100%",
         opacity: 0
@@ -1475,11 +1911,11 @@ function onErrorUploadFail(err) {
 function loadClientData(jobDetails) {
     if(idc("clientInfo")) {
         var clientInfo = idc("clientInfo");
-        var clientJs = jobDetails.client[0];
+        var clientJs = jobDetails.client;
         if(clientJs.companylogo)
             clientInfo.innerHTML = '<img src="'+ clientJs.companylogo +'" />';
         if(clientJs.Company)
-            clientInfo.innerHTML += '<p><span>Company:</span> <span>'+ clientJs.Company +'</span></p>';
+            clientInfo.innerHTML += '<p><span>Company:</span> <span>'+ clientJs.company +'</span></p>';
         if(clientJs.address) {
             var streetShort = replaceAll(clientJs.address," ","+");
             if(devicePlatform == null)
@@ -1506,50 +1942,69 @@ function returnDocFilename(docFind) {
 function addDocument(docFind, Inter, fullJson) {
     let checkInternal = false;
     for (var i = 0; i < avaliableDocs.length; i++) {
-        if (docFind.docid == avaliableDocs[i].docid && docFind.rev == avaliableDocs[i].rev)
+        if (docFind.docid == avaliableDocs[i].docid && docFind.revision == avaliableDocs[i].rev)
             checkInternal = true;
     }
     console.log("find document");
-    console.log(docFind);
-    console.log(Inter + returnDocFilename(docFind));
     if (checkInternal) {
         console.log("checking internal");
         readFile(Inter + returnDocFilename(docFind), function (results) {
-            addDocRow(docFind, Inter, fullJson, results);
-        });
-    } else {
-        console.log("checking server");
-        ajaxRequestGet(urlInit + "/" + appVersion + "/documents/" + docFind.docid + "/" + docFind.data + docFind.rev + ".json",
-            function (documentServerFind) {
-                writeTofile(Inter + returnDocFilename(docFind), documentServerFind, function () {
-                    if (hasCookie("avaliableDocs")) {
-                        let availDocs = JSON.parse(getCookie("avaliableDocs"));
-                        availDocs.push(docFind);
-                        setCookie("avaliableDocs", JSON.stringify(availDocs));
-                    } else {
-                        setCookie("avaliableDocs", "[" + JSON.stringify(docFind) + "]");
-                    }
-                    addDocRow(docFind, Inter, fullJson, documentServerFind);
+            if(results != "")
+                addDocRow(docFind, Inter, fullJson, results);
+            else {
+                readFile(docFind.data + docFind.revision + ".json", function (template) {
+                    addDocRow(docFind, Inter, fullJson, template);
                 });
-        }, true);
+            }
+        });
+    } 
+    else {
+        errorMessage("No local document found, Sync to server required");
     }
+    
 }
 
 function addDocRow(docFind, Inter, fullJson, results) {
     var jsonRow = JSON.parse(results);
-
+    console.log(docFind);
     var docNew = document.createElement("div");
     docNew.className = "taskBlock";
-    docNew.innerHTML = "<div><h3>" + docFind.rev + " - " + replaceAll(docFind.data,"-"," ") + "</h3></div>";
-
+    if(docFind.rev)
+        docFind.revision = docFind.rev;
+    docNew.innerHTML = "<div><h3>" + docFind.revision + " - " + replaceAll(docFind.data,"-"," ") + "</h3></div>";
+var trueCount = 0;
     for (var i = 0; i < jsonRow["pages"].length; i++)(function (i) {
+        if(jsonRow["pages"][i].length != 1) {
+            trueCount++;
+        
         var page = document.createElement("div");
         page.className = "page";
-        page.innerHTML = (i + 1) + ". " + jsonRow["pages"][i][0]["page"];
+        page.innerHTML = (trueCount ) + ". " + jsonRow["pages"][i][0]["page"];
         docNew.appendChild(page);
         page.onclick = function () {
             startDoc(results, i, Inter, fullJson);
+         var moveLeft = [idc("clientspage"),idc("locations"),idc("documents"),idc("viewJob"),idc("editDocs")];
+        
+        TweenMax.fromTo(moveLeft, 0.35, {
+            x: "0%",
+            opacity: 0
+        }, {
+            x: "100%",
+            opacity: 1,
+            onComplete:function() {
+                idc("viewJob").setAttribute("display","false");
+                idc("editDocs").setAttribute("display","true");
+                TweenMax.fromTo(idc("editDocs"), 0.35, {
+                    x: "-100%",
+                    opacity: 0
+                },{
+                    x:"0%",
+                    opacity: 1
+                });
+            }
+        });
             idc("rtpSend").style.display = "none";
+        }
         }
     })(i);
 
@@ -1558,7 +2013,7 @@ function addDocRow(docFind, Inter, fullJson, results) {
         idc("rtpSend").style.display = "none";
     }
     
-    idc("documents").appendChild(docNew);
+    idc("jobdocs").appendChild(docNew);
 }
 
 // Document functions
