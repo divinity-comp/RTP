@@ -32,6 +32,7 @@
     <link rel="stylesheet" type="text/css" href="assets/fonts/fonts.css" />
     <script type="text/javascript" src="js/general.js"></script>
     <script type="text/javascript" src="js/variables.js"></script>
+    <script type="text/javascript" src="js/hammer.js"></script>
     <script type="text/javascript" src="js/TweenMax.min.js"></script>
     <script type="text/javascript" src="js/signature_pad.js"></script>
 </head>
@@ -42,7 +43,7 @@
             <div class="alignFlex centerAbs">
                 <img src="assets/logo.svg" />
                 <form id="login" class="login">
-                    <input name="user" type="text" placeholder="Username" required="">
+                    <input name="user"autocorrect="off" autocapitalize="none"  type="text" placeholder="Username" required="">
                     <input name="pass" type="password" placeholder="Password" required="">
                     <button class="bWait buttonRed" onclick="loginOrPasswordReset(event)">Login</button>
                     <button class="bWait buttonRed" id="cookieToggle" onclick="stopEvent(event);toggleCookie('rememberUser',this);">Remember?

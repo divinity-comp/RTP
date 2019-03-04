@@ -1,6 +1,6 @@
  <div id="clientsDetails">
     <h2>Add Client</h2>
-    <input name="company" placeholder="Company" />
+    <input name="company" placeholder="Company" required />
     <input name="conName" placeholder="Contact Name" />
     <input name="conEmail" placeholder="Contact Email" />
     <input name="conPhone" placeholder="Contact Phone" />
@@ -9,12 +9,6 @@
     <input name="website" placeholder="Company website" />
     <input name="reg" placeholder="Company Registration" />
     <input name="vat" placeholder="Company Vat No" />
-    <div id="companyLogo" class="hidden">
-        <figure>
-            <img />
-        </figure>
-        <button onclick="getLogo()">Upload Logo</button>
-    </div>
     <button onclick="createClient()">Create Client</button>
     <button id="deleteClient" onclick="deleteClient(this)" style="display:none;">Delete Client</button>
 </div>

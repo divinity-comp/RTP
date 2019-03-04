@@ -40,7 +40,7 @@ var adminMenuList = [ {
 */
 var avaliableDocs = [];
 
- //  deleteAllCookies();
-//delete_cookie("avaliableDocs");
+//   deleteAllCookies();
+// delete_cookie("avaliableDocs");
 if (hasCookie("avaliableDocs"))
     avaliableDocs = JSON.parse(getCookie("avaliableDocs"));

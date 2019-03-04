@@ -166,7 +166,6 @@ function ajaxRequestToMake(url, callback, data, wait) {
             else
                 callback(xhr.responseText);
             
-            console.log(xhr.responseText);
         }
     }
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -371,14 +370,14 @@ function insideOtherArea(overArea, innerArea) {
 
 // read or write to file
 function writeTofile(fileName, data,successFunc,createDir) {
-    console.log(createDir);
+   // console.log(createDir);
     if(createDir) {
         
                 var multi = 0;
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
         
     fs.root.getDirectory(createDir, { create: true }, function (dirEntry) {
-        console.log('file write system open: ' + fs.name);
+      //  console.log('file write system open: ' + fs.name);
         
         
         
@@ -389,24 +388,24 @@ function writeTofile(fileName, data,successFunc,createDir) {
               fileEntry.createWriter(function (fileWriter) {
                   
                 fileWriter.onwritestart = function () {
-                    console.log("start file write");
+                   // console.log("start file write");
                 };
                 fileWriter.onwriteend = function () {
                     multi++;
-                    console.log("write attempt" + multi);
+                   // console.log("write attempt" + multi);
                     if(successFunc && multi == 2) {
                         
-                        console.log(data);
+                       // console.log(data);
                         successFunc();
                     }
                     else if(multi == 1) {
                         fileWriter.write(data);
-                        console.log("Successful file write...");
+                       // console.log("Successful file write...");
                     }
                 };
 
                 fileWriter.onerror = function (e) {
-                    console.log("Failed file write: " + e.toString());
+                  //  console.log("Failed file write: " + e.toString());
                 };
 
                 // If data object is not passed in,
@@ -421,21 +420,21 @@ function writeTofile(fileName, data,successFunc,createDir) {
             });
 
         }, function (e) {
-            console.log("Failed file 1 write: " + e.toString());
+         //   console.log("Failed file 1 write: " + e.toString());
         });
 
     }, function (e) {
-        console.log("Failed file 2 write: " + e.toString());
+       // console.log("Failed file 2 write: " + e.toString());
         });
         }, function (e) {
-            console.log("Failed file 3 write: " + e.toString());
+           // console.log("Failed file 3 write: " + e.toString());
         });
     }
     else {
     
                 var multi = 0;
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-        console.log('file write system open: ' + fs.name);
+        //console.log('file write system open: ' + fs.name);
         fs.root.getFile(fileName, {
             create: true,
             exclusive: false
@@ -443,24 +442,24 @@ function writeTofile(fileName, data,successFunc,createDir) {
               fileEntry.createWriter(function (fileWriter) {
                   
                 fileWriter.onwritestart = function () {
-                    console.log("start file write");
+                   // console.log("start file write");
                 };
                 fileWriter.onwriteend = function () {
                     multi++;
-                    console.log("write attempt" + multi);
+                    //console.log("write attempt" + multi);
                     if(successFunc && multi == 2) {
                         
-                        console.log(data);
+                        //console.log(data);
                         successFunc();
                     }
                     else if(multi == 1) {
                         fileWriter.write(data);
-                        console.log("Successful file write...");
+                        //console.log("Successful file write...");
                     }
                 };
 
                 fileWriter.onerror = function (e) {
-                    console.log("Failed file write: " + e.toString());
+                    //console.log("Failed file write: " + e.toString());
                 };
 
                 // If data object is not passed in,
@@ -475,11 +474,11 @@ function writeTofile(fileName, data,successFunc,createDir) {
             });
 
         }, function (e) {
-            console.log("Failed file 1 write: " + e.toString());
+           // console.log("Failed file 1 write: " + e.toString());
         });
 
     }, function (e) {
-        console.log("Failed file 2 write: " + e.toString());
+        //console.log("Failed file 2 write: " + e.toString());
     });
     }
 }
@@ -488,7 +487,7 @@ function readFile(fileName,successFunc) {
 
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
 
-        console.log('file read system open: ' + fs.name);
+        //console.log('file read system open: ' + fs.name);
         fs.root.getFile(fileName, {
             create: true,
             exclusive: false
@@ -505,15 +504,15 @@ function readFile(fileName,successFunc) {
         reader.readAsText(file);
 
     }, function (e) {
-        console.log("Data read: " + e.toString())
+        //console.log("Data read: " + e.toString())
     });
 
         }, function (e) {
-            console.log("Failed file 1 write: " + e.toString());
+           // console.log("Failed file 1 write: " + e.toString());
         });
 
     }, function (e) {
-        console.log("Failed file 2 write: " + e.toString());
+        //console.log("Failed file 2 write: " + e.toString());
     });
 }
 function urlStringConVersion(url, success, error) {
