@@ -404,10 +404,10 @@ function logout() {
     connectionStatus.connectionChanged = true;
     ajaxRequestGet("pages/login.html",
         function (response) {
-        idc("centralHub").innerHTML = response;
+            idc("centralHub").innerHTML = response;
             delete_cookie("user");
             delete_cookie("pass");
-        checkLogin();
+            checkLogin();
         },
     "");
 }
@@ -1011,45 +1011,52 @@ function referenceTreeUpdate() {
         });
         readFile("clientlist", function(rect) {
             var mainDocs = JSON.parse(rect);
-            for(i =0; i < mainDocs.clientlist.length;i++) (function(i){ 
-                var matchingFound = false;
-                for(a =0; a < referenceTree.clientlist.length;a++) (function(a){ 
-                    if(referenceTree.clientlist[a].id == mainDocs.clientlist[i].id)
-                        matchingFound = true;
-                })(a);
+            if(mainDocs.clientlist.length != 0) {
+                for(i =0; i < mainDocs.clientlist.length;i++) (function(i){ 
+                    var matchingFound = false;
+                    for(a =0; a < referenceTree.clientlist.length;a++) (function(a){ 
+                        if(referenceTree.clientlist[a].id == mainDocs.clientlist[i].id)
+                            matchingFound = true;
+                    })(a);
 
-                if(!matchingFound)
-                    referenceTree.clientlist.push(mainDocs.clientlist[i]);
-            })(i);
-            
+                    if(!matchingFound)
+                        referenceTree.clientlist.push(mainDocs.clientlist[i]);
+                })(i);
+            }
             allUpdateRef.client = true;
         });
         readFile("folderlist", function(rect) {
             var mainDocs = JSON.parse(rect);
-            for(i =0; i < referenceTree.folderlist.length;i++) (function(i){ 
-                var matchingFound = false;
-                for(a =0; a < referenceTree.folderlist.length;a++) (function(a){ 
-                    if(referenceTree.folderlist[a].foldername == mainDocs.folderlist[i].foldername)
-                        matchingFound = true;
-                })(a);
+            if(mainDocs.folderlist.length != 0) {
+                
+                for(i =0; i < referenceTree.folderlist.length;i++) (function(i){ 
+                    var matchingFound = false;
+                    for(a =0; a < referenceTree.folderlist.length;a++) (function(a){ 
+                        console.log(mainDocs.folderlist);
+                        if(referenceTree.folderlist[a].foldername == mainDocs.folderlist[i].foldername)
+                            matchingFound = true;
+                    })(a);
 
-                if(!matchingFound)
-                    referenceTree.folderlist.push(mainDocs.folderlist[i]);
-            })(i);
+                    if(!matchingFound)
+                        referenceTree.folderlist.push(mainDocs.folderlist[i]);
+                })(i);
+            }
             allUpdateRef.folder = true;
         });
         readFile("joblist", function(rect) {
             var mainDocs = JSON.parse(rect);
-            for(i =0; i < mainDocs.joblist.length;i++) (function(i){ 
-                var matchingFound = false;
-                for(a =0; a < referenceTree.joblist.length;a++) (function(a){ 
-                    if(referenceTree.joblist[a].id == mainDocs.joblist[i].id)
-                        matchingFound = true;
-                })(a);
+            if(mainDocs.joblist.length != 0) {
+                for(i =0; i < mainDocs.joblist.length;i++) (function(i){ 
+                    var matchingFound = false;
+                    for(a =0; a < referenceTree.joblist.length;a++) (function(a){ 
+                        if(referenceTree.joblist[a].id == mainDocs.joblist[i].id)
+                            matchingFound = true;
+                    })(a);
 
-                if(!matchingFound)
-                    referenceTree.joblist.push(mainDocs.joblist[i]);
-            })(i);
+                    if(!matchingFound)
+                        referenceTree.joblist.push(mainDocs.joblist[i]);
+                })(i);
+            }
             allUpdateRef.job = true;
         });
         var updateRefTree = setInterval(function(){ 
@@ -1098,16 +1105,16 @@ function loadPageSystem(docsToDownload) {
             hideBottomNav();
             }
             var mc = new Hammer(cButton);
-            if(clientList.id == "" || clientList.id == null) {
+            if(clientList[i].id == "" || clientList[i].id == null) {
 
                 // listen to events...
                 mc.on("press", function(ev) {
                     var clientspageSelected = idc("clientspage").getElementsByClassName("selected");
                     
-     idc("bottomOptions").style.display = "block";
-        for(a =0; a < clientspageSelected.length;a++) (function(a){ 
-            clientspageSelected[a].classList.remove("selected");
-        })(a);
+                     idc("bottomOptions").style.display = "block";
+                        for(a =0; a < clientspageSelected.length;a++) (function(a){ 
+                            clientspageSelected[a].classList.remove("selected");
+                        })(a);
                  
                     cButton.classList.add("selected");   
                     var clearBut = document.createElement("button");
@@ -1200,7 +1207,9 @@ function selectPageJob(pLv, addData) {
             onComplete:function() {
                 for(i = pLv ; i < moveLeft.length;i++) (function(i){ 
                     moveLeft[i].setAttribute("display","false");
-                    if(moveLeft[i].id !== "viewJob")
+                    if(moveLeft[i].id == "editDocs")
+                        moveLeft[i].children[0].innerHTML = "";
+                    else if(moveLeft[i].id !== "viewJob")
                         moveLeft[i].innerHTML = "";
                 })(i);
                 var iTags = idc("breadcrums").getElementsByTagName("i");
@@ -1246,6 +1255,16 @@ function selectPageJob(pLv, addData) {
 /* 
     Folder Functions
 */
+function isDataLocal(checkData,dataType) {
+    
+    console.log(checkData);
+    if(checkData.id != "null")
+        return {data:checkData.id,local:false,company:checkData.company};
+    else {
+        if(dataType == "client")
+            return {data:checkData.company,local:true};
+    }
+}
 var allowC = true;
 function createClient() {
     var clientsDetails = idc("clientsDetails");
@@ -1276,21 +1295,51 @@ function createClient() {
 function createFolder() {
     
     var folderDetails = idc("folderDetails");
-    if(idc("folderDetails").getElementsByTagName("input")[0].value != "") {
+    
+    
+    var verificationOfFolder = {state:true};
+    var folderButtons = idc("locations").getElementsByTagName("button");
+     for(i =0; i < folderButtons.length;i++) (function(i){ 
+        if(folderButtons[i].innerHTML == idc("folderDetails").getElementsByTagName("input")[1].value)
+            verificationOfFolder = {state:false,message:"Folder already exists"};
+     })(i);
+    
+    
+    if(idc("folderDetails").getElementsByTagName("input")[1].value == "") {
+            verificationOfFolder = {state:false,message:"Folder name cannot be blank"};
+    }
+    if(verificationOfFolder.state == true) {
+        var clientId = isDataLocal(
+            {id:idc("generalOverlay").getAttribute("clientid")
+             ,company:idc("generalOverlay").getAttribute("clientname")
+            }, "client");
         var folderDetails = {
             id:null,
-            clientid:idc("generalOverlay").getAttribute("clientname"),
-            foldername: idc("folderDetails").getElementsByTagName("input")[0].value
+            clientid:clientId.data,
+            sitecode: idc("folderDetails").getElementsByTagName("input")[0].value,
+            foldername: idc("folderDetails").getElementsByTagName("input")[1].value
         }
         referenceTree["folderlist"].push(folderDetails);
         referenceTreeSingleUpdate(function() {
             idc("locations").innerHTML = "";
-            loadPageSystem();
+            
+            var clientsPageButton = idc("clientspage").getElementsByTagName("button");
+             for(i =0; i < clientsPageButton.length;i++) (function(i){ 
+                 if("company" in clientId) {
+                     
+                     if(clientsPageButton[i].innerHTML == clientId.company)
+                         clientsPageButton[i].click();
+                 }
+                 else {
+                     if(clientsPageButton[i].innerHTML == clientId.data)
+                         clientsPageButton[i].click();
+                 }
+             })(i);
         });
         closeOverlay("generalOverlay");
     }
     else
-        errorMessage("Company name required");
+        errorMessage(verificationOfFolder.message);
 }
 function addSiteFolder(joblist,clientdata) {
     
@@ -1310,86 +1359,190 @@ function openClientFolder(clientData) {
     selectPageJob(1,{title:clientData.company});
     
     idc("locations").innerHTML = "";
-    readFile("folderlist", function(response) {
-        var folderList = JSON.parse(response)["folderlist"];
+    var folderList = referenceTree["folderlist"];
         
-        for(i =0; i < folderList.length;i++) (function(i){ 
+    var jobsFoundFolder = []; 
+    var joblist = referenceTree["joblist"];
+    for(i =0; i < folderList.length;i++) (function(i){
+        
+        var clientId = folderList[i].clientid;
+        var allowedButtonCreation = false;
+
+        if(folderList[i].clientid == clientData.id) {
+           allowedButtonCreation = true;
+        }
+        else if(folderList[i].clientid == clientData.company) {
+           allowedButtonCreation = true;
+        }
+        if(allowedButtonCreation) {
             var cButton = document.createElement("button");
-            
+
             var locationsEle = idc("locations");
-            cButton.innerHTML = folderList[i].company;
+            cButton.innerHTML = folderList[i].foldername;
             cButton.onclick = function() {
-                openJobFolder(folderList[i],clientData);
-            }
-            locationsEle.appendChild(cButton);
-        })(i);
-    });
-    
-    readFile("joblist", function(response) {
-        var joblist = JSON.parse(response)["joblist"];
-        var needsUnassigned = 0;
-        var jobList = {jobs:[], folder:"Unassigned"};
-        
-        for(i =0; i < joblist.length;i++) (function(i){ 
-            if(joblist[i].clientid == clientData.id) {
-                jobList.jobs.push(joblist[i]);
-                needsUnassigned++;
-            }
-        })(i);
-        
-        var locationsEle = idc("locations");
-        if(needsUnassigned != 0) {
-            var cButton = document.createElement("button");
-            
-            cButton.innerHTML = "Unassigned (" + needsUnassigned + ")" ;
-            cButton.onclick = function() {
-                openJobFolder(jobList, clientData);
+               
+                for(a =0; a < joblist.length;a++) (function(a){ 
+                    // check if folder id or folder name the same and client id or client name the same
+                    if((joblist[a].folder == folderList[i].id || joblist[a].foldername == folderList[i].foldername) && (joblist[a].clientid == clientData.id || joblist[a].company == clientData.company)
+                      ) {
+                        jobsFoundFolder.push(joblist[a]);
+                    }
+                })(a);
+                openJobFolder({joblist:jobsFoundFolder,foldername:folderList[i].foldername,id:folderList[i].id},clientData);
             }
             locationsEle.appendChild(cButton);
         }
+    })(i);
+    
+    var needsUnassigned = 0;
+    var jobList = {joblist:[], foldername:"Unassigned",id:null};
+
+    for(i =0; i < joblist.length;i++) (function(i){ 
+        if(joblist[i].clientid == clientData.id &&
+           joblist[i].company != clientData.company) {
+            jobList.joblist.push(joblist[i]);
+            needsUnassigned++;
+        }
+    })(i);
+
+    var locationsEle = idc("locations");
+    if(needsUnassigned != 0) {
         var cButton = document.createElement("button");
-        cButton.innerHTML = '<i class="fas fa-folder-plus"></i> Add Site' ;
-        cButton.className = "addButton" ;
+
+        cButton.innerHTML = "Unassigned (" + needsUnassigned + ")" ;
         cButton.onclick = function() {
-            addSiteFolder(jobList, clientData);
+            openJobFolder(jobList, clientData);
         }
         locationsEle.appendChild(cButton);
-    });
-    
+    }
+    var cButton = document.createElement("button");
+    cButton.innerHTML = '<i class="fas fa-folder-plus"></i> Add Site' ;
+    cButton.className = "addButton" ;
+    cButton.onclick = function() {
+        addSiteFolder(jobList, clientData);
+    }
+    locationsEle.appendChild(cButton);
     
 }
 function openJobFolder(locationData,clientData) {
     
-    selectPageJob(2,{title:locationData.folder});
+    selectPageJob(2,{title:locationData.foldername});
     
-    var folderList = locationData["jobs"];
-
-    for(i =0; i < folderList.length;i++) (function(i) { 
+    var jobList = locationData.joblist;
+if(jobList.length != 0) {
+    
+    for(i =0; i < jobList.length;i++) (function(i) { 
         var cButton = document.createElement("button");
-
+        
         var documentsEle = idc("documents");
-        cButton.innerHTML = folderList[i].id;
+        if( jobList[i].id == null)
+            cButton.innerHTML = "<span>Local ID: </span>" + i ;
+        else
+            cButton.innerHTML = jobList[i].id;
         cButton.onclick = function() {
-            openSingleJob(folderList[i],clientData);
+            openSingleJob(jobList[i],clientData,cButton.innerHTML);
         }
         documentsEle.appendChild(cButton);
     })(i);
+}
     
     var documentsEle = idc("documents");
     var cButton = document.createElement("button");
     cButton.innerHTML = '<i class="fas fa-file-alt"></i> Add Job' ;
     cButton.className = "addButton" ;
     cButton.onclick = function() {
-        addSiteFolder(jobList, clientData);
+        addJobToFolder(locationData,clientData);
     }
     documentsEle.appendChild(cButton);
 }
-
-function openSingleJob(jobdata,clientdata) {
+function addJobToFolder(locationData,clientData) {
+    
+    ajaxRequestGet("pages/jobs/create-job.html",
+            function (response) {
+                idc("generalOverlay").setAttribute("clientid",clientData.id);
+                idc("generalOverlay").setAttribute("clientname",clientData.company);
+                idc("generalOverlay").innerHTML = response;
+                idc("generalOverlay").classList.add("single-job");
+                idc("jobCreate").classList.add("inOverlay");
+                idc("jobCreate").getElementsByClassName("create")[0].onclick = function () {
+                    createJobLocally(locationData,clientData);
+                }
+    var docsToShow = referenceTree.maindocuments;
+    
+    for(i =0; i < docsToShow.length;i++) (function(i) { 
+        var cButton = document.createElement("button");
+        cButton.setAttribute("docid",docsToShow[i].docid);
+        cButton.setAttribute("data",docsToShow[i].data);
+        cButton.setAttribute("revision",docsToShow[i].revision);
+        var documentsEle = idc("documentList");
+        cButton.innerHTML = replaceAll(docsToShow[i].data,"-"," ") + " Ver." + docsToShow[i].revision;
+        cButton.onclick = function() {
+            if(cButton.getAttribute("active") != "true")
+                cButton.setAttribute("active","true");
+            else
+                cButton.setAttribute("active","false");
+        }
+        documentsEle.appendChild(cButton);
+    })(i);
+                openOverlay("generalOverlay");
+            },
+        "");
+    
+}
+function createJobLocally(locationData,clientData) {
+    
+    var documentsEle = idc("documentList");
+    var jobPageButton = documentsEle.getElementsByTagName("button");
+    var docsListNewJob = [];
+    
+    for(i =0; i < jobPageButton.length;i++) (function(i) { 
+        if(jobPageButton[i].getAttribute("active") == "true")
+            docsListNewJob.push({"data":jobPageButton[i].getAttribute("data"),"revision":jobPageButton[i].getAttribute("revision"),"docid":jobPageButton[i].getAttribute("docid")});
+    })(i);
+    
+    if(docsListNewJob.length != 0) {
+        
+            let randomID =  [...Array(10)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
+        var userData = getUserDataCookie();
+        var jobDetails = {
+            "id": null,
+            "clientid": clientData.id,
+            "company": clientData.company,
+            "stage": "active",
+            "jobdetails": docsListNewJob,
+            "folder": locationData.id,
+            "foldername": locationData.foldername,
+            "assignedusers": [{
+                "id": userData.id,
+                "name": userData.name,
+                "email": userData.email,
+                "user": getCookie("user")
+		      }],
+            "randomid":randomID
+        };
+        
+        referenceTree["joblist"].push(jobDetails);
+        referenceTreeSingleUpdate(function() {
+            idc("documents").innerHTML = "";
+            
+            var locationsPageButton = idc("locations").getElementsByTagName("button");
+             for(i =0; i < locationsPageButton.length;i++) (function(i){ 
+                     if(locationsPageButton[i].innerHTML == jobDetails.foldername)
+                         locationsPageButton[i].click();
+             })(i);
+        });
+        closeOverlay("generalOverlay");
+    }
+    else {
+        errorMessage("You must select a document");
+    }
+    
+}
+function openSingleJob(jobdata,clientdata,titleofjob) {
     jobdata.client = clientdata;
     jobJS = jobdata;
-    
-    selectPageJob(3,{title:jobdata.id});
+        
+    selectPageJob(3,{title:titleofjob});
     
     idc("jobdocs").innerHTML = "";
     idc("clientInfo").innerHTML = "";
@@ -2049,12 +2202,17 @@ function addDocument(docFind, Inter, fullJson) {
     let checkInternal = false;
     avaliableDocs = JSON.parse(getCookie("avaliableDocs"));
     for (var i = 0; i < avaliableDocs.length; i++) {
-        if (docFind.docid == avaliableDocs[i].docid && docFind.rev == avaliableDocs[i].revision)
+        if (docFind.docid == avaliableDocs[i].docid && (docFind.rev == avaliableDocs[i].revision || docFind.revision == avaliableDocs[i].revision))
             checkInternal = true;
     }
     
+    var revision = fullJson["jobdetails"][Inter]["rev"];
+    if(revision == null)
+        fullJson["jobdetails"][Inter]["revision"];
     
-    var docCookie = fullJson["clientid"] + "-" + fullJson["id"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + fullJson["jobdetails"][Inter]["rev"] + ".json";
+    var docCookie = fullJson["clientid"] + "-" + fullJson["id"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + revision + ".json";
+    if("randomid" in fullJson)
+        docCookie = fullJson["randomid"] + docCookie;
     if (checkInternal) {
         console.log("checking internal");
         readFile(docCookie, function (results) {
@@ -2063,7 +2221,7 @@ function addDocument(docFind, Inter, fullJson) {
             else {
                 
                 console.log("find document");
-                readFile(docFind.data + docFind.revision + ".json", function (template) {
+                readFile(docFind.data + revision + ".json", function (template) {
                     addDocRow(docFind, Inter, fullJson, template);
                 });
             }
@@ -2078,7 +2236,6 @@ function addDocument(docFind, Inter, fullJson) {
 
 function addDocRow(docFind, Inter, fullJson, results) {
     var jsonRow = JSON.parse(results);
-    console.log(docFind);
     var docNew = document.createElement("div");
     docNew.className = "taskBlock";
     if(docFind.rev)
@@ -2121,6 +2278,24 @@ function addDocRow(docFind, Inter, fullJson, results) {
 
     docNew.children[0].onclick = function () {
         startDoc(results, null, Inter, fullJson);
+        TweenMax.fromTo(idc("viewJob"), 0.35, {
+            x: "0%",
+            opacity: 0
+        }, {
+            x: "100%",
+            opacity: 1,
+            onComplete:function() {
+                idc("viewJob").setAttribute("display","false");
+                idc("editDocs").setAttribute("display","true");
+                TweenMax.fromTo(idc("editDocs"), 0.35, {
+                    x: "-100%",
+                    opacity: 0
+                },{
+                    x:"0%",
+                    opacity: 1
+                });
+            }
+        });
         idc("rtpSend").style.display = "none";
     }
     
@@ -2143,8 +2318,12 @@ function startDoc(fullDocData, pageNum, Inter, fullJson) {
     });
     if (!pageNum)
         pageNum = 0;
-    var docCookie = fullJson["clientid"] + "-" + fullJson["id"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + fullJson["jobdetails"][Inter]["rev"] + ".json";
-   
+    var revision = fullJson["jobdetails"][Inter]["rev"];
+    if(revision == null)
+        fullJson["jobdetails"][Inter]["revision"];
+    var docCookie = fullJson["clientid"] + "-" + fullJson["id"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + revision + ".json";
+    if("randomid" in fullJson)
+        docCookie = fullJson["randomid"] + docCookie;
     readFile(docCookie, function (response) {
         if (response == "" || response == null) {
             console.log("Create internal doc Cookie: " + docCookie);
@@ -2511,6 +2690,7 @@ function docElementLoadIn(loc, elParent) {
             genEl.classList.add("subtitle");
             genEl.innerHTML = elLoad.title;
         break;
+        case "documentVariable":
         case "text":
             genEl = document.createElement("p");
             genEl.classList.add("text");
@@ -2570,9 +2750,20 @@ function docElementLoadIn(loc, elParent) {
         case "textinput":
             locN.push("value");
             
+            var spaninput = document.createElement("span");
+            var textinput = document.createElement("input");
             genEl = document.createElement("div");
             if ("required" in elLoad) {
                 genEl.setAttribute("required", elLoad.required);
+                if (elLoad.required == "date") {
+                    setTimeout(function() {
+                        
+                    flatpickr(textinput, {
+                         minDate: "today",
+    dateFormat: "d/m/Y",
+});
+                    },500);
+                }
             }
             if ("label" in elLoad) {
                 var label = document.createElement("label");
@@ -2589,8 +2780,6 @@ function docElementLoadIn(loc, elParent) {
                 label.innerHTML = elLoad.heading;
                 genEl.appendChild(label);
             }
-            var spaninput = document.createElement("span");
-            var textinput = document.createElement("input");
             if ("value" in elLoad) {
                 textinput.value = elLoad.value;
             }
@@ -2723,6 +2912,15 @@ validatePage(function() {}, function() {},true);
                 label.innerHTML = elLoad.column;
                 genEl.appendChild(label);
             }
+            if("unlock" in elLoad) {
+                let blockid =  [...Array(10)].map(i=>(~~(Math.random()*26)).toString(36)).join('');
+                genEl.classList.add(blockid);
+                genEl.innerHTML += "<style>."+ elLoad.unlock + " ."+ blockid +" {opacity:0.5;pointer-events:none;}</style>";
+            }
+            if("block" in elLoad) {
+                
+                idc("documentPage").classList.add(elLoad.block);
+            }
             if("heading" in elLoad) {
                 var label = document.createElement("label");
                 label.innerHTML = elLoad.heading;
@@ -2762,6 +2960,10 @@ validatePage(function() {}, function() {}, true);
                 }
                 
                 if(input.hasAttribute("active")) {
+                 
+            if("block" in elLoad) {
+                idc("documentPage").classList.add(elLoad.block);
+            }  
                    input.removeAttribute("active");
                     if(hasTable == false) {
                         docJSON.pages =  jsonUpdate(docJSON.pages,locN,false);
@@ -2771,7 +2973,10 @@ validatePage(function() {}, function() {}, true);
                     }
                 }
                 else {
-                    
+                     
+            if("block" in elLoad) {
+                idc("documentPage").classList.remove(elLoad.block);
+            }
                     input.setAttribute("active","true");
                     if(hasTable == false) {
                         docJSON.pages =  jsonUpdate(docJSON.pages,locN,true);
@@ -2966,7 +3171,14 @@ validatePage(function() {}, function() {}, true);
                     var tRows = elLoad.rows;
                     var trHeader = document.createElement("tr");
                     var trAdder = document.createElement("tr");
-
+           
+                   
+            if("unlock" in elLoad) {
+                
+                let blockid =  [...Array(10)].map(i=>(~~(Math.random()*26)).toString(36)).join('');
+                genEl.classList.add(blockid);
+                genEl.innerHTML += "<style>."+ elLoad.unlock + " ."+ blockid +" {opacity:0.5;pointer-events:none;}</style>";
+            }
                     var simpleAdd = [[]];
                     for(var b = 0; b < tRows.length;b++) (function(b){
                         var tdHead = document.createElement("td");
@@ -3089,6 +3301,12 @@ validatePage(function() {}, function() {}, true);
                        genEl.innerHTML += "<h2>"+ elLoad.name +"</h2>";  
                                      
                    
+            if("unlock" in elLoad) {
+                
+                let blockid =  [...Array(10)].map(i=>(~~(Math.random()*26)).toString(36)).join('');
+                genEl.classList.add(blockid);
+                genEl.innerHTML += "<style>."+ elLoad.unlock + " ."+ blockid +" {opacity:0.5;pointer-events:none;}</style>";
+            }
                    var rowData = document.createElement("div");
                    rowData.innerHTML = "<div class='groupHead'><span>1</span>: " + elLoad.name + "</div>";
 

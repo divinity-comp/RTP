@@ -1,8 +1,18 @@
 
  <div id="folderDetails">
     <h2>Add Folder</h2>
-     <p>This will be used to auto fill the final document</p>
-    <input name="folder" placeholder="Site Name" required />
+    <p>This will be used to auto fill the final document</p>
+     
+     <h4>Site Id </h4>
+    <input name="siteid" placeholder="Example: G0009 "  />
+     <h4>Site Name </h4>
+    <input name="folder" placeholder="Building or room name" required />
+     
+    <div id="variableSingle" clas="folderVariable">
+        <input class="varName" placeholder="Data Key" required />
+        <input class="varData" placeholder="Date value" required />
+    <button onclick="locationDataAdd()">Add Location Data</button>
+    </div>
     <button onclick="createFolder()">Create Folder</button>
     <button id="deleteClient" onclick="deleteClient(this)" style="display:none;">Delete folder</button>
 </div>
