@@ -2691,6 +2691,22 @@ function docElementLoadIn(loc, elParent) {
             genEl.innerHTML = elLoad.title;
         break;
         case "documentVariable":
+            genEl = document.createElement("button");
+            genEl.classList.add("variable");
+           
+            
+            var internalInput = document.createElement("value");
+            genEl.appendChild(internalInput);
+            if ("value" in elLoad) {
+                internalInput.value = elLoad.title;
+            }
+            if("internalfile" in elLoad && "variable" in elLoad) {
+                genEl = document.createElement("button");
+                genEl.onclick = function() {
+                    openMultipleChoice(elLoad.internalfile, elParent.parentNode.children[parseInt(elLoad.variable)].children[0].value,genEl);
+                }
+            }
+        break;
         case "text":
             genEl = document.createElement("p");
             genEl.classList.add("text");
@@ -2917,10 +2933,6 @@ validatePage(function() {}, function() {},true);
                 genEl.classList.add(blockid);
                 genEl.innerHTML += "<style>."+ elLoad.unlock + " ."+ blockid +" {opacity:0.5;pointer-events:none;}</style>";
             }
-            if("block" in elLoad) {
-                
-                idc("documentPage").classList.add(elLoad.block);
-            }
             if("heading" in elLoad) {
                 var label = document.createElement("label");
                 label.innerHTML = elLoad.heading;
@@ -2928,8 +2940,14 @@ validatePage(function() {}, function() {},true);
             }
             var input = document.createElement("div");
             if("value" in elLoad) {
-               if(elLoad.value)
+               if(elLoad.value) {
                     input.setAttribute("active","true");
+               }
+            }
+            else {
+                if("block" in elLoad) {
+                    idc("documentPage").classList.add(elLoad.block);
+                }
             }
             if ("required" in elLoad) {
                 genEl.setAttribute("required", elLoad.required);
@@ -3215,6 +3233,26 @@ validatePage(function() {}, function() {}, true);
                                 docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
                             }
                         }
+                        else if(tRows[b]["type"] == "documentVariable") {
+                            
+           
+            
+                            var input = document.createElement("input");
+            tdAdd.classList.add("variable");
+            tdAdd.appendChild(input);
+            if("internalfile" in tRows[b] && "variable" in tRows[b]) {
+                
+                input.setAttribute("internal",tRows[b].internalfile);
+                input.setAttribute("variable",parseInt(tRows[b].variable));
+                input.setAttribute("onclick",
+      'openMultipleChoice(this.getAttribute("internal"),this.parentNode.parentNode.children[parseInt(this.getAttribute("variable"))].children[0].value,this)'); 
+            }
+                            
+                            input.oninput = function() {
+                                simpleAdd[0][b] = input.value;
+                                docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
+                            }
+                        }
                         if("width" in tRows[b]) {
                             tdAdd.className = tRows[b].width;
                             tdHead.className = tRows[b].width;
@@ -3233,10 +3271,10 @@ validatePage(function() {}, function() {}, true);
                         simpleAdd = elLoad.results;
                         if(oresults.length != 0) {
                             for(var e = 0; e < oresults[0].length;e++) (function(e){
-                                trAdder.children[e].getElementsByTagName("input")[0].value = "";
-                                trAdder.children[e].getElementsByTagName("input")[0].value = oresults[0][e];
-                                trAdder.children[e].getElementsByTagName("input")[0].oninput = function() {
-                                    simpleAdd[0][e] = trAdder.children[e].getElementsByTagName("input")[0].value;
+                                trAdder.children[e].children[0].value = "";
+                                trAdder.children[e].children[0].value = oresults[0][e];
+                                trAdder.children[e].children[0].onchange = function() {
+                                    simpleAdd[0][e] = trAdder.children[e].children[0].value;
                                     docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
 
                                 }
@@ -3248,11 +3286,11 @@ validatePage(function() {}, function() {}, true);
                             var newTr = lastTr.cloneNode(true);
                             tableG.appendChild(newTr);
                             
-                            var newTrInputs = newTr.getElementsByTagName("input");
+                            var newTrInputs = newTr.children;
                             for(var f = 0; f < oresults[e].length;f++) (function(f){
-                                newTrInputs[f].value = "";
-                                newTrInputs[f].value = oresults[e][f];
-                                newTrInputs[f].oninput = function() {
+                                newTrInputs[f].children[0].value = "";
+                                newTrInputs[f].children[0].value = oresults[e][f];
+                                newTrInputs[f].children[0].onchange = function() {
                                     simpleAdd[e][f] = newTrInputs[f].value;
                                     docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
 
@@ -3275,7 +3313,7 @@ validatePage(function() {}, function() {}, true);
                         var newTrInputs = newTr.getElementsByTagName("input");
                         var tableNum = tableG.getElementsByTagName("tr").length -2;
                         for(var b = 0; b < newTrInputs.length;b++) (function(b){
-                            newTrInputs[b].oninput = function() {
+                            newTrInputs[b].onchange = function() {
                                 simpleAdd[tableNum][b] = newTrInputs[b].value;
                                 docJSON.pages = jsonUpdate(docJSON.pages,locN,simpleAdd);
 
@@ -3515,6 +3553,37 @@ validatePage(function() {}, function() {}, true);
         elParent.appendChild(genEl);
     }
 }
+function openMultipleChoice(internalFile,variableName,elementToEffect) {
+    console.log(internalFile);
+    console.log(variableName);
+    ajaxRequestGet("documents/" + internalFile + ".json",
+        function (response) {
+            try {
+                idc("generalOverlay").innerHTML = "";
+                var genButtonCon = document.createElement("div");
+                genButtonCon.className = "variable";
+                var fileD = JSON.parse(response)[variableName];
+                var generalOverlay = idc("generalOverlay");
+                for(var c = 0; c < fileD.length;c++) (function(c){
+                    var genButton = document.createElement("button");
+                    genButton.innerHTML = fileD[c];
+                    
+                    genButton.onclick = function() {
+                        elementToEffect.value = genButton.innerHTML;
+                        closeOverlay("generalOverlay");
+                    }
+                    genButtonCon.appendChild(genButton);
+                })(c);
+                generalOverlay.appendChild(genButtonCon);
+                openOverlay("generalOverlay");
+            }
+            catch(error) {
+                alert(error);
+            }
+        },
+    "");
+}
+
 var signaturePad;
 function saveSignature() {
     let sigCanV = idc("signatureCanvas");
