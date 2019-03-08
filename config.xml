@@ -54,7 +54,6 @@
 	<splash qualifier="port-xxhdpi" src="res/screens/android/drawable-port-xxhdpi-screen.png" />
 	<splash qualifier="port-xxxhdpi" src="res/screens/android/drawable-port-xxxhdpi-screen.png" />
 </platform>
-    <!--
 <platform name="ios">
 	<icon height="57" platform="ios" src="res/icons/ios/icon.png" width="57" />
 	<icon height="114" platform="ios" src="res/icons/ios/icon@2x.png" width="114" />
@@ -83,7 +82,6 @@
 	<splash height="960" platform="ios" src="res/screens/ios/Default@2x~iphone.png" width="640" />
 	<splash height="480" platform="ios" src="res/screens/ios/Default~iphone.png" width="320" />
 </platform>
-    -->
     <allow-intent href="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
