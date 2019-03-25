@@ -289,11 +289,11 @@ body {
     -ms-flex-line-pack: center;
     align-content: center;
 }
-
-#noInternet h2 {
-    width: 100%;
+#noInternet p ,#noInternet h2 {
     text-align: center;
+    width: 100%;
 }
+
 
 #loginPage > div {
     max-width: 350px;
@@ -422,6 +422,7 @@ button#cookieToggle[active="true"]:before {
     min-height: 50px;
     background: #fff;
     overflow: hidden;
+    -webkit-box-shadow: 0px 0px 8px 0px #000000;
     box-shadow: 0px 0px 8px 0px #000000;
 }
 
@@ -1213,15 +1214,6 @@ display: none;
     background: #1ad66e;
 }
 
-#jobMenu {
-    width: 100%;
-    padding: 1em 1.5em;
-    display: flex;
-    justify-content: space-evenly;
-    background: #9c0000;
-    box-shadow: 0px 0px 5px 0px #2525259c;
-}
-
 .active #jobMenu {
     background: #d61a34;
 }
@@ -1234,90 +1226,9 @@ display: none;
     background: #1ad66e;
 }
 
-#jobMenu button {
-    font-size: 1.5em;
-    color: #fff;
-    font-weight: 600;
-    opacity: 0.5;
-    background: transparent;
-    border: 0;
-    width: 140px;
-    text-align: center;
-}
-
-#jobMenu button.active {
-    opacity: 1;
-}
-
-#documentPage {
-    display: none;
-    width: 100%;
-    font-size: 18px;
-    font-weight: 400;
-    padding-bottom: 5em;
-    text-transform: uppercase;
-}
-#documentPage h3 {
-    margin: 0;
-    width: 100%;
-}
-
-#documentPage .group .group {
-    margin-left: 2%;
-    margin-bottom: 0;
-}
-
-#documentPage,
-.group {
-    width: 92%;
-    margin: 30px 4% 0;
-    padding-bottom: 15px;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-    -ms-flex-flow: row wrap;
-    flex-flow: row wrap;
-    -webkit-box-pack: justify;
-    -ms-flex-pack: justify;
-    justify-content: space-between;
-    -webkit-box-align: end;
-    -ms-flex-align: end;
-    align-items: flex-end;
-}
-
 .group {
     margin: 0;
     width: 100%;
-}
-
-#documentPage section > * {
-    width: 100%;
-}
-
-#documentPage > div,
-.group > div {
-    margin-bottom: 15px;
-    width: 100%;
-}
-
-#documentPage .title {
-    font-size: 1.5em;
-    margin: 1em 0 0.5em;
-    width: 100%;
-}
-
-#documentPage .subtitle {
-    width: 100%;
-}
-
-#documentPage .text {
-    margin: 0.5em 0;
-    width: 100%;
-}
-#documentPage > div label {
-    margin:0.5em 0;
 }
 .textinput {
     width: 100%;
@@ -1433,34 +1344,6 @@ display: none;
     text-align: center;
 }
 
-#documentPage .third {
-    width: 31%;
-}
-
-#documentPage .tenth {
-    width: 8%;
-}
-
-#documentPage .quarter {
-    width: 23%;
-}
-
-#documentPage .half {
-    width: 47%;
-}
-
-#documentPage .three-quarters {
-    width: 72%;
-}
-
-#documentPage .fifth {
-    width: 20%;
-}
-
-#documentPage .radio .third {
-    width: 33%;
-}
-
 .radio > label {
 
     font-weight: bold;
@@ -1569,6 +1452,7 @@ table {
     border-top-right-radius: 0;
     border-top: 0;
     text-transform: uppercase;
+    -webkit-box-shadow: 0px 0px 5px 1px #b9b9b9;
     box-shadow: 0px 0px 5px 1px #b9b9b9;
 }
 
@@ -1671,7 +1555,7 @@ table {
     font-weight: 900;
 }
 
-#rtpSend {
+#rtpSend,#SyncQueue {
     background: #121f32;
     margin: 0;
     color: #fff;
@@ -1683,12 +1567,12 @@ table {
     font-weight: 900;
 }
 
-#rtpSend span {
+#rtpSend span,#SyncQueue span {
     margin-right: 1em;
     vertical-align: middle;
 }
 
-#rtpSend img {
+#rtpSend img,#SyncQueue img {
     max-height: 40px;
     vertical-align: middle;
 }
@@ -2022,7 +1906,6 @@ table {
     text-transform: uppercase;
     background: none;
 }
-}
 
 .controlList .userDetails p {
     margin: 0;
@@ -2043,105 +1926,6 @@ table {
     margin-top: 0.5em;
 }
 
-
-#breadcrums i[active="false"] {
-    visibility: hidden;
-    pointer-events: none;
-}
-
-#pageJob #singleDoc {
-    display: none;
-}
-
-
-#breadcrums {
-    margin: 0;
-    padding: 1em;
-    background: #0a121d;
-    color: #fff;
-    box-shadow: 0px 0px 5px 0px #2525259c;
-}
-
-#breadcrums * {
-    vertical-align: middle;
-}
-
-#breadcrums i {
-    margin: 0 5px;
-}
-
-
-#clientspage,
-#locations,
-#documents,
-#viewJob,
-#editDocs,
-#reload {
-    display: none;
-}
-#pageJob {
-    height: 100%;
-    overflow: auto;
-}
-
-
-#clientspage[display="true"],
-#locations[display="true"],
-#documents[display="true"],
-#viewJob[display="true"],
-#editDocs[display="true"] {
-    display: block;
-}
-
-#clientspage,
-#locations,
-#documents,
-#viewJob,
-#editDocs {
-    height: calc(100% - 80px);
-    overflow: auto;
-    padding-bottom: 15px;
-}
-
-#clientspage button,
-#locations button,
-#documents button {
-    width: 98%;
-    padding: 1em;
-    text-align: left;
-    background: #ffffff;
-    color: #000;
-    font-size: 1.25em;
-    font-weight: bold;
-    margin: 0.5em 0 0;
-    box-shadow: 0px 1px 8px 0px #0000002b;
-    
-    -webkit-transition: all 0.4s;
-    transition: all 0.4s;
-}
-#clientspage button.selected,
-#locations button.selected,
-#documents button.selected {
-    background: #000;
-    color: #fff;
-    transform: translateX(10px);
-}
-#pageJob button.addButton i {
-    font-size: 1.5em;
-    vertical-align: sub;
-    margin-right: 0.5em;
-}
-#pageJob button.addButton {
-    border: 2px solid;
-    border-left: 0;
-    width: initial;
-    margin: 1em 0 0 0;
-    display: block;
-    background: initial;
-    text-transform: uppercase;
-    padding: 1em 1em 1em 2em;
-    text-align: left;
-}
 .single-client {
     
 }
@@ -2173,6 +1957,243 @@ table {
 }
 .inOverlay h2 {
     margin-top: 0;
+}
+
+/* 
+
+    FOLDER MENU CSS
+
+*/
+
+#pageJob {
+    height: 100%;
+    overflow: auto;
+}
+#breadcrums i[active="false"] {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#pageJob #singleDoc {
+    display: none;
+}
+#breadcrums {
+    margin: 0;
+    padding: 1em;
+    background: #0a121d;
+    color: #fff;
+    -webkit-box-shadow: 0px 0px 5px 0px #2525259c;
+    box-shadow: 0px 0px 5px 0px #2525259c;
+}
+#breadcrums * {
+    vertical-align: middle;
+}
+#breadcrums i {
+    margin: 0 5px;
+}
+#clientspage,
+#locations,
+#documents,
+#viewJob,
+#editDocs,
+#reload {
+    display: none;
+}
+#pageJob {
+    height: 100%;
+    overflow: auto;
+}
+#clientspage[display="true"],
+#locations[display="true"],
+#documents[display="true"],
+#viewJob[display="true"],
+#editDocs[display="true"] {
+    display: block;
+}
+#clientspage,
+#locations,
+#documents,
+#viewJob,
+#editDocs {
+    height: calc(100% - 80px);
+    overflow: auto;
+    padding-bottom: 15px;
+}
+#clientspage button,
+#locations button,
+#documents button {
+    width: 98%;
+    padding: 1em;
+    text-align: left;
+    background: #ffffff;
+    color: #000;
+    font-size: 1.25em;
+    font-weight: bold;
+    margin: 0.5em 0 0;
+    -webkit-box-shadow: 0px 1px 8px 0px #0000002b;
+    box-shadow: 0px 1px 8px 0px #0000002b;
+    
+    -webkit-transition: all 0.4s;
+    transition: all 0.4s;
+}
+#clientspage button.selected,
+#locations button.selected,
+#documents button.selected {
+    background: #000;
+    color: #fff;
+    -webkit-transform: translateX(10px);
+    transform: translateX(10px);
+}
+#pageJob button.addButton i {
+    font-size: 1.5em;
+    vertical-align: sub;
+    margin-right: 0.5em;
+}
+#pageJob button.addButton {
+    border: 2px solid;
+    border-left: 0;
+    width: initial;
+    margin: 1em 0 0 0;
+    display: block;
+    background: initial;
+    text-transform: uppercase;
+    padding: 1em 1em 1em 2em;
+    text-align: left;
+}
+
+#jobMenu {
+    width: 100%;
+    padding: 1em 1.5em;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: space-evenly;
+    -ms-flex-pack: space-evenly;
+    justify-content: space-evenly;
+    background: #9c0000;
+    -webkit-box-shadow: 0px 0px 5px 0px #2525259c;
+    box-shadow: 0px 0px 5px 0px #2525259c;
+}
+
+.active #jobMenu {
+    background: #d61a34;
+}
+
+.review #jobMenu {
+    background: #1a6ed6;
+}
+
+.complete #jobMenu {
+    background: #1ad66e;
+}
+
+#jobMenu button {
+    font-size: 1.5em;
+    color: #fff;
+    font-weight: 600;
+    opacity: 0.5;
+    background: transparent;
+    border: 0;
+    width: 140px;
+    text-align: center;
+}
+
+#jobMenu button.active {
+    opacity: 1;
+}
+
+#documentPage {
+    display: none;
+    width: 100%;
+    font-size: 18px;
+    font-weight: 400;
+    padding-bottom: 5em;
+    text-transform: uppercase;
+}
+#documentPage h3 {
+    margin: 0;
+    width: 100%;
+}
+
+#documentPage .group .group {
+    margin-left: 2%;
+    margin-bottom: 0;
+}
+
+#documentPage,
+.group {
+    width: 92%;
+    margin: 30px 4% 0;
+    padding-bottom: 15px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: end;
+    -ms-flex-align: end;
+    align-items: flex-end;
+}
+
+#documentPage section > * {
+    width: 100%;
+}
+
+#documentPage > div,
+.group > div {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+#documentPage .title {
+    font-size: 1.5em;
+    margin: 1em 0 0.5em;
+    width: 100%;
+}
+
+#documentPage .subtitle {
+    width: 100%;
+}
+
+#documentPage .text {
+    margin: 0.5em 0;
+    width: 100%;
+}
+#documentPage > div label {
+    margin:0.5em 0;
+}
+
+#documentPage .third {
+    width: 31%;
+}
+
+#documentPage .tenth {
+    width: 8%;
+}
+
+#documentPage .quarter {
+    width: 23%;
+}
+
+#documentPage .half {
+    width: 47%;
+}
+
+#documentPage .three-quarters {
+    width: 72%;
+}
+
+#documentPage .fifth {
+    width: 20%;
+}
+
+#documentPage .radio .third {
+    width: 33%;
 }
 /* MEDIA QUIERIES */
 
@@ -2332,6 +2353,7 @@ table {
     bottom: 0;
     width: 100%;
     background: #fff;
+    -webkit-box-shadow: 0px 0px 6px 0px #00000054;
     box-shadow: 0px 0px 6px 0px #00000054;
 }
 #bottomOptions button {
@@ -2373,6 +2395,7 @@ table {
     width: 20px;
     display: inline-block;
     margin-right: 10px;
+    -webkit-box-shadow: inset 0px 0px 0px 2px #000;
     box-shadow: inset 0px 0px 0px 2px #000;
     vertical-align: bottom;
     -webkit-transition: all 0.4s;
@@ -2386,6 +2409,7 @@ table {
     background:#000;
 }
 #jobCreate #documentList button[active="true"]:before {
+    -webkit-box-shadow: inset 0px 0px 0px 2px #000,  inset 0px 0px 2px 23px #dc1a35;
     box-shadow: inset 0px 0px 0px 2px #000,  inset 0px 0px 2px 23px #dc1a35;
 }
 #jobCreate button.create {
@@ -2414,6 +2438,7 @@ table {
     margin-bottom: 0.5em;
     background: #fff;
     color: #000;
+    -webkit-box-shadow: 0px 0px 2px 0px #0000006b;
     box-shadow: 0px 0px 2px 0px #0000006b;
     width: 90%;
     margin: 0 5% 0.5em;

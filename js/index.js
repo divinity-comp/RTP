@@ -244,7 +244,6 @@ function loginOrPasswordReset(ev) {
         if (passwordCheck.hasAttribute("prevPhrase")) {
             ajaxRequestToMake(urlInit + "/" + appVersion + "/fgpw.php",
                 function (response) {
-                console.log("log" + response);
                     buttonE.removeAttribute("clicked");
                     let jsRes = JSON.parse(response);
                     if (jsRes.response === "success") {
@@ -262,7 +261,6 @@ function loginOrPasswordReset(ev) {
             setCookie("pass", formL[1].value);
             ajaxRequestToMake(urlInit + "/" + appVersion + "/login.php",
                 function (response) {
-                console.log("log" + response);
                     buttonE.removeAttribute("clicked");
                     let jsRes = JSON.parse(response);
                     if (jsRes.response === "success") {
@@ -1102,7 +1100,7 @@ function loadPageSystem(docsToDownload) {
             cButton.innerHTML = clientList[i].company;
             cButton.onclick = function() {
                 openClientFolder(clientList[i]);
-            hideBottomNav();
+                hideBottomNav();
             }
             var mc = new Hammer(cButton);
             if(clientList[i].id == "" || clientList[i].id == null) {
@@ -2271,7 +2269,7 @@ function addDocRow(docFind, Inter, fullJson, results) {
                 });
             }
         });
-            idc("rtpSend").style.display = "none";
+            idc("rtpSend").style.display = "block";
         }
         }
     })(i);
@@ -2392,7 +2390,7 @@ function loadFromJson(pageNum) {
                 
                 
             let viewJob = idc("viewJob");
-            let documentPage = idc("documentPage");
+            let documentPage = idc("editDocs");
 
             let tl = new TimelineMax();
 
@@ -3781,3 +3779,93 @@ function serverImageUpload(inputFile,serverLoc,params) {
         }
     }
 }
+var syncjobs = [];
+function syncQueue() {
+        var docCookie = fullJson["clientid"] + "-" + fullJson["id"] + "-" + fullJson["jobdetails"][Inter]["docid"] + "-Rev" + revision + ".json";
+
+    syncjobs.push({jobid:jobData["randomid"],docCookie:jobData["jobid"]});
+    successMessage("Added to Sync List");
+}
+function syncToServer() {
+    if(syncjobs.length == 0) {
+        successMessage("Everything is synced");
+    }
+    else {
+        
+        for(var b = 0; b < syncjobs.length;b++) (function (b) {
+            syncJob(syncjobs[b].randomid,syncjobs[b].docCookie);
+        })(b);
+               
+    }                                               
+                                                                         
+}
+function syncJob(syncid,docCookie) {
+ajaxRequestToMake(urlInit + "/" + appVersion + "/update/fulljob",
+                    function (ares) {
+                        let resJs = JSON.parse(ares);
+                        if (resJs.response == "success") {
+                            successMessage("Job Sent - Uploading files");
+                        } else {
+                            errorMessage("Job not sent");
+                        }
+                        if (filesUploaded == jobData.jobdetails.length - 1) {
+                            successMessage("Complete");
+                            rtpSendB.className = "";
+                        }
+                    }, {
+                        filename: docCookie + "-",
+                        filedata: response,
+                        job: jobData["jobid"]
+                    });
+            readFile(docCookie + ".json", function (response) {
+                ajaxRequestToMake(urlInit + "/" + appVersion + "/update/jobdocument",
+                    function (ares) {
+                        let resJs = JSON.parse(ares);
+                        if (resJs.response == "success") {
+                            successMessage((i + 1) + "/" + jobData.jobdetails.length);
+                        } else {
+                            errorMessage("Document not sent");
+                        }
+                        if (filesUploaded == jobData.jobdetails.length - 1) {
+                            successMessage("Complete");
+                            rtpSendB.className = "";
+                        }
+                    }, {
+                        filename: docCookie + "-",
+                        filedata: response,
+                        job: jobData["jobid"]
+                    });
+                
+                var jobDa = JSON.parse(response)["pages"];
+                
+                for(var b = 0; b < jobDa.length;b++) (function (b) {
+                     for(var c = 0; c < jobDa[b].length;c++) (function (c) {
+                        if("group" in jobDa[b][c] ) {
+                            
+                    for(var d = 0; d < jobDa[b][c]["group"].length;d++) (function (d) {
+                        if("type" in jobDa[b][c]["group"][d] && "value" in jobDa[b][c]["group"][d]) {
+                            if(jobDa[b][c]["group"][d].type == "signature") {
+                console.log(jobDa[b][c]["group"][d].value);
+            readFile(jobDa[b][c]["group"][d].value, function (responseS) {
+                console.log(responseS);
+                ajaxRequestToMake(urlInit + "/" + appVersion + "/update/jobfile",
+                    function (ares) {
+                        let resJs = JSON.parse(ares);
+                        if (resJs.response == "success") {
+                        } else {
+                            errorMessage("File not sent");
+                        }
+                    }, {
+                        filename: jobDa[b][c]["group"][d].value + ".png",
+                        filedata: responseS,
+                        job: jobData["jobid"]
+                    });
+            });
+                            }
+                        }
+                   })(d);
+                        }
+                    })(c);
+                })(b);
+            });
+ }
