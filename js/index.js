@@ -1355,13 +1355,14 @@ function addSiteFolder(joblist,clientdata) {
 }
 function openClientFolder(clientData) {
     selectPageJob(1,{title:clientData.company});
-    
+    console.log("open client folder");
     idc("locations").innerHTML = "";
-    var folderList = referenceTree["folderlist"];
+    idc("documents").innerHTML = "";
+    var folderList = referenceTree.folderlist;
         
-    var jobsFoundFolder = []; 
-    var joblist = referenceTree["joblist"];
+    var joblist = referenceTree.joblist;
     for(i =0; i < folderList.length;i++) (function(i){
+        var jobsFoundFolder = []; 
         
         var clientId = folderList[i].clientid;
         var allowedButtonCreation = false;
@@ -1381,12 +1382,21 @@ function openClientFolder(clientData) {
                
                 for(a =0; a < joblist.length;a++) (function(a){ 
                     // check if folder id or folder name the same and client id or client name the same
-                    if((joblist[a].folder == folderList[i].id || joblist[a].foldername == folderList[i].foldername) && (joblist[a].clientid == clientData.id || joblist[a].company == clientData.company)
+                    if(
+                        (joblist[a].folder == folderList[i].id || joblist[a].foldername == folderList[i].foldername) && 
+                        (joblist[a].clientid == clientData.id || joblist[a].company == clientData.company)
                       ) {
                         jobsFoundFolder.push(joblist[a]);
                     }
                 })(a);
-                openJobFolder({joblist:jobsFoundFolder,foldername:folderList[i].foldername,id:folderList[i].id},clientData);
+                openJobFolder(
+                    {
+                        joblist:jobsFoundFolder,
+                        foldername:folderList[i].foldername,
+                        id:folderList[i].id
+                    },
+                    clientData
+                );
             }
             locationsEle.appendChild(cButton);
         }
@@ -1427,22 +1437,38 @@ function openJobFolder(locationData,clientData) {
     selectPageJob(2,{title:locationData.foldername});
     
     var jobList = locationData.joblist;
-if(jobList.length != 0) {
+    idc("documents").innerHTML = "";
     
-    for(i =0; i < jobList.length;i++) (function(i) { 
-        var cButton = document.createElement("button");
-        
-        var documentsEle = idc("documents");
-        if( jobList[i].id == null)
-            cButton.innerHTML = "<span>Local ID: </span>" + i ;
-        else
-            cButton.innerHTML = jobList[i].id;
-        cButton.onclick = function() {
-            openSingleJob(jobList[i],clientData,cButton.innerHTML);
+    for(i = 0; i < jobList.length;i++) {
+        var randomLimit = 0;
+        for(a = 0; a < jobList.length;a++) {
+            if(jobList[i].randomid == jobList[a].randomid)
+                randomLimit++;
         }
-        documentsEle.appendChild(cButton);
-    })(i);
-}
+        
+        if(randomLimit === 2) {
+            jobList.splice(i,1);
+            i--;
+        }
+    }
+    console.log("Open job folder", jobList);
+    if(jobList.length != 0) {
+
+        for(i =0; i < jobList.length;i++) (function(i) { 
+            var cButton = document.createElement("button");
+
+            var documentsEle = idc("documents");
+            if( jobList[i].id == null)
+                cButton.innerHTML = "<span>Local ID: </span>" + i;
+            else
+                cButton.innerHTML = jobList[i].id;
+            
+            cButton.onclick = function() {
+                openSingleJob(jobList[i],clientData,cButton.innerHTML);
+            }
+            documentsEle.appendChild(cButton);
+        })(i);
+    }
     
     var documentsEle = idc("documents");
     var cButton = document.createElement("button");
@@ -1465,23 +1491,23 @@ function addJobToFolder(locationData,clientData) {
                 idc("jobCreate").getElementsByClassName("create")[0].onclick = function () {
                     createJobLocally(locationData,clientData);
                 }
-    var docsToShow = referenceTree.maindocuments;
-    
-    for(i =0; i < docsToShow.length;i++) (function(i) { 
-        var cButton = document.createElement("button");
-        cButton.setAttribute("docid",docsToShow[i].docid);
-        cButton.setAttribute("data",docsToShow[i].data);
-        cButton.setAttribute("revision",docsToShow[i].revision);
-        var documentsEle = idc("documentList");
-        cButton.innerHTML = replaceAll(docsToShow[i].data,"-"," ") + " Ver." + docsToShow[i].revision;
-        cButton.onclick = function() {
-            if(cButton.getAttribute("active") != "true")
-                cButton.setAttribute("active","true");
-            else
-                cButton.setAttribute("active","false");
-        }
-        documentsEle.appendChild(cButton);
-    })(i);
+                var docsToShow = referenceTree.maindocuments;
+
+                for(i =0; i < docsToShow.length;i++) (function(i) { 
+                    var cButton = document.createElement("button");
+                    cButton.setAttribute("docid",docsToShow[i].docid);
+                    cButton.setAttribute("data",docsToShow[i].data);
+                    cButton.setAttribute("revision",docsToShow[i].revision);
+                    var documentsEle = idc("documentList");
+                    cButton.innerHTML = replaceAll(docsToShow[i].data,"-"," ") + " Ver." + docsToShow[i].revision;
+                    cButton.onclick = function() {
+                        if(cButton.getAttribute("active") != "true")
+                            cButton.setAttribute("active","true");
+                        else
+                            cButton.setAttribute("active","false");
+                    }
+                    documentsEle.appendChild(cButton);
+                })(i);
                 openOverlay("generalOverlay");
             },
         "");
@@ -1495,12 +1521,15 @@ function createJobLocally(locationData,clientData) {
     
     for(i =0; i < jobPageButton.length;i++) (function(i) { 
         if(jobPageButton[i].getAttribute("active") == "true")
-            docsListNewJob.push({"data":jobPageButton[i].getAttribute("data"),"revision":jobPageButton[i].getAttribute("revision"),"docid":jobPageButton[i].getAttribute("docid")});
+            docsListNewJob.push(
+                {"data":jobPageButton[i].getAttribute("data"),
+                 "revision":jobPageButton[i].getAttribute("revision"),
+                 "docid":jobPageButton[i].getAttribute("docid")}
+            );
     })(i);
     
     if(docsListNewJob.length != 0) {
-        
-            let randomID =  [...Array(10)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
+        let randomID =  [...Array(10)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
         var userData = getUserDataCookie();
         var jobDetails = {
             "id": null,
@@ -1518,8 +1547,7 @@ function createJobLocally(locationData,clientData) {
 		      }],
             "randomid":randomID
         };
-        
-        referenceTree["joblist"].push(jobDetails);
+        referenceTree.joblist.push(jobDetails);
         referenceTreeSingleUpdate(function() {
             idc("documents").innerHTML = "";
             
@@ -2269,7 +2297,6 @@ function addDocRow(docFind, Inter, fullJson, results) {
                 });
             }
         });
-            idc("rtpSend").style.display = "block";
         }
         }
     })(i);
@@ -2346,6 +2373,8 @@ function loadFromJson(pageNum) {
         clearInterval(savedInterval);
     var canUpdate = false;
     var readyToUpdate = false;
+    
+    idc("documentPage").style.display = "block";
     savedInterval = setInterval(function () {
         canUpdate = true;
         if (hadChange) {
@@ -2390,7 +2419,7 @@ function loadFromJson(pageNum) {
                 
                 
             let viewJob = idc("viewJob");
-            let documentPage = idc("editDocs");
+            let documentPage = idc("documentPage");
 
             let tl = new TimelineMax();
 
@@ -2405,7 +2434,6 @@ function loadFromJson(pageNum) {
                 x:"0%",
                 opacity: 1
             });
-            idc("rtpSend").style.display = "block";
             },function() {
             });
         }
@@ -2431,8 +2459,17 @@ function loadFromJson(pageNum) {
                     opacity: 0,
                     ease: Circ.easeOut,
                     onComplete: function () {
-                        loadFromJson(pageNum + 1);
-                        idc("main").scrollTop = 0;
+                        console.log(docJSON);
+                        
+                        var newpageNum = pageNum + 1;
+                        
+                        while (docJSON["pages"][newpageNum][0]["hidden"] == "true") {
+                            newpageNum++;
+                        }
+                        
+                        idc("documentPage").innerHTML = "";
+                        loadFromJson(newpageNum );
+                        idc("editDocs").scrollTop = 0;
                     }
             });
             },
@@ -2597,7 +2634,7 @@ function validatePage(successF,failedF,dontScroll) {
         documentErrors.appendChild(specificError);
         failedElements[0].className += " ehighlight";
         if(dontScroll == null)
-        idc("documentPage").scrollTop = failedElements[0].offsetTop;
+            idc("editDocs").scrollTop = failedElements[0].offsetTop;
         
         var buttonLeft = document.createElement("button");
         buttonLeft.className = "buttonLeft";
@@ -2613,9 +2650,9 @@ function validatePage(successF,failedF,dontScroll) {
         if(failedElements[numLe].hasAttribute("error"))
             specificError.innerHTML = failedElements[numLe].getAttribute("error") ;
             if(failedElements[numLe].offsetTop == 0)
-                idc("documentPage").scrollTop = failedElements[numLe].parentNode.parentNode.parentNode.offsetTop;
+                idc("editDocs").scrollTop = failedElements[numLe].parentNode.parentNode.parentNode.offsetTop;
             else
-                idc("documentPage").scrollTop = failedElements[numLe].offsetTop;
+                idc("editDocs").scrollTop = failedElements[numLe].offsetTop;
         }
         documentErrors.appendChild(buttonLeft);
         var buttonRight = document.createElement("button");
@@ -2630,15 +2667,16 @@ function validatePage(successF,failedF,dontScroll) {
             failedElements[numLe].className = failedElements[numLe].className.replace('ehighlight','');
             if(numLe < failedElements.length)
                 numLe++;
+                
             failedElements[numLe].className += " ehighlight";
             documentErrors.children[0].innerHTML = (numLe + 1) + "/" + failedElements.length;
             documentErrors.setAttribute("num",numLe);
         if(failedElements[numLe].hasAttribute("error"))
             specificError.innerHTML = failedElements[numLe].getAttribute("error") ;
             if(failedElements[numLe].offsetTop == 0)
-                idc("documentPage").scrollTop = failedElements[numLe].parentNode.parentNode.parentNode.offsetTop;
+                idc("editDocs").scrollTop = failedElements[numLe].parentNode.parentNode.parentNode.offsetTop;
             else
-                idc("documentPage").scrollTop = failedElements[numLe].offsetTop;
+                idc("editDocs").scrollTop = failedElements[numLe].offsetTop;
             }
         }
         
@@ -3650,6 +3688,19 @@ function updateInTable(childE) {
                 rowDataSet.push(parentDchildDivs[ac].getElementsByClassName("checkbox")[0].getAttribute("active"));
         }
         docJSON.pages = jsonUpdate(docJSON.pages,hasTable,rowDataSet);
+    }
+}
+function toggleRequiredFields(togEle) {
+    if(togEle.parentElement.hasAttribute("access")) {
+        if(togEle.parentElement.getAttribute("access") == "true") {
+            togEle.parentElement.setAttribute("access", "false");
+       }
+       else {
+           togEle.parentElement.setAttribute("access", "true");
+       }
+    }
+    else {
+        togEle.parentElement.setAttribute("access", "true");
     }
 }
 function jsonUpdate(jsToChange, layers,vChange) {

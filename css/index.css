@@ -435,13 +435,13 @@ button#cookieToggle[active="true"]:before {
 #clientDeats figure {
     margin: 0;
     float: left;
-    width: 50%;
+    width: 125px;
     height: 100%;
 }
 
 #clientDeats figure img {
     max-height: 90%;
-    padding: 5% 10% 0 0px;
+    padding: 5% 0 0 0px;
 }
 
 #mobileMenu {
@@ -2442,4 +2442,33 @@ table {
     box-shadow: 0px 0px 2px 0px #0000006b;
     width: 90%;
     margin: 0 5% 0.5em;
+}
+div[access="false"] input, div[access="false"] textarea {
+    display: none;
+}
+button.toggleReq {
+    color: #121f32;
+    background: transparent;
+    border: 2px solid #000;
+    margin-top: 0;
+    font-size: 0.9em;
+}
+div[access="false"] .toggleReq:before {
+    content:'+';
+    margin-right: 0.5em;
+}
+div[access="true"] .toggleReq:before {
+    content:'-';
+    margin-right: 0.5em;
+}
+
+#syncToServer {
+    background: #fff;
+    padding: 10px 1em;
+    border: 2px solid;
+    font-size: 1.1em;
+    margin-top: 0.75em;
+    border-radius: 5px;
+    color: #bf1028;
+    font-weight: bold;
 }

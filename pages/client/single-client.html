@@ -1,14 +1,17 @@
  <div id="clientsDetails">
     <h2>Add Client</h2>
-    <input name="company" placeholder="Company" required />
-    <input name="conName" placeholder="Contact Name" />
-    <input name="conEmail" placeholder="Contact Email" />
-    <input name="conPhone" placeholder="Contact Phone" />
-    <textarea name="add" placeholder="Company Address"></textarea>
-    <input name="postcode" placeholder="Postcode" />
-    <input name="website" placeholder="Company website" />
-    <input name="reg" placeholder="Company Registration" />
-    <input name="vat" placeholder="Company Vat No" />
+        <input name="company" placeholder="Company" required />
+        <input name="conName" placeholder="Contact Name" />
+     <div access="false"> 
+        <button class="toggleReq" onclick="toggleRequiredFields(this)">Show unrequired fields</button>
+        <input name="conEmail" placeholder="Contact Email" />
+        <input name="conPhone" placeholder="Contact Phone" />
+        <textarea name="add" placeholder="Company Address"></textarea>
+        <input name="postcode" placeholder="Postcode" />
+        <input name="website" placeholder="Company website" />
+        <input name="reg" placeholder="Company Registration" />
+        <input name="vat" placeholder="Company Vat No" />
+     </div>
     <button onclick="createClient()">Create Client</button>
     <button id="deleteClient" onclick="deleteClient(this)" style="display:none;">Delete Client</button>
 </div>
