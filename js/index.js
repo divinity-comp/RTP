@@ -2374,7 +2374,7 @@ function loadFromJson(pageNum) {
     var canUpdate = false;
     var readyToUpdate = false;
     
-    idc("documentPage").style.display = "block";
+    idc("documentPage").style.display = "flex";
     savedInterval = setInterval(function () {
         canUpdate = true;
         if (hadChange) {
